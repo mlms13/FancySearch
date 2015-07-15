@@ -1,0 +1,5 @@
+-lib mithril
+-cp src
+-cp demo
+-main Main
+-js bin/demo.js
