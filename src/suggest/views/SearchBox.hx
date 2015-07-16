@@ -10,6 +10,8 @@ class SearchBox implements View {
   }
 
   public function view() : ViewOutput {
-    return INPUT();
+    return INPUT({
+      placeholder : vm.placeholder
+    });
   }
 }
