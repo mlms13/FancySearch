@@ -3,9 +3,29 @@
   <head>
     <meta charset="utf-8">
     <title>Search Box Test</title>
+    <style media="screen">
+      body {
+        background: #eee;
+        font-family: sans-serif;
+        margin: 0;
+      }
+      .fancy-container {
+        margin: 30px auto 0;
+        max-width: 800px;
+        position: relative;
+        width: 60%;
+      }
+      .fancy-container input {
+        font-size: 16px;
+        padding: 14px 8px;
+        width: 100%;
+      }
+    </style>
   </head>
   <body>
-    <input type="text" class="fancify">
+    <div class="fancy-container">
+      <input type="text" class="fancify" placeholder="Search for Something">
+    </div>
     <script type="text/javascript" src="./demo.js"></script>
   </body>
 </html>
