@@ -1,25 +1,16 @@
-import mithril.M;
-import suggest.views.SearchBox;
-import suggest.models.SearchBoxViewModel;
+import suggest.FancySearch;
 
-class Main implements Component {
-  var searchVm : SearchBoxViewModel;
-  var search : SearchBox;
-  public function new() {}
-
-  public function controller() {
+class Main {
+  public var search : FancySearch;
+  public function new() {
     var options = {
-      placeholder : 'Search'
+      suggestions : ["Apple", "Banana", "Carrot", "Peach", "Pear", "Turnip"]
     };
-    searchVm = new SearchBoxViewModel(options);
-    search = new SearchBox(searchVm);
-  }
-
-  public function view() {
-    return search.view();
+    var input = js.Browser.document.querySelector('input.fancify');
+    search = new FancySearch(cast input, options);
   }
 
   static function main() {
-    M.mount(js.Browser.document.body, new Main());
+    new Main();
   }
 }
