@@ -1,4 +1,4 @@
-package suggest;
+package fancy;
 
 import js.html.InputElement;
 
@@ -12,7 +12,7 @@ typedef FancySearchOptions = {
   ?classes : FancySearchClassNames
 };
 
-class FancySearch {
+class Search {
   public var suggestions(default, null) : Array<String>;
   public var filterFn(default, null) : String -> String -> Bool;
   public var classes(default, null) : FancySearchClassNames;
