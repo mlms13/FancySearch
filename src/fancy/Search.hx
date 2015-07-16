@@ -17,6 +17,7 @@ typedef FancySearchOptions = {
 
 class Search {
   public var input : InputElement;
+  public var suggList : Suggestions;
   public var suggestions(default, null) : Array<String>;
   public var filterFn(default, null) : String -> String -> Bool;
   public var classes(default, null) : FancySearchClassNames;
@@ -29,6 +30,9 @@ class Search {
     classes = options.classes != null ? options.classes : {};
     classes.input = classes.input != null ? classes.input : 'fs-search-input';
     classes.inputFocus = classes.inputFocus != null ? classes.inputFocus : 'fs-search-input-focus';
+
+    // create sibling elements
+    suggList = new Suggestions(input.parentElement, suggestions, filterFn);
 
     // apply classes
     input.addClass(classes.input);

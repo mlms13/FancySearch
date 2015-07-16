@@ -1,3 +1,4 @@
+-lib thx.core
 -cp src
 -cp demo
 -main Main
