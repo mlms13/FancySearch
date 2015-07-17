@@ -19,34 +19,36 @@ class Dom {
     // TODO: add fallback for older IE
   }
 
-  public static function create(name : String, ?attrs : Dynamic, ?children : Array<Dynamic>) : Element {
+  public static function create(name : String, ?attrs : Dynamic<Dynamic>, ?children : Array<Element>, ?textContent : String) : Element {
     if (attrs == null) {
       attrs = {};
+    }
+    if (children == null) {
       children = [];
-    } else if (children == null) {
-      if (Std.is(attrs, Array))
-        children = (attrs : Array<Dynamic>).copy();
-      attrs = {};
     }
 
     var classNames = Reflect.hasField(attrs, 'class') ? Reflect.field(attrs, 'class') : '';
     var nameParts = name.split('.');
     name = nameParts.shift();
 
-    classNames += ' ' + nameParts.join(' ');
+    if (nameParts.length > 0)
+      classNames += ' ' + nameParts.join(' ');
 
     var el = document.createElement(name);
     for (att in Reflect.fields(attrs)) {
+      trace(att);
+      trace(Reflect.field(attrs, att));
       el.setAttribute(att, Reflect.field(attrs, att));
     }
 
     el.className = classNames;
 
     for (child in children) {
-      if (Std.is(child, Element))
-        el.appendChild(child);
-      else if (Std.is(child, String))
-        el.appendChild(document.createTextNode(child));
+      el.appendChild(child);
+    }
+
+    if (textContent != null) {
+      el.appendChild(document.createTextNode(textContent));
     }
 
     return el;

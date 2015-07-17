@@ -382,8 +382,8 @@ fancy_Search.prototype = {
 	,__class__: fancy_Search
 };
 var fancy_Suggestions = function(parent,suggestions,filter) {
-	this.el = fancy_util_Dom.create("div.fa-suggestion-container",[fancy_util_Dom.create("ul",suggestions.map(function(_) {
-		return fancy_util_Dom.create("li",_);
+	this.el = fancy_util_Dom.create("div.fa-suggestion-container",null,[fancy_util_Dom.create("ul",null,suggestions.map(function(_) {
+		return fancy_util_Dom.create("li",null,null,_);
 	}))]);
 	parent.appendChild(this.el);
 };
@@ -404,25 +404,22 @@ fancy_util_Dom.removeClass = function(el,className) {
 fancy_util_Dom.on = function(el,eventName,callback) {
 	el.addEventListener(eventName,callback);
 };
-fancy_util_Dom.create = function(name,attrs,children) {
-	if(attrs == null) {
-		attrs = { };
-		children = [];
-	} else if(children == null) {
-		if((attrs instanceof Array) && attrs.__enum__ == null) children = attrs.slice();
-		attrs = { };
-	}
+fancy_util_Dom.create = function(name,attrs,children,textContent) {
+	if(attrs == null) attrs = { };
+	if(children == null) children = [];
 	var classNames;
 	if(Object.prototype.hasOwnProperty.call(attrs,"class")) classNames = Reflect.field(attrs,"class"); else classNames = "";
 	var nameParts = name.split(".");
 	name = nameParts.shift();
-	classNames += " " + nameParts.join(" ");
+	if(nameParts.length > 0) classNames += " " + nameParts.join(" ");
 	var el = window.document.createElement(name);
 	var _g = 0;
 	var _g1 = Reflect.fields(attrs);
 	while(_g < _g1.length) {
 		var att = _g1[_g];
 		++_g;
+		console.log(att);
+		console.log(Reflect.field(attrs,att));
 		el.setAttribute(att,Reflect.field(attrs,att));
 	}
 	el.className = classNames;
@@ -430,8 +427,9 @@ fancy_util_Dom.create = function(name,attrs,children) {
 	while(_g2 < children.length) {
 		var child = children[_g2];
 		++_g2;
-		if(js_Boot.__instanceof(child,HTMLElement)) el.appendChild(child); else if(typeof(child) == "string") el.appendChild(window.document.createTextNode(child));
+		el.appendChild(child);
 	}
+	if(textContent != null) el.appendChild(window.document.createTextNode(textContent));
 	return el;
 };
 var haxe_StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
