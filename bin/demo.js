@@ -91,6 +91,29 @@ HxOverrides.dateStr = function(date) {
 	var s = date.getSeconds();
 	return date.getFullYear() + "-" + (m < 10?"0" + m:"" + m) + "-" + (d < 10?"0" + d:"" + d) + " " + (h < 10?"0" + h:"" + h) + ":" + (mi < 10?"0" + mi:"" + mi) + ":" + (s < 10?"0" + s:"" + s);
 };
+HxOverrides.strDate = function(s) {
+	var _g = s.length;
+	switch(_g) {
+	case 8:
+		var k = s.split(":");
+		var d = new Date();
+		d.setTime(0);
+		d.setUTCHours(k[0]);
+		d.setUTCMinutes(k[1]);
+		d.setUTCSeconds(k[2]);
+		return d;
+	case 10:
+		var k1 = s.split("-");
+		return new Date(k1[0],k1[1] - 1,k1[2],0,0,0);
+	case 19:
+		var k2 = s.split(" ");
+		var y = k2[0].split("-");
+		var t = k2[1].split(":");
+		return new Date(y[0],y[1] - 1,y[2],t[0],t[1],t[2]);
+	default:
+		throw new js__$Boot_HaxeError("Invalid date format : " + s);
+	}
+};
 HxOverrides.cca = function(s,index) {
 	var x = s.charCodeAt(index);
 	if(x != x) return undefined;
@@ -353,25 +376,18 @@ Type.enumIndex = function(e) {
 };
 var fancy_Search = function(el,options) {
 	this.input = el;
-	if(options.suggestions != null) this.suggestions = options.suggestions; else this.suggestions = [];
-	if(options.filterFn != null) this.filterFn = options.filterFn; else this.filterFn = fancy_Search.defaultFilterer;
-	if(options.classes != null) this.classes = options.classes; else this.classes = { };
-	if(this.classes.input != null) this.classes.input = this.classes.input; else this.classes.input = "fs-search-input";
-	if(this.classes.inputFocus != null) this.classes.inputFocus = this.classes.inputFocus; else this.classes.inputFocus = "fs-search-input-focus";
-	this.suggList = new fancy_Suggestions(this.input.parentElement,this.suggestions,this.filterFn);
+	if(options != null) options = options; else options = { };
+	if(options.classes != null) options.classes = options.classes; else options.classes = { };
+	this.classes = thx_Objects.combine({ input : "fs-search-input", inputFocus : "fs-search-input-focus", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item"},options.classes);
+	this.suggList = new fancy_Suggestions({ parent : this.input.parentElement, suggestions : options.suggestions, filter : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem}});
 	fancy_util_Dom.addClass(this.input,this.classes.input);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
 	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
 };
 fancy_Search.__name__ = ["fancy","Search"];
-fancy_Search.defaultFilterer = function(suggestion,search) {
-	return suggestion.indexOf(search) >= 0;
-};
 fancy_Search.prototype = {
 	input: null
 	,suggList: null
-	,suggestions: null
-	,filterFn: null
 	,classes: null
 	,onSearchFocus: function(e) {
 		fancy_util_Dom.addClass(this.input,this.classes.inputFocus);
@@ -381,15 +397,27 @@ fancy_Search.prototype = {
 	}
 	,__class__: fancy_Search
 };
-var fancy_Suggestions = function(parent,suggestions,filter) {
-	this.el = fancy_util_Dom.create("div.fa-suggestion-container",null,[fancy_util_Dom.create("ul",null,suggestions.map(function(_) {
-		return fancy_util_Dom.create("li",null,null,_);
+var fancy_Suggestions = function(options) {
+	var _g = this;
+	this.parent = options.parent;
+	this.classes = options.classes;
+	if(options.suggestions != null) this.suggestions = options.suggestions; else this.suggestions = [];
+	if(options.filter != null) this.filter = options.filter; else this.filter = fancy_Suggestions.defaultFilterer;
+	this.el = fancy_util_Dom.create("div." + this.classes.suggestionContainer + this.classes.suggestionsClosed,null,[fancy_util_Dom.create("ul." + this.classes.suggestionList,null,this.suggestions.map(function(_) {
+		return fancy_util_Dom.create("li" + _g.classes.suggestionItem,null,null,_);
 	}))]);
-	parent.appendChild(this.el);
+	this.parent.appendChild(this.el);
 };
 fancy_Suggestions.__name__ = ["fancy","Suggestions"];
+fancy_Suggestions.defaultFilterer = function(suggestion,search) {
+	return suggestion.indexOf(search) >= 0;
+};
 fancy_Suggestions.prototype = {
-	el: null
+	parent: null
+	,classes: null
+	,suggestions: null
+	,filter: null
+	,el: null
 	,__class__: fancy_Suggestions
 };
 var fancy_util_Dom = function() { };
@@ -561,6 +589,14 @@ haxe_IMap.prototype = {
 	,exists: null
 	,keys: null
 	,__class__: haxe_IMap
+};
+var haxe_Utf8 = function() { };
+haxe_Utf8.__name__ = ["haxe","Utf8"];
+haxe_Utf8.compare = function(a,b) {
+	if(a > b) return 1; else if(a == b) return 0; else return -1;
+};
+haxe_Utf8.sub = function(s,pos,len) {
+	return HxOverrides.substr(s,pos,len);
 };
 var haxe_ds_StringMap = function() {
 	this.h = { };
@@ -765,18 +801,18 @@ thx_Arrays.after = function(array,element) {
 thx_Arrays.all = function(arr,predicate) {
 	var _g = 0;
 	while(_g < arr.length) {
-		var item = arr[_g];
+		var element = arr[_g];
 		++_g;
-		if(!predicate(item)) return false;
+		if(!predicate(element)) return false;
 	}
 	return true;
 };
 thx_Arrays.any = function(arr,predicate) {
 	var _g = 0;
 	while(_g < arr.length) {
-		var item = arr[_g];
+		var element = arr[_g];
 		++_g;
-		if(predicate(item)) return true;
+		if(predicate(element)) return true;
 	}
 	return false;
 };
@@ -926,9 +962,9 @@ thx_Arrays.filterNull = function(a) {
 thx_Arrays.find = function(array,predicate) {
 	var _g = 0;
 	while(_g < array.length) {
-		var item = array[_g];
+		var element = array[_g];
 		++_g;
-		if(predicate(item)) return item;
+		if(predicate(element)) return element;
 	}
 	return null;
 };
@@ -966,17 +1002,20 @@ thx_Arrays.groupByAppend = function(arr,resolver,map) {
 	});
 	return map;
 };
+thx_Arrays.hasElements = function(array) {
+	return null != array && array.length > 0;
+};
 thx_Arrays.head = function(array) {
 	return array[0];
 };
-thx_Arrays.ifEmpty = function(value,alt) {
-	if(null != value && 0 != value.length) return value; else return alt;
+thx_Arrays.ifEmpty = function(array,alt) {
+	if(null != array && 0 != array.length) return array; else return alt;
 };
 thx_Arrays.initial = function(array) {
 	return array.slice(0,array.length - 1);
 };
 thx_Arrays.isEmpty = function(array) {
-	return array.length == 0;
+	return null == array || array.length == 0;
 };
 thx_Arrays.last = function(array) {
 	return array[array.length - 1];
@@ -1005,9 +1044,9 @@ thx_Arrays.order = function(array,sort) {
 thx_Arrays.pull = function(array,toRemove,equality) {
 	var _g = 0;
 	while(_g < toRemove.length) {
-		var item = toRemove[_g];
+		var element = toRemove[_g];
 		++_g;
-		thx_Arrays.removeAll(array,item,equality);
+		thx_Arrays.removeAll(array,element,equality);
 	}
 };
 thx_Arrays.pushIf = function(array,condition,value) {
@@ -1353,6 +1392,14 @@ thx_Dates.daysRange = function(start,end) {
 thx_Dates.equals = function(self,other) {
 	return self.getTime() == other.getTime();
 };
+thx_Dates.nearEquals = function(self,other,units,period) {
+	if(units == null) units = 1;
+	if(null == period) period = thx_TimePeriod.Second;
+	if(units < 0) units = -units;
+	var min = thx_Dates.jump(self,period,-units);
+	var max = thx_Dates.jump(self,period,units);
+	return min.getTime() <= other.getTime() && max.getTime() >= other.getTime();
+};
 thx_Dates.more = function(self,other) {
 	return self.getTime() > other.getTime();
 };
@@ -1405,22 +1452,28 @@ thx_Dates.sameMinute = function(self,other) {
 	return thx_Dates.sameHour(self,other) && self.getMinutes() == other.getMinutes();
 };
 thx_Dates.snapNext = function(date,period) {
-	var t = thx_Timestamps.snapNext(date.getTime(),period);
-	var d = new Date();
-	d.setTime(t);
-	return d;
+	{
+		var this1 = thx__$Timestamp_Timestamp_$Impl_$.snapNext(date.getTime(),period);
+		var d = new Date();
+		d.setTime(this1);
+		return d;
+	}
 };
 thx_Dates.snapPrev = function(date,period) {
-	var t = thx_Timestamps.snapPrev(date.getTime(),period);
-	var d = new Date();
-	d.setTime(t);
-	return d;
+	{
+		var this1 = thx__$Timestamp_Timestamp_$Impl_$.snapPrev(date.getTime(),period);
+		var d = new Date();
+		d.setTime(this1);
+		return d;
+	}
 };
 thx_Dates.snapTo = function(date,period) {
-	var t = thx_Timestamps.snapTo(date.getTime(),period);
-	var d = new Date();
-	d.setTime(t);
-	return d;
+	{
+		var this1 = thx__$Timestamp_Timestamp_$Impl_$.snapTo(date.getTime(),period);
+		var d = new Date();
+		d.setTime(this1);
+		return d;
+	}
 };
 thx_Dates.jump = function(date,period,amount) {
 	var sec = date.getSeconds();
@@ -1504,6 +1557,24 @@ thx_Dates.prevDay = function(d) {
 thx_Dates.nextDay = function(d) {
 	return thx_Dates.jump(d,thx_TimePeriod.Day,1);
 };
+thx_Dates.prevHour = function(d) {
+	return thx_Dates.jump(d,thx_TimePeriod.Hour,-1);
+};
+thx_Dates.nextHour = function(d) {
+	return thx_Dates.jump(d,thx_TimePeriod.Hour,1);
+};
+thx_Dates.prevMinute = function(d) {
+	return thx_Dates.jump(d,thx_TimePeriod.Minute,-1);
+};
+thx_Dates.nextMinute = function(d) {
+	return thx_Dates.jump(d,thx_TimePeriod.Minute,1);
+};
+thx_Dates.prevSecond = function(d) {
+	return thx_Dates.jump(d,thx_TimePeriod.Second,-1);
+};
+thx_Dates.nextSecond = function(d) {
+	return thx_Dates.jump(d,thx_TimePeriod.Second,1);
+};
 thx_Dates.withYear = function(date,year) {
 	return thx_Dates.create(year,date.getMonth(),date.getDate(),date.getHours(),date.getMinutes(),date.getSeconds());
 };
@@ -1521,160 +1592,6 @@ thx_Dates.withMinute = function(date,minute) {
 };
 thx_Dates.withSecond = function(date,second) {
 	return thx_Dates.create(date.getFullYear(),date.getMonth(),date.getDate(),date.getHours(),date.getMinutes(),second);
-};
-var thx_Timestamps = function() { };
-thx_Timestamps.__name__ = ["thx","Timestamps"];
-thx_Timestamps.create = function(year,month,day,hour,minute,second) {
-	return thx_Dates.create(year,month,day,hour,minute,second).getTime();
-};
-thx_Timestamps.snapNext = function(time,period) {
-	switch(period[1]) {
-	case 0:
-		return Math.ceil(time / 1000.0) * 1000.0;
-	case 1:
-		return Math.ceil(time / 60000.0) * 60000.0;
-	case 2:
-		return Math.ceil(time / 3600000.0) * 3600000.0;
-	case 3:
-		var d;
-		var d1 = new Date();
-		d1.setTime(time);
-		d = d1;
-		return thx_Timestamps.create(d.getFullYear(),d.getMonth(),d.getDate() + 1,0,0,0);
-	case 4:
-		var d2;
-		var d3 = new Date();
-		d3.setTime(time);
-		d2 = d3;
-		var wd = d2.getDay();
-		return thx_Timestamps.create(d2.getFullYear(),d2.getMonth(),d2.getDate() + 7 - wd,0,0,0);
-	case 5:
-		var d4;
-		var d5 = new Date();
-		d5.setTime(time);
-		d4 = d5;
-		return thx_Timestamps.create(d4.getFullYear(),d4.getMonth() + 1,1,0,0,0);
-	case 6:
-		var d6;
-		var d7 = new Date();
-		d7.setTime(time);
-		d6 = d7;
-		return thx_Timestamps.create(d6.getFullYear() + 1,0,1,0,0,0);
-	}
-};
-thx_Timestamps.snapPrev = function(time,period) {
-	switch(period[1]) {
-	case 0:
-		return Math.floor(time / 1000.0) * 1000.0;
-	case 1:
-		return Math.floor(time / 60000.0) * 60000.0;
-	case 2:
-		return Math.floor(time / 3600000.0) * 3600000.0;
-	case 3:
-		var d;
-		var d1 = new Date();
-		d1.setTime(time);
-		d = d1;
-		return thx_Timestamps.create(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0);
-	case 4:
-		var d2;
-		var d3 = new Date();
-		d3.setTime(time);
-		d2 = d3;
-		var wd = d2.getDay();
-		return thx_Timestamps.create(d2.getFullYear(),d2.getMonth(),d2.getDate() - wd,0,0,0);
-	case 5:
-		var d4;
-		var d5 = new Date();
-		d5.setTime(time);
-		d4 = d5;
-		return thx_Timestamps.create(d4.getFullYear(),d4.getMonth(),1,0,0,0);
-	case 6:
-		var d6;
-		var d7 = new Date();
-		d7.setTime(time);
-		d6 = d7;
-		return thx_Timestamps.create(d6.getFullYear(),0,1,0,0,0);
-	}
-};
-thx_Timestamps.snapTo = function(time,period) {
-	switch(period[1]) {
-	case 0:
-		return Math.round(time / 1000.0) * 1000.0;
-	case 1:
-		return Math.round(time / 60000.0) * 60000.0;
-	case 2:
-		return Math.round(time / 3600000.0) * 3600000.0;
-	case 3:
-		var d;
-		var d1 = new Date();
-		d1.setTime(time);
-		d = d1;
-		var mod;
-		if(d.getHours() >= 12) mod = 1; else mod = 0;
-		return thx_Timestamps.create(d.getFullYear(),d.getMonth(),d.getDate() + mod,0,0,0);
-	case 4:
-		var d2;
-		var d3 = new Date();
-		d3.setTime(time);
-		d2 = d3;
-		var wd = d2.getDay();
-		var mod1;
-		if(wd < 3) mod1 = -wd; else if(wd > 3) mod1 = 7 - wd; else if(d2.getHours() < 12) mod1 = -wd; else mod1 = 7 - wd;
-		return thx_Timestamps.create(d2.getFullYear(),d2.getMonth(),d2.getDate() + mod1,0,0,0);
-	case 5:
-		var d4;
-		var d5 = new Date();
-		d5.setTime(time);
-		d4 = d5;
-		var mod2;
-		if(d4.getDate() > Math.round(DateTools.getMonthDays(d4) / 2)) mod2 = 1; else mod2 = 0;
-		return thx_Timestamps.create(d4.getFullYear(),d4.getMonth() + mod2,1,0,0,0);
-	case 6:
-		var d6;
-		var d7 = new Date();
-		d7.setTime(time);
-		d6 = d7;
-		var mod3;
-		if(time > new Date(d6.getFullYear(),6,2,0,0,0).getTime()) mod3 = 1; else mod3 = 0;
-		return thx_Timestamps.create(d6.getFullYear() + mod3,0,1,0,0,0);
-	}
-};
-thx_Timestamps.snapToWeekDay = function(time,day,firstDayOfWk) {
-	return thx_Dates.snapToWeekDay((function($this) {
-		var $r;
-		var d = new Date();
-		d.setTime(time);
-		$r = d;
-		return $r;
-	}(this)),day,firstDayOfWk).getTime();
-};
-thx_Timestamps.snapNextWeekDay = function(time,day) {
-	return thx_Dates.snapNextWeekDay((function($this) {
-		var $r;
-		var d = new Date();
-		d.setTime(time);
-		$r = d;
-		return $r;
-	}(this)),day).getTime();
-};
-thx_Timestamps.snapPrevWeekDay = function(time,day) {
-	return thx_Dates.snapPrevWeekDay((function($this) {
-		var $r;
-		var d = new Date();
-		d.setTime(time);
-		$r = d;
-		return $r;
-	}(this)),day).getTime();
-};
-thx_Timestamps.r = function(t,v) {
-	return Math.round(t / v) * v;
-};
-thx_Timestamps.f = function(t,v) {
-	return Math.floor(t / v) * v;
-};
-thx_Timestamps.c = function(t,v) {
-	return Math.ceil(t / v) * v;
 };
 var thx_TimePeriod = { __ename__ : ["thx","TimePeriod"], __constructs__ : ["Second","Minute","Hour","Day","Week","Month","Year"] };
 thx_TimePeriod.Second = ["Second",0];
@@ -1892,7 +1809,7 @@ thx_Dynamics.compare = function(a,b) {
 			case "Date":
 				return thx_Dates.compare(a,b);
 			default:
-				if(Object.prototype.hasOwnProperty.call(a,"compare")) return Reflect.callMethod(a,Reflect.field(a,"compare"),[b]); else return thx_Strings.compare(Std.string(a),Std.string(b));
+				if(Object.prototype.hasOwnProperty.call(a,"compare")) return Reflect.callMethod(a,Reflect.field(a,"compare"),[b]); else return haxe_Utf8.compare(Std.string(a),Std.string(b));
 			}
 			break;
 		case 7:
@@ -2085,9 +2002,19 @@ thx_Floats.interpolateAngleCCW = function(f,a,b,turn) {
 	if(b > a) b -= turn;
 	return thx_Floats.wrapCircular(thx_Floats.interpolate(f,a,b),turn);
 };
+thx_Floats.max = function(a,b) {
+	if(a > b) return a; else return b;
+};
+thx_Floats.min = function(a,b) {
+	if(a < b) return a; else return b;
+};
 thx_Floats.nearEquals = function(a,b,tollerance) {
 	if(tollerance == null) tollerance = 10e-10;
-	return Math.abs(a - b) <= tollerance;
+	if(isFinite(a)) return Math.abs(a - b) <= tollerance;
+	if(isNaN(a)) return isNaN(b);
+	if(isNaN(b)) return false;
+	if(!isFinite(b)) return a > 0 == b > 0;
+	return false;
 };
 thx_Floats.nearEqualAngles = function(a,b,turn,tollerance) {
 	if(tollerance == null) tollerance = 10e-10;
@@ -2304,6 +2231,9 @@ thx_Ints.min = function(a,b) {
 	if(a < b) return a; else return b;
 };
 thx_Ints.parse = function(s,base) {
+	if(null == base) {
+		if(s.substring(0,2) == "0x") base = 16; else base = 10;
+	}
 	var v = parseInt(s,base);
 	if(isNaN(v)) return null; else return v;
 };
@@ -2362,6 +2292,9 @@ thx_Iterables.first = function(it) {
 thx_Iterables.last = function(it) {
 	return thx_Iterators.last($iterator(it)());
 };
+thx_Iterables.hasElements = function(it) {
+	return thx_Iterators.hasElements($iterator(it)());
+};
 thx_Iterables.isEmpty = function(it) {
 	return thx_Iterators.isEmpty($iterator(it)());
 };
@@ -2417,15 +2350,15 @@ var thx_Iterators = function() { };
 thx_Iterators.__name__ = ["thx","Iterators"];
 thx_Iterators.all = function(it,predicate) {
 	while( it.hasNext() ) {
-		var item = it.next();
-		if(!predicate(item)) return false;
+		var element = it.next();
+		if(!predicate(element)) return false;
 	}
 	return true;
 };
 thx_Iterators.any = function(it,predicate) {
 	while( it.hasNext() ) {
-		var item = it.next();
-		if(predicate(item)) return true;
+		var element = it.next();
+		if(predicate(element)) return true;
 	}
 	return false;
 };
@@ -2433,20 +2366,23 @@ thx_Iterators.eachPair = function(it,handler) {
 	thx_Arrays.eachPair(thx_Iterators.toArray(it),handler);
 };
 thx_Iterators.filter = function(it,predicate) {
-	return thx_Iterators.reduce(it,function(acc,item) {
-		if(predicate(item)) acc.push(item);
+	return thx_Iterators.reduce(it,function(acc,element) {
+		if(predicate(element)) acc.push(element);
 		return acc;
 	},[]);
 };
 thx_Iterators.find = function(it,f) {
 	while( it.hasNext() ) {
-		var item = it.next();
-		if(f(item)) return item;
+		var element = it.next();
+		if(f(element)) return element;
 	}
 	return null;
 };
 thx_Iterators.first = function(it) {
 	if(it.hasNext()) return it.next(); else return null;
+};
+thx_Iterators.hasElements = function(it) {
+	return it.hasNext();
 };
 thx_Iterators.isEmpty = function(it) {
 	return !it.hasNext();
@@ -2497,12 +2433,12 @@ thx_Iterators.reducei = function(it,callback,initial) {
 	return initial;
 };
 thx_Iterators.toArray = function(it) {
-	var items = [];
+	var elements = [];
 	while( it.hasNext() ) {
-		var item = it.next();
-		items.push(item);
+		var element = it.next();
+		elements.push(element);
 	}
-	return items;
+	return elements;
 };
 thx_Iterators.unzip = function(it) {
 	var a1 = [];
@@ -2610,7 +2546,7 @@ thx_Maps.tuples = function(map) {
 		return { _0 : key, _1 : _1};
 	});
 };
-thx_Maps.mapToObject = function(map) {
+thx_Maps.toObject = function(map) {
 	return thx_Arrays.reduce(thx_Maps.tuples(map),function(o,t) {
 		o[t._0] = t._1;
 		return o;
@@ -2650,7 +2586,25 @@ thx_Objects.exists = function(o,name) {
 thx_Objects.fields = function(o) {
 	return Reflect.fields(o);
 };
-thx_Objects.merge = function(to,from,replacef) {
+thx_Objects.combine = function(first,second) {
+	var to = { };
+	var _g = 0;
+	var _g1 = Reflect.fields(first);
+	while(_g < _g1.length) {
+		var field = _g1[_g];
+		++_g;
+		Reflect.setField(to,field,Reflect.field(first,field));
+	}
+	var _g2 = 0;
+	var _g11 = Reflect.fields(second);
+	while(_g2 < _g11.length) {
+		var field1 = _g11[_g2];
+		++_g2;
+		Reflect.setField(to,field1,Reflect.field(second,field1));
+	}
+	return to;
+};
+thx_Objects.assign = function(to,from,replacef) {
 	if(null == replacef) replacef = function(field,oldv,newv) {
 		return newv;
 	};
@@ -2681,7 +2635,7 @@ thx_Objects.clone = function(src,cloneInstances) {
 	if(cloneInstances == null) cloneInstances = false;
 	return thx_Dynamics.clone(src,cloneInstances);
 };
-thx_Objects.objectToMap = function(o) {
+thx_Objects.toMap = function(o) {
 	return thx_Arrays.reduce(thx_Objects.tuples(o),function(map,t) {
 		var value = t._1;
 		map.set(t._0,value);
@@ -2796,20 +2750,23 @@ thx_Strings.after = function(value,searchFor) {
 	if(pos < 0) return ""; else return value.substring(pos + searchFor.length);
 };
 thx_Strings.capitalize = function(s) {
-	return s.substring(0,1).toUpperCase() + s.substring(1);
+	return HxOverrides.substr(s,0,1).toUpperCase() + HxOverrides.substr(s,1,s.length - 1);
 };
 thx_Strings.capitalizeWords = function(value,whiteSpaceOnly) {
 	if(whiteSpaceOnly == null) whiteSpaceOnly = false;
-	if(whiteSpaceOnly) return thx_Strings.UCWORDSWS.map(value.substring(0,1).toUpperCase() + value.substring(1),thx_Strings.upperMatch); else return thx_Strings.UCWORDS.map(value.substring(0,1).toUpperCase() + value.substring(1),thx_Strings.upperMatch);
+	if(whiteSpaceOnly) return thx_Strings.UCWORDSWS.map(HxOverrides.substr(value,0,1).toUpperCase() + HxOverrides.substr(value,1,value.length - 1),thx_Strings.upperMatch); else return thx_Strings.UCWORDS.map(HxOverrides.substr(value,0,1).toUpperCase() + HxOverrides.substr(value,1,value.length - 1),thx_Strings.upperMatch);
 };
 thx_Strings.collapse = function(value) {
 	return thx_Strings.WSG.replace(StringTools.trim(value)," ");
 };
 thx_Strings.compare = function(a,b) {
-	if(a < b) return -1; else if(a > b) return 1; else return 0;
+	return haxe_Utf8.compare(a,b);
 };
 thx_Strings.contains = function(s,test) {
 	return s.indexOf(test) >= 0;
+};
+thx_Strings.count = function(s,test) {
+	return s.split(test).length - 1;
 };
 thx_Strings.containsAny = function(s,tests) {
 	return thx_Arrays.any(tests,(function(f,s1) {
@@ -2822,21 +2779,28 @@ thx_Strings.dasherize = function(s) {
 	return StringTools.replace(s,"_","-");
 };
 thx_Strings.ellipsis = function(s,maxlen,symbol) {
-	if(symbol == null) symbol = "...";
+	if(symbol == null) symbol = "…";
 	if(maxlen == null) maxlen = 20;
-	if(s.length > maxlen) return s.substring(0,symbol.length > maxlen - symbol.length?symbol.length:maxlen - symbol.length) + symbol; else return s;
+	var sl = s.length;
+	var symboll = symbol.length;
+	if(sl > maxlen) {
+		if(maxlen < symboll) return HxOverrides.substr(symbol,symboll - maxlen,maxlen); else return HxOverrides.substr(s,0,maxlen - symboll) + symbol;
+	} else return s;
 };
 thx_Strings.filter = function(s,predicate) {
 	return s.split("").filter(predicate).join("");
 };
 thx_Strings.filterCharcode = function(s,predicate) {
-	return thx_Strings.toCharcodeArray(s).filter(predicate).map(function(i) {
+	return thx_Strings.toCharcodes(s).filter(predicate).map(function(i) {
 		return String.fromCharCode(i);
 	}).join("");
 };
 thx_Strings.from = function(value,searchFor) {
 	var pos = value.indexOf(searchFor);
 	if(pos < 0) return ""; else return value.substring(pos);
+};
+thx_Strings.hasContent = function(value) {
+	return value != null && value.length > 0;
 };
 thx_Strings.humanize = function(s) {
 	return StringTools.replace(thx_Strings.underscore(s),"_"," ");
@@ -2861,8 +2825,7 @@ thx_Strings.isEmpty = function(value) {
 };
 thx_Strings.random = function(value,length) {
 	if(length == null) length = 1;
-	var pos = Math.floor((value.length - length + 1) * Math.random());
-	return HxOverrides.substr(value,pos,length);
+	return haxe_Utf8.sub(value,Math.floor((value.length - length + 1) * Math.random()),length);
 };
 thx_Strings.iterator = function(s) {
 	var _this = s.split("");
@@ -2912,7 +2875,7 @@ thx_Strings.surround = function(s,left,right) {
 thx_Strings.toArray = function(s) {
 	return s.split("");
 };
-thx_Strings.toCharcodeArray = function(s) {
+thx_Strings.toCharcodes = function(s) {
 	return thx_Strings.map(s,function(s1) {
 		return HxOverrides.cca(s1,0);
 	});
@@ -2920,8 +2883,8 @@ thx_Strings.toCharcodeArray = function(s) {
 thx_Strings.toChunks = function(s,len) {
 	var chunks = [];
 	while(s.length > 0) {
-		chunks.push(s.substring(0,len));
-		s = s.substring(len);
+		chunks.push(HxOverrides.substr(s,0,len));
+		s = HxOverrides.substr(s,len,s.length - len);
 	}
 	return chunks;
 };
@@ -2996,6 +2959,178 @@ thx_Strings.wrapLine = function(s,columns,indent,newline) {
 		}
 	}
 	return indent + parts.join(newline + indent);
+};
+var thx__$Timestamp_Timestamp_$Impl_$ = {};
+thx__$Timestamp_Timestamp_$Impl_$.__name__ = ["thx","_Timestamp","Timestamp_Impl_"];
+thx__$Timestamp_Timestamp_$Impl_$.create = function(year,month,day,hour,minute,second) {
+	return thx_Dates.create(year,month,day,hour,minute,second).getTime();
+};
+thx__$Timestamp_Timestamp_$Impl_$.fromDate = function(d) {
+	return d.getTime();
+};
+thx__$Timestamp_Timestamp_$Impl_$.fromString = function(s) {
+	return HxOverrides.strDate(s).getTime();
+};
+thx__$Timestamp_Timestamp_$Impl_$.toDate = function(this1) {
+	var d = new Date();
+	d.setTime(this1);
+	return d;
+};
+thx__$Timestamp_Timestamp_$Impl_$.toString = function(this1) {
+	var _this;
+	var d = new Date();
+	d.setTime(this1);
+	_this = d;
+	return HxOverrides.dateStr(_this);
+};
+thx__$Timestamp_Timestamp_$Impl_$.snapNext = function(this1,period) {
+	switch(period[1]) {
+	case 0:
+		return Math.ceil(this1 / 1000.0) * 1000.0;
+	case 1:
+		return Math.ceil(this1 / 60000.0) * 60000.0;
+	case 2:
+		return Math.ceil(this1 / 3600000.0) * 3600000.0;
+	case 3:
+		var d;
+		var d1 = new Date();
+		d1.setTime(this1);
+		d = d1;
+		var year = d.getFullYear();
+		var month = d.getMonth();
+		var day = d.getDate() + 1;
+		return thx_Dates.create(year,month,day,0,0,0).getTime();
+	case 4:
+		var d2;
+		var d3 = new Date();
+		d3.setTime(this1);
+		d2 = d3;
+		var wd = d2.getDay();
+		var year1 = d2.getFullYear();
+		var month1 = d2.getMonth();
+		var day1 = d2.getDate() + 7 - wd;
+		return thx_Dates.create(year1,month1,day1,0,0,0).getTime();
+	case 5:
+		var d4;
+		var d5 = new Date();
+		d5.setTime(this1);
+		d4 = d5;
+		var year2 = d4.getFullYear();
+		var month2 = d4.getMonth() + 1;
+		return thx_Dates.create(year2,month2,1,0,0,0).getTime();
+	case 6:
+		var d6;
+		var d7 = new Date();
+		d7.setTime(this1);
+		d6 = d7;
+		var year3 = d6.getFullYear() + 1;
+		return thx_Dates.create(year3,0,1,0,0,0).getTime();
+	}
+};
+thx__$Timestamp_Timestamp_$Impl_$.snapPrev = function(this1,period) {
+	switch(period[1]) {
+	case 0:
+		return Math.floor(this1 / 1000.0) * 1000.0;
+	case 1:
+		return Math.floor(this1 / 60000.0) * 60000.0;
+	case 2:
+		return Math.floor(this1 / 3600000.0) * 3600000.0;
+	case 3:
+		var d;
+		var d1 = new Date();
+		d1.setTime(this1);
+		d = d1;
+		var year = d.getFullYear();
+		var month = d.getMonth();
+		var day = d.getDate();
+		return thx_Dates.create(year,month,day,0,0,0).getTime();
+	case 4:
+		var d2;
+		var d3 = new Date();
+		d3.setTime(this1);
+		d2 = d3;
+		var wd = d2.getDay();
+		var year1 = d2.getFullYear();
+		var month1 = d2.getMonth();
+		var day1 = d2.getDate() - wd;
+		return thx_Dates.create(year1,month1,day1,0,0,0).getTime();
+	case 5:
+		var d4;
+		var d5 = new Date();
+		d5.setTime(this1);
+		d4 = d5;
+		var year2 = d4.getFullYear();
+		var month2 = d4.getMonth();
+		return thx_Dates.create(year2,month2,1,0,0,0).getTime();
+	case 6:
+		var d6;
+		var d7 = new Date();
+		d7.setTime(this1);
+		d6 = d7;
+		var year3 = d6.getFullYear();
+		return thx_Dates.create(year3,0,1,0,0,0).getTime();
+	}
+};
+thx__$Timestamp_Timestamp_$Impl_$.snapTo = function(this1,period) {
+	switch(period[1]) {
+	case 0:
+		return Math.round(this1 / 1000.0) * 1000.0;
+	case 1:
+		return Math.round(this1 / 60000.0) * 60000.0;
+	case 2:
+		return Math.round(this1 / 3600000.0) * 3600000.0;
+	case 3:
+		var d;
+		var d1 = new Date();
+		d1.setTime(this1);
+		d = d1;
+		var mod;
+		if(d.getHours() >= 12) mod = 1; else mod = 0;
+		var year = d.getFullYear();
+		var month = d.getMonth();
+		var day = d.getDate() + mod;
+		return thx_Dates.create(year,month,day,0,0,0).getTime();
+	case 4:
+		var d2;
+		var d3 = new Date();
+		d3.setTime(this1);
+		d2 = d3;
+		var wd = d2.getDay();
+		var mod1;
+		if(wd < 3) mod1 = -wd; else if(wd > 3) mod1 = 7 - wd; else if(d2.getHours() < 12) mod1 = -wd; else mod1 = 7 - wd;
+		var year1 = d2.getFullYear();
+		var month1 = d2.getMonth();
+		var day1 = d2.getDate() + mod1;
+		return thx_Dates.create(year1,month1,day1,0,0,0).getTime();
+	case 5:
+		var d4;
+		var d5 = new Date();
+		d5.setTime(this1);
+		d4 = d5;
+		var mod2;
+		if(d4.getDate() > Math.round(DateTools.getMonthDays(d4) / 2)) mod2 = 1; else mod2 = 0;
+		var year2 = d4.getFullYear();
+		var month2 = d4.getMonth() + mod2;
+		return thx_Dates.create(year2,month2,1,0,0,0).getTime();
+	case 6:
+		var d6;
+		var d7 = new Date();
+		d7.setTime(this1);
+		d6 = d7;
+		var mod3;
+		if(this1 > new Date(d6.getFullYear(),6,2,0,0,0).getTime()) mod3 = 1; else mod3 = 0;
+		var year3 = d6.getFullYear() + mod3;
+		return thx_Dates.create(year3,0,1,0,0,0).getTime();
+	}
+};
+thx__$Timestamp_Timestamp_$Impl_$.r = function(t,v) {
+	return Math.round(t / v) * v;
+};
+thx__$Timestamp_Timestamp_$Impl_$.f = function(t,v) {
+	return Math.floor(t / v) * v;
+};
+thx__$Timestamp_Timestamp_$Impl_$.c = function(t,v) {
+	return Math.ceil(t / v) * v;
 };
 var thx__$Tuple_Tuple0_$Impl_$ = {};
 thx__$Tuple_Tuple0_$Impl_$.__name__ = ["thx","_Tuple","Tuple0_Impl_"];
@@ -3176,7 +3311,7 @@ thx_Types.hasSuperClass = function(cls,sup) {
 	return false;
 };
 thx_Types.sameType = function(a,b) {
-	return thx_Types.typeToString(Type["typeof"](a)) == thx_Types.typeToString(Type["typeof"](b));
+	return thx_Types.toString(Type["typeof"](a)) == thx_Types.toString(Type["typeof"](b));
 };
 thx_Types.typeInheritance = function(type) {
 	switch(type[1]) {
@@ -3205,7 +3340,7 @@ thx_Types.typeInheritance = function(type) {
 		throw new js__$Boot_HaxeError("invalid type " + Std.string(type));
 	}
 };
-thx_Types.typeToString = function(type) {
+thx_Types.toString = function(type) {
 	switch(type[1]) {
 	case 0:
 		return "Null";
@@ -3233,7 +3368,13 @@ thx_Types.valueTypeInheritance = function(value) {
 	return thx_Types.typeInheritance(Type["typeof"](value));
 };
 thx_Types.valueTypeToString = function(value) {
-	return thx_Types.typeToString(Type["typeof"](value));
+	return thx_Types.toString(Type["typeof"](value));
+};
+thx_Types.anyValueToString = function(value) {
+	if(js_Boot.__instanceof(value,ValueType)) return thx_Types.toString(value);
+	if(js_Boot.__instanceof(value,Class)) return Type.getClassName(value);
+	if(js_Boot.__instanceof(value,Enum)) return Type.getEnumName(value);
+	return thx_Types.valueTypeToString(value);
 };
 var thx_error_ErrorWrapper = function(message,innerError,stack,pos) {
 	thx_Error.call(this,message,stack,pos);
@@ -3324,7 +3465,7 @@ js_Boot.__toStr = {}.toString;
 thx_Floats.TOLERANCE = 10e-5;
 thx_Floats.EPSILON = 10e-10;
 thx_Floats.pattern_parse = new EReg("^(\\+|-)?\\d+(\\.\\d+)?(e-?\\d+)?$","");
-thx_Ints.pattern_parse = new EReg("^[+-]?(\\d+|0x[0-9A-F]+)$","i");
+thx_Ints.pattern_parse = new EReg("^\\s*[+-]?(\\d+|0x[0-9A-F]+)","i");
 thx_Ints.BASE = "0123456789abcdefghijklmnopqrstuvwxyz";
 thx_Strings.UCWORDS = new EReg("[^a-zA-Z]([a-z])","g");
 thx_Strings.UCWORDSWS = new EReg("[ \t\r\n][a-z]","g");

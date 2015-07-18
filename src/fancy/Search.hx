@@ -2,37 +2,59 @@ package fancy;
 
 import js.html.InputElement;
 import js.html.Event;
+using thx.Objects;
 using fancy.util.Dom;
 
 typedef FancySearchClassNames = {
   ?input : String,
-  ?inputFocus : String
+  ?inputFocus : String,
+  ?suggestionContainer : String,
+  ?suggestionsOpen : String,
+  ?suggestionsClosed : String,
+  ?suggestionList : String,
+  ?suggestionItem : String,
 };
 
 typedef FancySearchOptions = {
   ?suggestions : Array<String>,
-  ?filterFn : String -> String -> Bool,
+  ?filter : Suggestions.FilterFunction,
   ?classes : FancySearchClassNames
 };
 
 class Search {
   public var input : InputElement;
   public var suggList : Suggestions;
-  public var suggestions(default, null) : Array<String>;
-  public var filterFn(default, null) : String -> String -> Bool;
-  public var classes(default, null) : FancySearchClassNames;
+  public var classes : FancySearchClassNames;
 
   public function new(el : InputElement, ?options : FancySearchOptions) {
     // initialize all of the options
     input = el;
-    suggestions = options.suggestions != null ? options.suggestions : [];
-    filterFn = options.filterFn != null ? options.filterFn : defaultFilterer;
-    classes = options.classes != null ? options.classes : {};
-    classes.input = classes.input != null ? classes.input : 'fs-search-input';
-    classes.inputFocus = classes.inputFocus != null ? classes.inputFocus : 'fs-search-input-focus';
+    options = options != null ? options : {};
+    options.classes = options.classes != null ? options.classes : {};
+
+    classes = Objects.merge({
+      input : 'fs-search-input',
+      inputFocus : 'fs-search-input-focus',
+      suggestionContainer : 'fs-suggestion-container',
+      suggestionsOpen : 'fs-suggestion-container-open',
+      suggestionsClosed : 'fs-suggestion-container-closed',
+      suggestionList : 'fs-suggestion-list',
+      suggestionItem : 'fs-suggestion-item'
+    }, options.classes);
 
     // create sibling elements
-    suggList = new Suggestions(input.parentElement, suggestions, filterFn);
+    suggList = new Suggestions({
+      parent : input.parentElement,
+      suggestions : options.suggestions,
+      filter : options.filter,
+      classes : {
+        suggestionContainer : classes.suggestionContainer,
+        suggestionsOpen : classes.suggestionsOpen,
+        suggestionsClosed : classes.suggestionsClosed,
+        suggestionList : classes.suggestionList,
+        suggestionItem : classes.suggestionItem
+      }
+    });
 
     // apply classes
     input.addClass(classes.input);
@@ -40,10 +62,6 @@ class Search {
     // apply event listeners
     input.on('focus', onSearchFocus);
     input.on('blur', onSearchBlur);
-  }
-
-  static function defaultFilterer(suggestion : String, search : String) {
-    return suggestion.indexOf(search) >= 0;
   }
 
   function onSearchFocus(e : Event) {
