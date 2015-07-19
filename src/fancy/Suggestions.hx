@@ -36,10 +36,10 @@ class Suggestions {
     filter = options.filter != null ? options.filter : defaultFilterer;
 
     // set up the dom
-    el = Dom.create('div.${classes.suggestionContainer}${classes.suggestionsClosed}', [
+    el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [
       Dom.create(
         'ul.${classes.suggestionList}',
-        suggestions.map.fn(Dom.create('li${classes.suggestionItem}', _))
+        suggestions.map.fn(Dom.create('li.${classes.suggestionItem}', _))
       )
     ]);
 
