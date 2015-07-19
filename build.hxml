@@ -1,5 +1,6 @@
 -lib thx.core
 -cp src
 -cp demo
+-dce full
 -main Main
 -js bin/demo.js
