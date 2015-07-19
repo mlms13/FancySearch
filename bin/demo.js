@@ -403,8 +403,8 @@ var fancy_Suggestions = function(options) {
 	this.classes = options.classes;
 	if(options.suggestions != null) this.suggestions = options.suggestions; else this.suggestions = [];
 	if(options.filter != null) this.filter = options.filter; else this.filter = fancy_Suggestions.defaultFilterer;
-	this.el = fancy_util_Dom.create("div." + this.classes.suggestionContainer + this.classes.suggestionsClosed,null,[fancy_util_Dom.create("ul." + this.classes.suggestionList,null,this.suggestions.map(function(_) {
-		return fancy_util_Dom.create("li" + _g.classes.suggestionItem,null,null,_);
+	this.el = fancy_util_Dom.create("div." + this.classes.suggestionContainer + "." + this.classes.suggestionsClosed,null,[fancy_util_Dom.create("ul." + this.classes.suggestionList,null,this.suggestions.map(function(_) {
+		return fancy_util_Dom.create("li." + _g.classes.suggestionItem,null,null,_);
 	}))]);
 	this.parent.appendChild(this.el);
 };
