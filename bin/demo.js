@@ -50,7 +50,7 @@ var fancy_Search = function(el,options) {
 	this.input = el;
 	if(options != null) options = options; else options = { };
 	if(options.classes != null) options.classes = options.classes; else options.classes = { };
-	this.classes = thx_Objects.combine({ input : "fs-search-input", inputFocus : "fs-search-input-focus", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item"},options.classes);
+	this.classes = thx_Objects.combine({ input : "fs-search-input", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item"},options.classes);
 	this.suggList = new fancy_Suggestions({ parent : this.input.parentElement, suggestions : options.suggestions, filter : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem}});
 	fancy_util_Dom.addClass(this.input,this.classes.input);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
@@ -58,10 +58,10 @@ var fancy_Search = function(el,options) {
 };
 fancy_Search.prototype = {
 	onSearchFocus: function(e) {
-		fancy_util_Dom.addClass(this.input,this.classes.inputFocus);
+		this.suggList.open();
 	}
 	,onSearchBlur: function(e) {
-		fancy_util_Dom.removeClass(this.input,this.classes.inputFocus);
+		this.suggList.close();
 	}
 };
 var fancy_Suggestions = function(options) {
@@ -77,6 +77,14 @@ var fancy_Suggestions = function(options) {
 };
 fancy_Suggestions.defaultFilterer = function(suggestion,search) {
 	return suggestion.indexOf(search) >= 0;
+};
+fancy_Suggestions.prototype = {
+	open: function() {
+		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsClosed),this.classes.suggestionsOpen);
+	}
+	,close: function() {
+		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsOpen),this.classes.suggestionsClosed);
+	}
 };
 var fancy_util_Dom = function() { };
 fancy_util_Dom.addClass = function(el,className) {

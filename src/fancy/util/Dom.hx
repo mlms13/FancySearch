@@ -7,11 +7,13 @@ import js.html.Event;
 class Dom {
   public static function addClass(el : Element, className : String) {
     el.className += ' $className';
+    return el;
   }
 
   public static function removeClass(el : Element, className : String) {
     var regex = new EReg('(?:^|\\s)($className)(?!\\S)', 'g');
     el.className = regex.replace(el.className, '');
+    return el;
   }
 
   public static function on(el : Element, eventName : String, callback : Event -> Void) {

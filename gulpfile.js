@@ -17,7 +17,7 @@ gulp.task('stylus', function () {
 gulp.task('build', ['stylus']);
 
 gulp.task('watch', ['build'], function () {
-  gulp.watch('./demo/styl/**/*.sytl', ['stylus']);
+  gulp.watch(['./demo/styl/**/*.styl'], ['stylus']);
 });
 
 gulp.task('default', ['watch']);

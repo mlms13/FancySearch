@@ -6,6 +6,12 @@
   position: absolute;
   right: 0;
 }
+.fs-suggestion-container-closed {
+  display: none;
+}
+.fs-suggestion-container-open {
+  display: block;
+}
 .fs-suggestion-list {
   background: #fff;
   border: 1px solid #ddd;

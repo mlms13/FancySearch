@@ -46,6 +46,18 @@ class Suggestions {
     parent.appendChild(el);
   }
 
+  public function open() {
+    el.removeClass(classes.suggestionsClosed)
+      .addClass(classes.suggestionsOpen);
+  }
+
+  public function close() {
+    el.removeClass(classes.suggestionsOpen)
+      .addClass(classes.suggestionsClosed);
+  }
+
+
+
   static function defaultFilterer(suggestion : String, search : String) {
     return suggestion.indexOf(search) >= 0;
   }

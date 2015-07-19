@@ -7,7 +7,6 @@ using fancy.util.Dom;
 
 typedef FancySearchClassNames = {
   ?input : String,
-  ?inputFocus : String,
   ?suggestionContainer : String,
   ?suggestionsOpen : String,
   ?suggestionsClosed : String,
@@ -34,7 +33,6 @@ class Search {
 
     classes = Objects.merge({
       input : 'fs-search-input',
-      inputFocus : 'fs-search-input-focus',
       suggestionContainer : 'fs-suggestion-container',
       suggestionsOpen : 'fs-suggestion-container-open',
       suggestionsClosed : 'fs-suggestion-container-closed',
@@ -65,10 +63,10 @@ class Search {
   }
 
   function onSearchFocus(e : Event) {
-    input.addClass(classes.inputFocus);
+    suggList.open();
   }
 
   function onSearchBlur(e: Event) {
-    input.removeClass(classes.inputFocus);
+    suggList.close();
   }
 }
