@@ -1,5 +1,6 @@
 package fancy;
 
+import js.html.Element;
 import js.html.InputElement;
 import js.html.Event;
 import js.html.KeyboardEvent;
@@ -28,6 +29,7 @@ typedef FancySearchKeyboardShortcuts = {
 };
 
 typedef FancySearchOptions = {
+  ?container : Element,
   ?suggestions : Array<String>,
   ?filter : Suggestions.FilterFunction,
   ?classes : FancySearchClassNames,
@@ -36,6 +38,7 @@ typedef FancySearchOptions = {
 
 class Search {
   public var input : InputElement;
+  public var container : Element;
   public var list : Suggestions;
   public var classes : FancySearchClassNames;
   public var keys : FancySearchKeyboardShortcuts;
@@ -44,6 +47,7 @@ class Search {
     // initialize all of the options
     input = el;
     options = options != null ? options : {};
+    container = options.container != null ? options.container : input.parentElement;
     options.classes = options.classes != null ? options.classes : {};
     options.keys = options.keys != null ? options.keys : {};
 
@@ -67,7 +71,7 @@ class Search {
 
     // create sibling elements
     list = new Suggestions({
-      parent : input.parentElement,
+      parent : container,
       suggestions : options.suggestions,
       filterFn : options.filter,
       classes : {
