@@ -68,7 +68,15 @@ class Search {
 
     // apply event listeners
     input.on('input', onSearchInput);
+    input.on('focus', onSearchFocus);
     input.on('blur', onSearchBlur);
+  }
+
+  function onSearchFocus(e : Event) {
+    // reopen suggestion list if suggestions are filtered, but some exist
+    if (suggList.filtered.length < suggList.suggestions.length && suggList.filtered.length > 0) {
+      suggList.open();
+    }
   }
 
   function onSearchInput(e : Event) {

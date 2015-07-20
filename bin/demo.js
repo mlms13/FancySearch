@@ -72,10 +72,14 @@ var fancy_Search = function(el,options) {
 	this.suggList = new fancy_Suggestions({ parent : this.input.parentElement, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
 	fancy_util_Dom.addClass(this.input,this.classes.input);
 	fancy_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
+	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
 	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
 };
 fancy_Search.prototype = {
-	onSearchInput: function(e) {
+	onSearchFocus: function(e) {
+		if(this.suggList.filtered.length < this.suggList.suggestions.length && this.suggList.filtered.length > 0) this.suggList.open();
+	}
+	,onSearchInput: function(e) {
 		this.suggList.filter(this.input.value);
 		this.suggList.open();
 	}
