@@ -35,13 +35,11 @@ HxOverrides.iter = function(a) {
 		return this.arr[this.cur++];
 	}};
 };
-var Main = function() {
+var Main = function() { };
+Main.main = function() {
 	var options = { suggestions : ["Apple","Banana","Carrot","Peach","Pear","Turnip"]};
 	var input = window.document.querySelector("input.fancify");
-	this.search = new fancy_Search(input,options);
-};
-Main.main = function() {
-	new Main();
+	var search = new fancy_Search(input,options);
 };
 var Reflect = function() { };
 Reflect.field = function(o,field) {
