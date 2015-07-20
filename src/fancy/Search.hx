@@ -12,6 +12,8 @@ using fancy.util.Dom;
 
 typedef FancySearchClassNames = {
   ?input : String,
+  ?inputEmpty : String,
+  ?clearButton : String,
   ?suggestionContainer : String,
   ?suggestionsOpen : String,
   ?suggestionsClosed : String,
@@ -32,27 +34,33 @@ typedef FancySearchOptions = {
   ?container : Element,
   ?suggestions : Array<String>,
   ?filter : Suggestions.FilterFunction,
+  ?clearBtn : Bool,
   ?classes : FancySearchClassNames,
   ?keys : FancySearchKeyboardShortcuts
 };
 
 class Search {
   public var input : InputElement;
-  public var container : Element;
   public var list : Suggestions;
   public var classes : FancySearchClassNames;
   public var keys : FancySearchKeyboardShortcuts;
 
   public function new(el : InputElement, ?options : FancySearchOptions) {
+    var clearBtn : Element;
+    var container : Element;
+
     // initialize all of the options
     input = el;
     options = options != null ? options : {};
     container = options.container != null ? options.container : input.parentElement;
+    options.clearBtn = options.clearBtn != null ? options.clearBtn : true;
     options.classes = options.classes != null ? options.classes : {};
     options.keys = options.keys != null ? options.keys : {};
 
     classes = Objects.merge({
       input : 'fs-search-input',
+      inputEmpty : 'fs-search-input-empty',
+      clearButton : 'fs-clear-input-button',
       suggestionContainer : 'fs-suggestion-container',
       suggestionsOpen : 'fs-suggestion-container-open',
       suggestionsClosed : 'fs-suggestion-container-closed',
@@ -70,6 +78,13 @@ class Search {
     }, options.keys);
 
     // create sibling elements
+    clearBtn = Dom.create('button.${classes.clearButton}', '\u00D7');
+    clearBtn.on('click', onClearButtonClick);
+
+    if (options.clearBtn) {
+      container.appendChild(clearBtn);
+    }
+
     list = new Suggestions({
       parent : container,
       suggestions : options.suggestions,
@@ -87,7 +102,11 @@ class Search {
     });
 
     // apply classes
-    input.addClass(classes.input);
+    input.addClass(classes.input).addClass(classes.inputEmpty);
+
+    if (input.value.length < 1) {
+      input.addClass(classes.inputEmpty);
+    }
 
     // apply event listeners
     input.on('focus', onSearchFocus);
@@ -108,6 +127,11 @@ class Search {
   }
 
   function onSearchInput(e : Event) {
+    if (input.value.length < 1) {
+      input.addClass(classes.inputEmpty);
+    } else {
+      input.removeClass(classes.inputEmpty);
+    }
     list.filter(input.value);
     list.open();
   }
@@ -122,5 +146,10 @@ class Search {
     } else if (keys.selectionDown.contains(code) && list.isOpen) {
       list.moveSelectionDown();
     }
+  }
+
+  function onClearButtonClick(e : Event) {
+    input.value = "";
+    input.addClass(classes.inputEmpty);
   }
 }

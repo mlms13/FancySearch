@@ -3,6 +3,24 @@
     &-input
       box-sizing border-box
 
+  &-clear-input-button
+    border 0
+    background transparent
+    color #999
+    cursor pointer
+    font-size 16px
+    position absolute
+    right 20px
+    top 50%
+    transform translateY(-50%)
+    transition color 200ms
+
+    &:hover
+      color #444
+
+    .fs-search-input-empty + &
+      display none
+
   &-suggestion
     &-container
       left 0

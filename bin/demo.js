@@ -63,15 +63,22 @@ Reflect.fields = function(o) {
 	return a;
 };
 var fancy_Search = function(el,options) {
+	var clearBtn;
+	var container;
 	this.input = el;
 	if(options != null) options = options; else options = { };
-	if(options.container != null) this.container = options.container; else this.container = this.input.parentElement;
+	if(options.container != null) container = options.container; else container = this.input.parentElement;
+	if(options.clearBtn != null) options.clearBtn = options.clearBtn; else options.clearBtn = true;
 	if(options.classes != null) options.classes = options.classes; else options.classes = { };
 	if(options.keys != null) options.keys = options.keys; else options.keys = { };
-	this.classes = thx_Objects.combine({ input : "fs-search-input", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
+	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN]},options.keys);
-	this.list = new fancy_Suggestions({ parent : this.container, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
-	fancy_util_Dom.addClass(this.input,this.classes.input);
+	clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
+	fancy_util_Dom.on(clearBtn,"click",$bind(this,this.onClearButtonClick));
+	if(options.clearBtn) container.appendChild(clearBtn);
+	this.list = new fancy_Suggestions({ parent : container, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
+	fancy_util_Dom.addClass(fancy_util_Dom.addClass(this.input,this.classes.input),this.classes.inputEmpty);
+	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
 	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
 	fancy_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
@@ -85,6 +92,7 @@ fancy_Search.prototype = {
 		this.list.close();
 	}
 	,onSearchInput: function(e) {
+		if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty); else fancy_util_Dom.removeClass(this.input,this.classes.inputEmpty);
 		this.list.filter(this.input.value);
 		this.list.open();
 	}
@@ -92,6 +100,10 @@ fancy_Search.prototype = {
 		var code;
 		if(e.which != null) code = e.which; else code = e.keyCode;
 		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.list.close(); else if(thx_Arrays.contains(this.keys.selectionUp,code) && this.list.isOpen) this.list.moveSelectionUp(); else if(thx_Arrays.contains(this.keys.selectionDown,code) && this.list.isOpen) this.list.moveSelectionDown();
+	}
+	,onClearButtonClick: function(e) {
+		this.input.value = "";
+		fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 	}
 };
 var fancy_Suggestions = function(options) {

@@ -1,6 +1,27 @@
 .fs-search-input {
   box-sizing: border-box;
 }
+.fs-clear-input-button {
+  border: 0;
+  background: transparent;
+  color: #999;
+  cursor: pointer;
+  font-size: 16px;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+          transform: translateY(-50%);
+  -webkit-transition: color 200ms;
+          transition: color 200ms;
+}
+.fs-clear-input-button:hover {
+  color: #444;
+}
+.fs-search-input-empty + .fs-clear-input-button {
+  display: none;
+}
 .fs-suggestion-container {
   left: 0;
   position: absolute;
