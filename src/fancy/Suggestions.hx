@@ -82,9 +82,7 @@ class Suggestions {
       .addClass(classes.suggestionsClosed);
   }
 
-
-
   static function defaultFilterer(suggestion : String, search : String) {
-    return suggestion.indexOf(search) >= 0;
+    return suggestion.toLowerCase().indexOf(search.toLowerCase()) >= 0;
   }
 }

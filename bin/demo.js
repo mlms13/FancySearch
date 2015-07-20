@@ -109,7 +109,7 @@ var fancy_Suggestions = function(options) {
 	this.parent.appendChild(this.el);
 };
 fancy_Suggestions.defaultFilterer = function(suggestion,search) {
-	return suggestion.indexOf(search) >= 0;
+	return suggestion.toLowerCase().indexOf(search.toLowerCase()) >= 0;
 };
 fancy_Suggestions.prototype = {
 	filter: function(search) {
