@@ -31,6 +31,6 @@
 .fs-suggestion-item-negative {
   display: none;
 }
-.fs-suggestion-item:hover {
+.fs-suggestion-item-selected {
   background: #eee;
 }

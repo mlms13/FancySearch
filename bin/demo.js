@@ -68,8 +68,8 @@ var fancy_Search = function(el,options) {
 	this.input = el;
 	if(options != null) options = options; else options = { };
 	if(options.classes != null) options.classes = options.classes; else options.classes = { };
-	this.classes = thx_Objects.combine({ input : "fs-search-input", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative"},options.classes);
-	this.suggList = new fancy_Suggestions({ parent : this.input.parentElement, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail}});
+	this.classes = thx_Objects.combine({ input : "fs-search-input", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
+	this.suggList = new fancy_Suggestions({ parent : this.input.parentElement, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
 	fancy_util_Dom.addClass(this.input,this.classes.input);
 	fancy_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
 	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
@@ -89,19 +89,33 @@ var fancy_Suggestions = function(options) {
 	this.classes = options.classes;
 	if(options.suggestions != null) this.suggestions = options.suggestions; else this.suggestions = [];
 	this.filtered = this.suggestions.slice();
+	this.selected = "";
 	if(options.filterFn != null) this.filterFn = options.filterFn; else this.filterFn = fancy_Suggestions.defaultFilterer;
 	this.elements = thx_Arrays.reduce(this.suggestions,function(acc,curr) {
-		var value = fancy_util_Dom.create("li." + _g.classes.suggestionItem + "." + _g.classes.suggestionItemMatch,null,null,curr);
-		if(__map_reserved[curr] != null) acc.setReserved(curr,value); else acc.h[curr] = value;
+		acc.set(curr,fancy_util_Dom.create("li." + _g.classes.suggestionItem + "." + _g.classes.suggestionItemMatch,null,null,curr));
 		return acc;
 	},new haxe_ds_StringMap());
+	var $it0 = this.elements.keys();
+	while( $it0.hasNext() ) {
+		var elName = $it0.next();
+		var elName1 = [elName];
+		fancy_util_Dom.on(fancy_util_Dom.on(this.elements.get(elName1[0]),"mouseover",(function(elName1) {
+			return function(_) {
+				_g.selectItem(elName1[0]);
+			};
+		})(elName1)),"mouseout",(function() {
+			return function(_1) {
+				_g.selectItem();
+			};
+		})());
+	}
 	this.el = fancy_util_Dom.create("div." + this.classes.suggestionContainer + "." + this.classes.suggestionsClosed,null,[fancy_util_Dom.create("ul." + this.classes.suggestionList,null,(function($this) {
 		var $r;
 		var _g3 = [];
-		var $it0 = $this.elements.iterator();
-		while( $it0.hasNext() ) {
-			var el = $it0.next();
-			_g3.push(el);
+		var $it1 = $this.elements.iterator();
+		while( $it1.hasNext() ) {
+			var item = $it1.next();
+			_g3.push(item);
 		}
 		$r = _g3;
 		return $r;
@@ -122,7 +136,13 @@ fancy_Suggestions.prototype = {
 		while(_g1 < _g11.length) {
 			var sugg = _g11[_g1];
 			++_g1;
-			if(thx_Arrays.contains(this.filtered,sugg)) fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemFail),this.classes.suggestionItemMatch); else fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemMatch),this.classes.suggestionItemFail);
+			if(thx_Arrays.contains(this.filtered,sugg)) fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemFail),this.classes.suggestionItemMatch); else {
+				fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemMatch),this.classes.suggestionItemFail);
+				if(this.selected == sugg) {
+					fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemSelected);
+					this.selected = "";
+				}
+			}
 		}
 	}
 	,open: function() {
@@ -130,6 +150,12 @@ fancy_Suggestions.prototype = {
 	}
 	,close: function() {
 		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsOpen),this.classes.suggestionsClosed);
+	}
+	,selectItem: function(key) {
+		if(key == null) key = "";
+		if(this.selected != "") fancy_util_Dom.removeClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
+		this.selected = key;
+		if(this.elements.get(this.selected) != null) fancy_util_Dom.addClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
 	}
 };
 var fancy_util_Dom = function() { };
@@ -148,6 +174,7 @@ fancy_util_Dom.removeClass = function(el,className) {
 };
 fancy_util_Dom.on = function(el,eventName,callback) {
 	el.addEventListener(eventName,callback);
+	return el;
 };
 fancy_util_Dom.create = function(name,attrs,children,textContent) {
 	if(attrs == null) attrs = { };
@@ -197,7 +224,10 @@ var haxe_ds_StringMap = function() {
 };
 haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
 haxe_ds_StringMap.prototype = {
-	get: function(key) {
+	set: function(key,value) {
+		if(__map_reserved[key] != null) this.setReserved(key,value); else this.h[key] = value;
+	}
+	,get: function(key) {
 		if(__map_reserved[key] != null) return this.getReserved(key);
 		return this.h[key];
 	}
@@ -207,6 +237,10 @@ haxe_ds_StringMap.prototype = {
 	}
 	,getReserved: function(key) {
 		if(this.rh == null) return null; else return this.rh["$" + key];
+	}
+	,keys: function() {
+		var _this = this.arrayKeys();
+		return HxOverrides.iter(_this);
 	}
 	,arrayKeys: function() {
 		var out = [];

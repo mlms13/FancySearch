@@ -1,6 +1,7 @@
 package fancy;
 
 import js.html.Element;
+import haxe.ds.StringMap;
 using thx.Arrays;
 using thx.Functions;
 using fancy.util.Dom;
@@ -14,7 +15,8 @@ typedef SuggestionBoxClassNames = {
   suggestionList : String,
   suggestionItem : String,
   suggestionItemMatch : String,
-  suggestionItemFail : String
+  suggestionItemFail : String,
+  suggestionItemSelected : String,
 };
 
 typedef SuggestionOptions = {
@@ -29,7 +31,8 @@ class Suggestions {
   public var classes(default, null) : SuggestionBoxClassNames;
   public var suggestions(default, null) : Array<String>;
   public var filtered(default, null) : Array<String>;
-  public var elements(default, null) : Map<String, Element>;
+  public var elements(default, null) : StringMap<Element>;
+  public var selected(default, null) : String; // selected item in `filtered`
   public var filterFn : FilterFunction;
   var el : Element;
 
@@ -39,17 +42,28 @@ class Suggestions {
     classes = options.classes;
     suggestions = options.suggestions != null ? options.suggestions : [];
     filtered = suggestions.copy();
+    selected = '';
     filterFn = options.filterFn != null ? options.filterFn : defaultFilterer;
-    elements = suggestions.reduce(function (acc : Map<String, Element>, curr) {
+    elements = suggestions.reduce(function (acc : StringMap<Element>, curr) {
       acc.set(curr, Dom.create('li.${classes.suggestionItem}.${classes.suggestionItemMatch}', curr));
       return acc;
-    }, new Map<String, Element>());
+    }, new StringMap<Element>());
 
     // set up the dom
+    for (elName in elements.keys()) {
+      elements.get(elName)
+        .on('mouseover', function (_) {
+          selectItem(elName);
+        })
+        .on('mouseout', function (_) {
+          selectItem(); // select none
+        });
+    }
+
     el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [
       Dom.create(
         'ul.${classes.suggestionList}',
-        [for (el in elements) el]
+        [for (item in elements) item]
       )
     ]);
 
@@ -60,14 +74,20 @@ class Suggestions {
     filtered = suggestions.filter.fn(filterFn(_, search));
     for (sugg in suggestions) {
       if (filtered.contains(sugg)) {
-        elements[sugg]
+        elements.get(sugg)
           .removeClass(classes.suggestionItemFail)
           .addClass(classes.suggestionItemMatch);
       }
       else {
-        elements[sugg]
+        elements.get(sugg)
           .removeClass(classes.suggestionItemMatch)
           .addClass(classes.suggestionItemFail);
+
+        // unselect item if it is no longer part of the filtered list
+        if (selected == sugg) {
+          elements.get(sugg).removeClass(classes.suggestionItemSelected);
+          selected = "";
+        }
       }
     }
   }
@@ -80,6 +100,16 @@ class Suggestions {
   public function close() {
     el.removeClass(classes.suggestionsOpen)
       .addClass(classes.suggestionsClosed);
+  }
+
+  public function selectItem(?key : String = '') {
+    if (selected != '') {
+      elements.get(selected).removeClass(classes.suggestionItemSelected);
+    }
+
+    selected = key;
+    if (elements.get(selected) != null)
+      elements.get(selected).addClass(classes.suggestionItemSelected);
   }
 
   static function defaultFilterer(suggestion : String, search : String) {

@@ -13,7 +13,8 @@ typedef FancySearchClassNames = {
   ?suggestionList : String,
   ?suggestionItem : String,
   ?suggestionItemMatch : String,
-  ?suggestionItemFail : String
+  ?suggestionItemFail : String,
+  ?suggestionItemSelected : String
 };
 
 typedef FancySearchOptions = {
@@ -41,7 +42,8 @@ class Search {
       suggestionList : 'fs-suggestion-list',
       suggestionItem : 'fs-suggestion-item',
       suggestionItemMatch : 'fs-suggestion-item-positive',
-      suggestionItemFail : 'fs-suggestion-item-negative'
+      suggestionItemFail : 'fs-suggestion-item-negative',
+      suggestionItemSelected : 'fs-suggestion-item-selected'
     }, options.classes);
 
     // create sibling elements
@@ -56,7 +58,8 @@ class Search {
         suggestionList : classes.suggestionList,
         suggestionItem : classes.suggestionItem,
         suggestionItemMatch : classes.suggestionItemMatch,
-        suggestionItemFail : classes.suggestionItemFail
+        suggestionItemFail : classes.suggestionItemFail,
+        suggestionItemSelected : classes.suggestionItemSelected
       }
     });
 

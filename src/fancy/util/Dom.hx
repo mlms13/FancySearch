@@ -25,6 +25,7 @@ class Dom {
   public static function on(el : Element, eventName : String, callback : Event -> Void) {
     el.addEventListener(eventName, callback);
     // TODO: add fallback for older IE
+    return el;
   }
 
   public static function create(name : String, ?attrs : Dynamic<Dynamic>, ?children : Array<Element>, ?textContent : String) : Element {
