@@ -22,7 +22,9 @@ typedef FancySearchClassNames = {
 };
 
 typedef FancySearchKeyboardShortcuts = {
-  ?closeMenu : Array<Int>
+  ?closeMenu : Array<Int>,
+  ?selectionUp : Array<Int>,
+  ?selectionDown : Array<Int>
 };
 
 typedef FancySearchOptions = {
@@ -58,7 +60,9 @@ class Search {
     }, options.classes);
 
     keys = Objects.merge({
-      closeMenu : [Keys.ESCAPE]
+      closeMenu : [Keys.ESCAPE],
+      selectionUp : [Keys.UP],
+      selectionDown : [Keys.DOWN]
     }, options.keys);
 
     // create sibling elements
@@ -109,6 +113,10 @@ class Search {
 
     if (keys.closeMenu.contains(code)) {
       suggList.close();
+    } else if (keys.selectionUp.contains(code) && suggList.isOpen) {
+      suggList.moveSelectionUp();
+    } else if (keys.selectionDown.contains(code) && suggList.isOpen) {
+      suggList.moveSelectionDown();
     }
   }
 }

@@ -34,6 +34,7 @@ class Suggestions {
   public var elements(default, null) : StringMap<Element>;
   public var selected(default, null) : String; // selected item in `filtered`
   public var filterFn : FilterFunction;
+  public var isOpen : Bool;
   var el : Element;
 
   public function new(options : SuggestionOptions) {
@@ -44,6 +45,7 @@ class Suggestions {
     filtered = suggestions.copy();
     selected = '';
     filterFn = options.filterFn != null ? options.filterFn : defaultFilterer;
+    isOpen = false;
     elements = suggestions.reduce(function (acc : StringMap<Element>, curr) {
       acc.set(curr, Dom.create('li.${classes.suggestionItem}.${classes.suggestionItemMatch}', curr));
       return acc;
@@ -93,11 +95,14 @@ class Suggestions {
   }
 
   public function open() {
+    isOpen = true;
     el.removeClass(classes.suggestionsClosed)
       .addClass(classes.suggestionsOpen);
   }
 
   public function close() {
+    isOpen = false;
+    selectItem();
     el.removeClass(classes.suggestionsOpen)
       .addClass(classes.suggestionsClosed);
   }
@@ -110,6 +115,21 @@ class Suggestions {
     selected = key;
     if (elements.get(selected) != null)
       elements.get(selected).addClass(classes.suggestionItemSelected);
+  }
+
+  public function moveSelectionUp() {
+    var currentIndex = filtered.indexOf(selected),
+      targetIndex = currentIndex > 0 ? currentIndex - 1 : filtered.length - 1;
+
+    selectItem(filtered[targetIndex]);
+  }
+
+  public function moveSelectionDown() {
+    var currentIndex = filtered.indexOf(selected),
+      targetIndex = (currentIndex + 1) == filtered.length ? 0 : currentIndex + 1;
+
+    selectItem(filtered[targetIndex]);
+
   }
 
   static function defaultFilterer(suggestion : String, search : String) {

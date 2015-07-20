@@ -70,7 +70,7 @@ var fancy_Search = function(el,options) {
 	if(options.classes != null) options.classes = options.classes; else options.classes = { };
 	if(options.keys != null) options.keys = options.keys; else options.keys = { };
 	this.classes = thx_Objects.combine({ input : "fs-search-input", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
-	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE]},options.keys);
+	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN]},options.keys);
 	this.suggList = new fancy_Suggestions({ parent : this.input.parentElement, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
 	fancy_util_Dom.addClass(this.input,this.classes.input);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
@@ -92,7 +92,7 @@ fancy_Search.prototype = {
 	,onSearchKeyup: function(e) {
 		var code;
 		if(e.which != null) code = e.which; else code = e.keyCode;
-		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.suggList.close();
+		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.suggList.close(); else if(thx_Arrays.contains(this.keys.selectionUp,code) && this.suggList.isOpen) this.suggList.moveSelectionUp(); else if(thx_Arrays.contains(this.keys.selectionDown,code) && this.suggList.isOpen) this.suggList.moveSelectionDown();
 	}
 };
 var fancy_Suggestions = function(options) {
@@ -103,6 +103,7 @@ var fancy_Suggestions = function(options) {
 	this.filtered = this.suggestions.slice();
 	this.selected = "";
 	if(options.filterFn != null) this.filterFn = options.filterFn; else this.filterFn = fancy_Suggestions.defaultFilterer;
+	this.isOpen = false;
 	this.elements = thx_Arrays.reduce(this.suggestions,function(acc,curr) {
 		acc.set(curr,fancy_util_Dom.create("li." + _g.classes.suggestionItem + "." + _g.classes.suggestionItemMatch,null,null,curr));
 		return acc;
@@ -158,9 +159,12 @@ fancy_Suggestions.prototype = {
 		}
 	}
 	,open: function() {
+		this.isOpen = true;
 		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsClosed),this.classes.suggestionsOpen);
 	}
 	,close: function() {
+		this.isOpen = false;
+		this.selectItem();
 		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsOpen),this.classes.suggestionsClosed);
 	}
 	,selectItem: function(key) {
@@ -168,6 +172,18 @@ fancy_Suggestions.prototype = {
 		if(this.selected != "") fancy_util_Dom.removeClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
 		this.selected = key;
 		if(this.elements.get(this.selected) != null) fancy_util_Dom.addClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
+	}
+	,moveSelectionUp: function() {
+		var currentIndex = HxOverrides.indexOf(this.filtered,this.selected,0);
+		var targetIndex;
+		if(currentIndex > 0) targetIndex = currentIndex - 1; else targetIndex = this.filtered.length - 1;
+		this.selectItem(this.filtered[targetIndex]);
+	}
+	,moveSelectionDown: function() {
+		var currentIndex = HxOverrides.indexOf(this.filtered,this.selected,0);
+		var targetIndex;
+		if(currentIndex + 1 == this.filtered.length) targetIndex = 0; else targetIndex = currentIndex + 1;
+		this.selectItem(this.filtered[targetIndex]);
 	}
 };
 var fancy_util_Dom = function() { };
@@ -356,5 +372,7 @@ var __map_reserved = {}
       }
     ;
 fancy_util_Keys.ESCAPE = 27;
+fancy_util_Keys.UP = 38;
+fancy_util_Keys.DOWN = 40;
 Main.main();
 })(typeof console != "undefined" ? console : {log:function(){}});
