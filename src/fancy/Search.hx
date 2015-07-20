@@ -58,11 +58,11 @@ class Search {
     input.addClass(classes.input);
 
     // apply event listeners
-    input.on('focus', onSearchFocus);
+    input.on('input', onSearchInput);
     input.on('blur', onSearchBlur);
   }
 
-  function onSearchFocus(e : Event) {
+  function onSearchInput(e : Event) {
     suggList.open();
   }
 

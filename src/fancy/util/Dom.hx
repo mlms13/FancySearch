@@ -5,8 +5,14 @@ import js.html.Element;
 import js.html.Event;
 
 class Dom {
+  public static function hasClass(el : Element, className : String) {
+    var regex = new EReg('(?:^|\\s)($className)(?!\\S)', 'g');
+    return regex.match(el.className);
+  }
+
   public static function addClass(el : Element, className : String) {
-    el.className += ' $className';
+    if (!hasClass(el, className))
+      el.className += ' $className';
     return el;
   }
 
