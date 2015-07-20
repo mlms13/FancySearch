@@ -25,6 +25,12 @@
   color: #666;
   padding: 5px 10px;
 }
+.fs-suggestion-item-positive {
+  display: block;
+}
+.fs-suggestion-item-negative {
+  display: none;
+}
 .fs-suggestion-item:hover {
   background: #eee;
 }

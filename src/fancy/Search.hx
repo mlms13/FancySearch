@@ -12,6 +12,8 @@ typedef FancySearchClassNames = {
   ?suggestionsClosed : String,
   ?suggestionList : String,
   ?suggestionItem : String,
+  ?suggestionItemMatch : String,
+  ?suggestionItemFail : String
 };
 
 typedef FancySearchOptions = {
@@ -37,20 +39,24 @@ class Search {
       suggestionsOpen : 'fs-suggestion-container-open',
       suggestionsClosed : 'fs-suggestion-container-closed',
       suggestionList : 'fs-suggestion-list',
-      suggestionItem : 'fs-suggestion-item'
+      suggestionItem : 'fs-suggestion-item',
+      suggestionItemMatch : 'fs-suggestion-item-positive',
+      suggestionItemFail : 'fs-suggestion-item-negative'
     }, options.classes);
 
     // create sibling elements
     suggList = new Suggestions({
       parent : input.parentElement,
       suggestions : options.suggestions,
-      filter : options.filter,
+      filterFn : options.filter,
       classes : {
         suggestionContainer : classes.suggestionContainer,
         suggestionsOpen : classes.suggestionsOpen,
         suggestionsClosed : classes.suggestionsClosed,
         suggestionList : classes.suggestionList,
-        suggestionItem : classes.suggestionItem
+        suggestionItem : classes.suggestionItem,
+        suggestionItemMatch : classes.suggestionItemMatch,
+        suggestionItemFail : classes.suggestionItemFail
       }
     });
 
@@ -63,6 +69,7 @@ class Search {
   }
 
   function onSearchInput(e : Event) {
+    suggList.filter(input.value);
     suggList.open();
   }
 

@@ -1,6 +1,7 @@
 package fancy;
 
 import js.html.Element;
+using thx.Arrays;
 using thx.Functions;
 using fancy.util.Dom;
 
@@ -11,21 +12,25 @@ typedef SuggestionBoxClassNames = {
   suggestionsOpen : String,
   suggestionsClosed : String,
   suggestionList : String,
-  suggestionItem : String
+  suggestionItem : String,
+  suggestionItemMatch : String,
+  suggestionItemFail : String
 };
 
 typedef SuggestionOptions = {
   parent : Element,
   classes : SuggestionBoxClassNames,
   ?suggestions : Array<String>,
-  ?filter : FilterFunction,
+  ?filterFn : FilterFunction,
 };
 
 class Suggestions {
   public var parent(default, null) : Element;
   public var classes(default, null) : SuggestionBoxClassNames;
   public var suggestions(default, null) : Array<String>;
-  public var filter : FilterFunction;
+  public var filtered(default, null) : Array<String>;
+  public var elements(default, null) : Map<String, Element>;
+  public var filterFn : FilterFunction;
   var el : Element;
 
   public function new(options : SuggestionOptions) {
@@ -33,17 +38,38 @@ class Suggestions {
     parent = options.parent;
     classes = options.classes;
     suggestions = options.suggestions != null ? options.suggestions : [];
-    filter = options.filter != null ? options.filter : defaultFilterer;
+    filtered = suggestions.copy();
+    filterFn = options.filterFn != null ? options.filterFn : defaultFilterer;
+    elements = suggestions.reduce(function (acc : Map<String, Element>, curr) {
+      acc.set(curr, Dom.create('li.${classes.suggestionItem}.${classes.suggestionItemMatch}', curr));
+      return acc;
+    }, new Map<String, Element>());
 
     // set up the dom
     el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [
       Dom.create(
         'ul.${classes.suggestionList}',
-        suggestions.map.fn(Dom.create('li.${classes.suggestionItem}', _))
+        [for (el in elements) el]
       )
     ]);
 
     parent.appendChild(el);
+  }
+
+  public function filter(search : String) {
+    filtered = suggestions.filter.fn(filterFn(_, search));
+    for (sugg in suggestions) {
+      if (filtered.contains(sugg)) {
+        elements[sugg]
+          .removeClass(classes.suggestionItemFail)
+          .addClass(classes.suggestionItemMatch);
+      }
+      else {
+        elements[sugg]
+          .removeClass(classes.suggestionItemMatch)
+          .addClass(classes.suggestionItemFail);
+      }
+    }
   }
 
   public function open() {
