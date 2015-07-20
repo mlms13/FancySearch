@@ -68,23 +68,31 @@ var fancy_Search = function(el,options) {
 	this.input = el;
 	if(options != null) options = options; else options = { };
 	if(options.classes != null) options.classes = options.classes; else options.classes = { };
+	if(options.keys != null) options.keys = options.keys; else options.keys = { };
 	this.classes = thx_Objects.combine({ input : "fs-search-input", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
+	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE]},options.keys);
 	this.suggList = new fancy_Suggestions({ parent : this.input.parentElement, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
 	fancy_util_Dom.addClass(this.input,this.classes.input);
-	fancy_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
 	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
+	fancy_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
+	fancy_util_Dom.on(this.input,"keyup",$bind(this,this.onSearchKeyup));
 };
 fancy_Search.prototype = {
 	onSearchFocus: function(e) {
 		if(this.suggList.filtered.length < this.suggList.suggestions.length && this.suggList.filtered.length > 0) this.suggList.open();
 	}
+	,onSearchBlur: function(e) {
+		this.suggList.close();
+	}
 	,onSearchInput: function(e) {
 		this.suggList.filter(this.input.value);
 		this.suggList.open();
 	}
-	,onSearchBlur: function(e) {
-		this.suggList.close();
+	,onSearchKeyup: function(e) {
+		var code;
+		if(e.which != null) code = e.which; else code = e.keyCode;
+		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.suggList.close();
 	}
 };
 var fancy_Suggestions = function(options) {
@@ -208,6 +216,7 @@ fancy_util_Dom.create = function(name,attrs,children,textContent) {
 	if(textContent != null) el.appendChild(window.document.createTextNode(textContent));
 	return el;
 };
+var fancy_util_Keys = function() { };
 var haxe_IMap = function() { };
 var haxe_ds__$StringMap_StringMapIterator = function(map,keys) {
 	this.map = map;
@@ -346,5 +355,6 @@ var __map_reserved = {}
         };
       }
     ;
+fancy_util_Keys.ESCAPE = 27;
 Main.main();
 })(typeof console != "undefined" ? console : {log:function(){}});

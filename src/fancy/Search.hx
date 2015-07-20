@@ -2,7 +2,11 @@ package fancy;
 
 import js.html.InputElement;
 import js.html.Event;
+import js.html.KeyboardEvent;
+import fancy.util.Keys;
+
 using thx.Objects;
+using thx.Arrays;
 using fancy.util.Dom;
 
 typedef FancySearchClassNames = {
@@ -17,22 +21,29 @@ typedef FancySearchClassNames = {
   ?suggestionItemSelected : String
 };
 
+typedef FancySearchKeyboardShortcuts = {
+  ?closeMenu : Array<Int>
+};
+
 typedef FancySearchOptions = {
   ?suggestions : Array<String>,
   ?filter : Suggestions.FilterFunction,
-  ?classes : FancySearchClassNames
+  ?classes : FancySearchClassNames,
+  ?keys : FancySearchKeyboardShortcuts
 };
 
 class Search {
   public var input : InputElement;
   public var suggList : Suggestions;
   public var classes : FancySearchClassNames;
+  public var keys : FancySearchKeyboardShortcuts;
 
   public function new(el : InputElement, ?options : FancySearchOptions) {
     // initialize all of the options
     input = el;
     options = options != null ? options : {};
     options.classes = options.classes != null ? options.classes : {};
+    options.keys = options.keys != null ? options.keys : {};
 
     classes = Objects.merge({
       input : 'fs-search-input',
@@ -45,6 +56,10 @@ class Search {
       suggestionItemFail : 'fs-suggestion-item-negative',
       suggestionItemSelected : 'fs-suggestion-item-selected'
     }, options.classes);
+
+    keys = Objects.merge({
+      closeMenu : [Keys.ESCAPE]
+    }, options.keys);
 
     // create sibling elements
     suggList = new Suggestions({
@@ -67,9 +82,10 @@ class Search {
     input.addClass(classes.input);
 
     // apply event listeners
-    input.on('input', onSearchInput);
     input.on('focus', onSearchFocus);
     input.on('blur', onSearchBlur);
+    input.on('input', onSearchInput);
+    input.on('keyup', cast onSearchKeyup);
   }
 
   function onSearchFocus(e : Event) {
@@ -79,12 +95,20 @@ class Search {
     }
   }
 
+  function onSearchBlur(e: Event) {
+    suggList.close();
+  }
+
   function onSearchInput(e : Event) {
     suggList.filter(input.value);
     suggList.open();
   }
 
-  function onSearchBlur(e: Event) {
-    suggList.close();
+  function onSearchKeyup(e : KeyboardEvent) {
+    var code = e.which != null ? e.which : e.keyCode;
+
+    if (keys.closeMenu.contains(code)) {
+      suggList.close();
+    }
   }
 }
