@@ -71,7 +71,7 @@ var fancy_Search = function(el,options) {
 	if(options.keys != null) options.keys = options.keys; else options.keys = { };
 	this.classes = thx_Objects.combine({ input : "fs-search-input", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN]},options.keys);
-	this.suggList = new fancy_Suggestions({ parent : this.input.parentElement, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
+	this.list = new fancy_Suggestions({ parent : this.input.parentElement, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
 	fancy_util_Dom.addClass(this.input,this.classes.input);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
 	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
@@ -80,19 +80,19 @@ var fancy_Search = function(el,options) {
 };
 fancy_Search.prototype = {
 	onSearchFocus: function(e) {
-		if(this.suggList.filtered.length < this.suggList.suggestions.length && this.suggList.filtered.length > 0) this.suggList.open();
+		if(this.list.filtered.length < this.list.suggestions.length && this.list.filtered.length > 0) this.list.open();
 	}
 	,onSearchBlur: function(e) {
-		this.suggList.close();
+		this.list.close();
 	}
 	,onSearchInput: function(e) {
-		this.suggList.filter(this.input.value);
-		this.suggList.open();
+		this.list.filter(this.input.value);
+		this.list.open();
 	}
 	,onSearchKeyup: function(e) {
 		var code;
 		if(e.which != null) code = e.which; else code = e.keyCode;
-		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.suggList.close(); else if(thx_Arrays.contains(this.keys.selectionUp,code) && this.suggList.isOpen) this.suggList.moveSelectionUp(); else if(thx_Arrays.contains(this.keys.selectionDown,code) && this.suggList.isOpen) this.suggList.moveSelectionDown();
+		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.list.close(); else if(thx_Arrays.contains(this.keys.selectionUp,code) && this.list.isOpen) this.list.moveSelectionUp(); else if(thx_Arrays.contains(this.keys.selectionDown,code) && this.list.isOpen) this.list.moveSelectionDown();
 	}
 };
 var fancy_Suggestions = function(options) {

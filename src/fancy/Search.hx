@@ -36,7 +36,7 @@ typedef FancySearchOptions = {
 
 class Search {
   public var input : InputElement;
-  public var suggList : Suggestions;
+  public var list : Suggestions;
   public var classes : FancySearchClassNames;
   public var keys : FancySearchKeyboardShortcuts;
 
@@ -66,7 +66,7 @@ class Search {
     }, options.keys);
 
     // create sibling elements
-    suggList = new Suggestions({
+    list = new Suggestions({
       parent : input.parentElement,
       suggestions : options.suggestions,
       filterFn : options.filter,
@@ -94,29 +94,29 @@ class Search {
 
   function onSearchFocus(e : Event) {
     // reopen suggestion list if suggestions are filtered, but some exist
-    if (suggList.filtered.length < suggList.suggestions.length && suggList.filtered.length > 0) {
-      suggList.open();
+    if (list.filtered.length < list.suggestions.length && list.filtered.length > 0) {
+      list.open();
     }
   }
 
   function onSearchBlur(e: Event) {
-    suggList.close();
+    list.close();
   }
 
   function onSearchInput(e : Event) {
-    suggList.filter(input.value);
-    suggList.open();
+    list.filter(input.value);
+    list.open();
   }
 
   function onSearchKeyup(e : KeyboardEvent) {
     var code = e.which != null ? e.which : e.keyCode;
 
     if (keys.closeMenu.contains(code)) {
-      suggList.close();
-    } else if (keys.selectionUp.contains(code) && suggList.isOpen) {
-      suggList.moveSelectionUp();
-    } else if (keys.selectionDown.contains(code) && suggList.isOpen) {
-      suggList.moveSelectionDown();
+      list.close();
+    } else if (keys.selectionUp.contains(code) && list.isOpen) {
+      list.moveSelectionUp();
+    } else if (keys.selectionDown.contains(code) && list.isOpen) {
+      list.moveSelectionDown();
     }
   }
 }
