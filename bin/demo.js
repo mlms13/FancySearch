@@ -74,7 +74,7 @@ var fancy_Search = function(el,options) {
 	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN]},options.keys);
 	clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
-	fancy_util_Dom.on(clearBtn,"click",$bind(this,this.onClearButtonClick));
+	fancy_util_Dom.on(clearBtn,"mousedown",$bind(this,this.onClearButtonClick));
 	if(options.clearBtn) container.appendChild(clearBtn);
 	this.list = new fancy_Suggestions({ parent : container, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
 	fancy_util_Dom.addClass(fancy_util_Dom.addClass(this.input,this.classes.input),this.classes.inputEmpty);
@@ -102,6 +102,7 @@ fancy_Search.prototype = {
 		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.list.close(); else if(thx_Arrays.contains(this.keys.selectionUp,code) && this.list.isOpen) this.list.moveSelectionUp(); else if(thx_Arrays.contains(this.keys.selectionDown,code) && this.list.isOpen) this.list.moveSelectionDown();
 	}
 	,onClearButtonClick: function(e) {
+		e.preventDefault();
 		this.input.value = "";
 		fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 	}

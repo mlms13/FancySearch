@@ -79,7 +79,7 @@ class Search {
 
     // create sibling elements
     clearBtn = Dom.create('button.${classes.clearButton}', '\u00D7');
-    clearBtn.on('click', onClearButtonClick);
+    clearBtn.on('mousedown', onClearButtonClick);
 
     if (options.clearBtn) {
       container.appendChild(clearBtn);
@@ -149,6 +149,7 @@ class Search {
   }
 
   function onClearButtonClick(e : Event) {
+    e.preventDefault();
     input.value = "";
     input.addClass(classes.inputEmpty);
   }
