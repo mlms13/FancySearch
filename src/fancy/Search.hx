@@ -33,13 +33,14 @@ typedef FancySearchKeyboardShortcuts = {
 };
 
 typedef FancySearchOptions = {
-  ?container : Element,
-  ?suggestions : Array<String>,
-  ?filter : Suggestions.FilterFunction,
-  ?clearBtn : Bool,
   ?classes : FancySearchClassNames,
+  ?clearBtn : Bool,
+  ?container : Element,
+  ?filter : Suggestions.FilterFunction,
   ?keys : FancySearchKeyboardShortcuts,
-  ?onChooseSelection : Suggestions.SelectionChooseFunction
+  ?limit : Int,
+  ?onChooseSelection : Suggestions.SelectionChooseFunction,
+  ?suggestions : Array<String>,
 };
 
 class Search {
@@ -53,11 +54,12 @@ class Search {
     // initialize all of the options
     input = el;
     options = options != null ? options : {};
-    if (options.container == null) options.container = input.parentElement;
-    if (options.clearBtn == null) options.clearBtn = true;
-    if (options.onChooseSelection == null) options.onChooseSelection = chooseSelection;
     options.classes = options.classes != null ? options.classes : {};
     options.keys = options.keys != null ? options.keys : {};
+    if (options.clearBtn == null) options.clearBtn = true;
+    if (options.container == null) options.container = input.parentElement;
+    if (options.limit == null) options.limit = 5;
+    if (options.onChooseSelection == null) options.onChooseSelection = chooseSelection;
 
     classes = Objects.merge({
       input : 'fs-search-input',
@@ -90,10 +92,8 @@ class Search {
     }
 
     list = new Suggestions({
-      parent : options.container,
-      suggestions : options.suggestions,
       filterFn : options.filter,
-      onChooseSelection : options.onChooseSelection,
+      limit : options.limit,
       classes : {
         suggestionContainer : classes.suggestionContainer,
         suggestionsOpen : classes.suggestionsOpen,
@@ -104,7 +104,10 @@ class Search {
         suggestionItemMatch : classes.suggestionItemMatch,
         suggestionItemFail : classes.suggestionItemFail,
         suggestionItemSelected : classes.suggestionItemSelected
-      }
+      },
+      onChooseSelection : options.onChooseSelection,
+      parent : options.container,
+      suggestions : options.suggestions,
     });
 
     // apply classes

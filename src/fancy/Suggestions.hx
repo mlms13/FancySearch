@@ -24,16 +24,18 @@ typedef SuggestionBoxClassNames = {
 };
 
 typedef SuggestionOptions = {
-  parent : Element,
   classes : SuggestionBoxClassNames,
-  onChooseSelection : SelectionChooseFunction,
-  ?suggestions : Array<String>,
   ?filterFn : FilterFunction,
+  limit : Int,
+  onChooseSelection : SelectionChooseFunction,
+  parent : Element,
+  ?suggestions : Array<String>,
 };
 
 class Suggestions {
   public var parent(default, null) : Element;
   public var classes(default, null) : SuggestionBoxClassNames;
+  public var limit(default, null) : Int;
   public var onChooseSelection(default, null) : SelectionChooseFunction;
   public var suggestions(default, null) : Array<String>;
   public var filtered(default, null) : Array<String>;
@@ -47,6 +49,7 @@ class Suggestions {
     // defaults
     parent = options.parent;
     classes = options.classes;
+    limit = options.limit;
     onChooseSelection = options.onChooseSelection;
     suggestions = options.suggestions != null ? options.suggestions : [];
     filtered = suggestions.copy();
@@ -84,7 +87,7 @@ class Suggestions {
 
   public function filter(search : String) {
     var matchFound = false;
-    filtered = suggestions.filter.fn(filterFn(_, search));
+    filtered = suggestions.filter.fn(filterFn(_, search)).slice(0, limit);
     for (sugg in suggestions) {
       if (filtered.contains(sugg)) {
         matchFound = true;

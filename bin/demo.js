@@ -37,7 +37,7 @@ HxOverrides.iter = function(a) {
 };
 var Main = function() { };
 Main.main = function() {
-	var options = { suggestions : ["Apple","Banana","Carrot","Peach","Pear","Turnip"]};
+	var options = { limit : 6, suggestions : ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"]};
 	var search = fancy_Search.createFromSelector(".fancy-container input",options);
 };
 var Reflect = function() { };
@@ -64,17 +64,18 @@ Reflect.fields = function(o) {
 var fancy_Search = function(el,options) {
 	this.input = el;
 	if(options != null) options = options; else options = { };
-	if(options.container == null) options.container = this.input.parentElement;
-	if(options.clearBtn == null) options.clearBtn = true;
-	if(options.onChooseSelection == null) options.onChooseSelection = $bind(this,this.chooseSelection);
 	if(options.classes != null) options.classes = options.classes; else options.classes = { };
 	if(options.keys != null) options.keys = options.keys; else options.keys = { };
+	if(options.clearBtn == null) options.clearBtn = true;
+	if(options.container == null) options.container = this.input.parentElement;
+	if(options.limit == null) options.limit = 5;
+	if(options.onChooseSelection == null) options.onChooseSelection = $bind(this,this.chooseSelection);
 	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN], selectionChoose : [fancy_util_Keys.ENTER]},options.keys);
 	this.clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
 	fancy_util_Dom.on(this.clearBtn,"mousedown",$bind(this,this.onClearButtonClick));
 	if(options.clearBtn) options.container.appendChild(this.clearBtn);
-	this.list = new fancy_Suggestions({ parent : options.container, suggestions : options.suggestions, filterFn : options.filter, onChooseSelection : options.onChooseSelection, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
+	this.list = new fancy_Suggestions({ filterFn : options.filter, limit : options.limit, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}, onChooseSelection : options.onChooseSelection, parent : options.container, suggestions : options.suggestions});
 	fancy_util_Dom.addClass(fancy_util_Dom.addClass(this.input,this.classes.input),this.classes.inputEmpty);
 	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
@@ -119,6 +120,7 @@ var fancy_Suggestions = function(options) {
 	var _g = this;
 	this.parent = options.parent;
 	this.classes = options.classes;
+	this.limit = options.limit;
 	this.onChooseSelection = options.onChooseSelection;
 	if(options.suggestions != null) this.suggestions = options.suggestions; else this.suggestions = [];
 	this.filtered = this.suggestions.slice();
@@ -160,7 +162,7 @@ fancy_Suggestions.prototype = {
 		var matchFound = false;
 		this.filtered = this.suggestions.filter(function(_) {
 			return _g.filterFn(_,search);
-		});
+		}).slice(0,this.limit);
 		var _g1 = 0;
 		var _g11 = this.suggestions;
 		while(_g1 < _g11.length) {
