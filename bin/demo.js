@@ -70,12 +70,12 @@ var fancy_Search = function(el,options) {
 	if(options.container == null) options.container = this.input.parentElement;
 	if(options.limit == null) options.limit = 5;
 	if(options.onChooseSelection == null) options.onChooseSelection = $bind(this,this.chooseSelection);
-	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
+	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN], selectionChoose : [fancy_util_Keys.ENTER]},options.keys);
 	this.clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
 	fancy_util_Dom.on(this.clearBtn,"mousedown",$bind(this,this.onClearButtonClick));
 	if(options.clearBtn) options.container.appendChild(this.clearBtn);
-	this.list = new fancy_Suggestions({ filterFn : options.filter, limit : options.limit, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}, onChooseSelection : options.onChooseSelection, parent : options.container, suggestions : options.suggestions});
+	this.list = new fancy_Suggestions({ filterFn : options.filter, limit : options.limit, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemSelected : this.classes.suggestionItemSelected}, onChooseSelection : options.onChooseSelection, parent : options.container, suggestions : options.suggestions});
 	fancy_util_Dom.addClass(fancy_util_Dom.addClass(this.input,this.classes.input),this.classes.inputEmpty);
 	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
@@ -128,7 +128,7 @@ var fancy_Suggestions = function(options) {
 	if(options.filterFn != null) this.filterFn = options.filterFn; else this.filterFn = fancy_Suggestions.defaultFilterer;
 	this.isOpen = false;
 	this.elements = thx_Arrays.reduce(this.suggestions,function(acc,curr) {
-		acc.set(curr,fancy_util_Dom.create("li." + _g.classes.suggestionItem + "." + _g.classes.suggestionItemMatch,null,null,curr));
+		acc.set(curr,fancy_util_Dom.create("li." + _g.classes.suggestionItem,null,null,curr));
 		return acc;
 	},new haxe_ds_StringMap());
 	thx_Iterators.map(this.elements.keys(),function(elName) {
@@ -140,46 +140,42 @@ var fancy_Suggestions = function(options) {
 			_g.selectItem();
 		});
 	});
-	this.el = fancy_util_Dom.create("div." + this.classes.suggestionContainer + "." + this.classes.suggestionsClosed,null,[fancy_util_Dom.create("ul." + this.classes.suggestionList,null,(function($this) {
+	this.list = fancy_util_Dom.create("ul." + this.classes.suggestionList,null,(function($this) {
 		var $r;
-		var _g3 = [];
+		var _g1 = [];
 		var $it0 = $this.elements.iterator();
 		while( $it0.hasNext() ) {
 			var item = $it0.next();
-			_g3.push(item);
+			_g1.push(item);
 		}
-		$r = _g3;
+		$r = _g1;
 		return $r;
-	}(this)))]);
+	}(this)));
+	this.el = fancy_util_Dom.create("div." + this.classes.suggestionContainer + "." + this.classes.suggestionsClosed,null,[this.list]);
 	this.parent.appendChild(this.el);
 };
-fancy_Suggestions.defaultFilterer = function(suggestion,search) {
-	return suggestion.toLowerCase().indexOf(search.toLowerCase()) >= 0;
+fancy_Suggestions.defaultFilterer = function(suggestions,search) {
+	search = search.toLowerCase();
+	return thx_Arrays.order(suggestions.filter(function(_) {
+		return _.toLowerCase().indexOf(search) >= 0;
+	}),function(a,b) {
+		var posA = a.toLowerCase().indexOf(search);
+		var posB = b.toLowerCase().indexOf(search);
+		if(posA == posB) {
+			if(a < b) return -1; else if(a > b) return 1; else return 0;
+		} else return posA - posB;
+	});
 };
 fancy_Suggestions.prototype = {
 	filter: function(search) {
 		var _g = this;
-		var matchFound = false;
-		this.filtered = this.suggestions.filter(function(_) {
-			return _g.filterFn(_,search);
-		}).slice(0,this.limit);
-		var _g1 = 0;
-		var _g11 = this.suggestions;
-		while(_g1 < _g11.length) {
-			var sugg = _g11[_g1];
-			++_g1;
-			if(thx_Arrays.contains(this.filtered,sugg)) {
-				matchFound = true;
-				fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemFail),this.classes.suggestionItemMatch);
-			} else {
-				fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemMatch),this.classes.suggestionItemFail);
-				if(this.selected == sugg) {
-					fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemSelected);
-					this.selected = "";
-				}
-			}
-		}
-		if(matchFound) fancy_util_Dom.removeClass(this.el,this.classes.suggestionsEmpty); else fancy_util_Dom.addClass(this.el,this.classes.suggestionsEmpty);
+		this.filtered = this.filterFn(this.suggestions,search).slice(0,this.limit);
+		fancy_util_Dom.empty(this.list);
+		this.filtered.map(function(_) {
+			return _g.list.appendChild(_g.elements.get(_));
+		});
+		if(!thx_Arrays.contains(this.filtered,this.selected)) this.selected = "";
+		if(this.filtered.length == 0) fancy_util_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_util_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
 	}
 	,open: function() {
 		this.isOpen = true;
@@ -258,6 +254,10 @@ fancy_util_Dom.create = function(name,attrs,children,textContent) {
 	if(textContent != null) el.appendChild(window.document.createTextNode(textContent));
 	return el;
 };
+fancy_util_Dom.empty = function(el) {
+	while(el.firstChild != null) el.removeChild(el.firstChild);
+	return el;
+};
 var fancy_util_Keys = function() { };
 var haxe_IMap = function() { };
 var haxe_ds__$StringMap_StringMapIterator = function(map,keys) {
@@ -325,6 +325,11 @@ thx_Arrays.contains = function(array,element,eq) {
 		return false;
 	}
 };
+thx_Arrays.order = function(array,sort) {
+	var n = array.slice();
+	n.sort(sort);
+	return n;
+};
 thx_Arrays.reduce = function(array,callback,initial) {
 	return array.reduce(callback,initial);
 };
@@ -360,6 +365,16 @@ var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
 	return Array.prototype.indexOf.call(a,o,i);
+};
+if(Array.prototype.map == null) Array.prototype.map = function(f) {
+	var a = [];
+	var _g1 = 0;
+	var _g = this.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		a[i] = f(this[i]);
+	}
+	return a;
 };
 if(Array.prototype.filter == null) Array.prototype.filter = function(f1) {
 	var a1 = [];

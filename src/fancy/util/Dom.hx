@@ -62,4 +62,11 @@ class Dom {
 
     return el;
   }
+
+  public static function empty(el : Element) {
+    while (el.firstChild != null) {
+      el.removeChild(el.firstChild);
+    }
+    return el;
+  }
 }

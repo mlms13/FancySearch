@@ -7,9 +7,9 @@ using thx.Functions;
 using thx.Iterators;
 using fancy.util.Dom;
 
-typedef FilterFunction = String -> String -> Bool;
+typedef FilterFunction = Array<String> -> String -> Array<String>;
 
-typedef SelectionChooseFunction = String ->  Void;
+typedef SelectionChooseFunction = String -> Void;
 
 typedef SuggestionBoxClassNames = {
   suggestionContainer : String,
@@ -18,8 +18,6 @@ typedef SuggestionBoxClassNames = {
   suggestionList : String,
   suggestionsEmpty : String,
   suggestionItem : String,
-  suggestionItemMatch : String,
-  suggestionItemFail : String,
   suggestionItemSelected : String,
 };
 
@@ -44,6 +42,7 @@ class Suggestions {
   public var filterFn : FilterFunction;
   public var isOpen : Bool;
   var el : Element;
+  var list : Element;
 
   public function new(options : SuggestionOptions) {
     // defaults
@@ -57,7 +56,7 @@ class Suggestions {
     filterFn = options.filterFn != null ? options.filterFn : defaultFilterer;
     isOpen = false;
     elements = suggestions.reduce(function (acc : StringMap<Element>, curr) {
-      acc.set(curr, Dom.create('li.${classes.suggestionItem}.${classes.suggestionItemMatch}', curr));
+      acc.set(curr, Dom.create('li.${classes.suggestionItem}', curr));
       return acc;
     }, new StringMap<Element>());
 
@@ -75,43 +74,29 @@ class Suggestions {
         });
     });
 
-    el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [
-      Dom.create(
-        'ul.${classes.suggestionList}',
-        [for (item in elements) item]
-      )
-    ]);
+    list = Dom.create(
+      'ul.${classes.suggestionList}',
+      [for (item in elements) item]
+    );
+    el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [list]);
 
     parent.appendChild(el);
   }
 
   public function filter(search : String) {
-    var matchFound = false;
-    filtered = suggestions.filter.fn(filterFn(_, search)).slice(0, limit);
-    for (sugg in suggestions) {
-      if (filtered.contains(sugg)) {
-        matchFound = true;
-        elements.get(sugg)
-          .removeClass(classes.suggestionItemFail)
-          .addClass(classes.suggestionItemMatch);
-      }
-      else {
-        elements.get(sugg)
-          .removeClass(classes.suggestionItemMatch)
-          .addClass(classes.suggestionItemFail);
+    filtered = filterFn(suggestions, search).slice(0, limit);
+    list.empty();
 
-        // unselect item if it is no longer part of the filtered list
-        if (selected == sugg) {
-          elements.get(sugg).removeClass(classes.suggestionItemSelected);
-          selected = "";
-        }
-      }
+    filtered.map.fn(list.appendChild(elements.get(_)));
+
+    if (!filtered.contains(selected)) {
+      selected = "";
     }
 
-    if (matchFound) {
-      el.removeClass(classes.suggestionsEmpty);
-    } else {
+    if (filtered.length == 0) {
       el.addClass(classes.suggestionsEmpty);
+    } else {
+      el.removeClass(classes.suggestionsEmpty);
     }
   }
 
@@ -156,7 +141,18 @@ class Suggestions {
     onChooseSelection(selected);
   }
 
-  static function defaultFilterer(suggestion : String, search : String) {
-    return suggestion.toLowerCase().indexOf(search.toLowerCase()) >= 0;
+  static function defaultFilterer(suggestions : Array<String>, search : String) {
+    search = search.toLowerCase();
+    return suggestions
+      .filter.fn(_.toLowerCase().indexOf(search) >= 0)
+      .order(function (a, b) {
+        var posA = a.toLowerCase().indexOf(search),
+            posB = b.toLowerCase().indexOf(search);
+
+        return if (posA == posB)
+          if (a < b) -1 else if ( a > b ) 1 else 0;
+        else
+          posA - posB;
+      });
   }
 }

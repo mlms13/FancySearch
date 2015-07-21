@@ -20,8 +20,6 @@ typedef FancySearchClassNames = {
   ?suggestionsEmpty : String,
   ?suggestionList : String,
   ?suggestionItem : String,
-  ?suggestionItemMatch : String,
-  ?suggestionItemFail : String,
   ?suggestionItemSelected : String
 };
 
@@ -71,8 +69,6 @@ class Search {
       suggestionsEmpty : 'fs-suggestion-container-empty',
       suggestionList : 'fs-suggestion-list',
       suggestionItem : 'fs-suggestion-item',
-      suggestionItemMatch : 'fs-suggestion-item-positive',
-      suggestionItemFail : 'fs-suggestion-item-negative',
       suggestionItemSelected : 'fs-suggestion-item-selected'
     }, options.classes);
 
@@ -101,8 +97,6 @@ class Search {
         suggestionsEmpty : classes.suggestionsEmpty,
         suggestionList : classes.suggestionList,
         suggestionItem : classes.suggestionItem,
-        suggestionItemMatch : classes.suggestionItemMatch,
-        suggestionItemFail : classes.suggestionItemFail,
         suggestionItemSelected : classes.suggestionItemSelected
       },
       onChooseSelection : options.onChooseSelection,
