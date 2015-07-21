@@ -41,12 +41,12 @@ typedef FancySearchOptions = {
 
 class Search {
   public var input : InputElement;
+  public var clearBtn : Element;
   public var list : Suggestions;
   public var classes : FancySearchClassNames;
   public var keys : FancySearchKeyboardShortcuts;
 
   public function new(el : InputElement, ?options : FancySearchOptions) {
-    var clearBtn : Element;
     var container : Element;
 
     // initialize all of the options
@@ -126,7 +126,7 @@ class Search {
     list.close();
   }
 
-  function onSearchInput(e : Event) {
+  function filterUsingInputValue() {
     if (input.value.length < 1) {
       input.addClass(classes.inputEmpty);
     } else {
@@ -134,6 +134,10 @@ class Search {
     }
     list.filter(input.value);
     list.open();
+  }
+
+  function onSearchInput(e : Event) {
+    filterUsingInputValue();
   }
 
   function onSearchKeyup(e : KeyboardEvent) {
@@ -151,6 +155,6 @@ class Search {
   function onClearButtonClick(e : Event) {
     e.preventDefault();
     input.value = "";
-    input.addClass(classes.inputEmpty);
+    filterUsingInputValue();
   }
 }
