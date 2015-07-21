@@ -63,19 +63,19 @@ Reflect.fields = function(o) {
 	return a;
 };
 var fancy_Search = function(el,options) {
-	var container;
 	this.input = el;
 	if(options != null) options = options; else options = { };
-	if(options.container != null) container = options.container; else container = this.input.parentElement;
-	if(options.clearBtn != null) options.clearBtn = options.clearBtn; else options.clearBtn = true;
+	if(options.container == null) options.container = this.input.parentElement;
+	if(options.clearBtn == null) options.clearBtn = true;
+	if(options.onChooseSelection == null) options.onChooseSelection = $bind(this,this.chooseSelection);
 	if(options.classes != null) options.classes = options.classes; else options.classes = { };
 	if(options.keys != null) options.keys = options.keys; else options.keys = { };
 	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
-	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN]},options.keys);
+	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN], selectionChoose : [fancy_util_Keys.ENTER]},options.keys);
 	this.clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
 	fancy_util_Dom.on(this.clearBtn,"mousedown",$bind(this,this.onClearButtonClick));
-	if(options.clearBtn) container.appendChild(this.clearBtn);
-	this.list = new fancy_Suggestions({ parent : container, suggestions : options.suggestions, filterFn : options.filter, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
+	if(options.clearBtn) options.container.appendChild(this.clearBtn);
+	this.list = new fancy_Suggestions({ parent : options.container, suggestions : options.suggestions, filterFn : options.filter, onChooseSelection : options.onChooseSelection, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
 	fancy_util_Dom.addClass(fancy_util_Dom.addClass(this.input,this.classes.input),this.classes.inputEmpty);
 	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
@@ -101,18 +101,23 @@ fancy_Search.prototype = {
 	,onSearchKeyup: function(e) {
 		var code;
 		if(e.which != null) code = e.which; else code = e.keyCode;
-		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.list.close(); else if(thx_Arrays.contains(this.keys.selectionUp,code) && this.list.isOpen) this.list.moveSelectionUp(); else if(thx_Arrays.contains(this.keys.selectionDown,code) && this.list.isOpen) this.list.moveSelectionDown();
+		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.list.close(); else if(thx_Arrays.contains(this.keys.selectionUp,code) && this.list.isOpen) this.list.moveSelectionUp(); else if(thx_Arrays.contains(this.keys.selectionDown,code) && this.list.isOpen) this.list.moveSelectionDown(); else if(thx_Arrays.contains(this.keys.selectionChoose,code) && this.list.selected != "") this.list.chooseSelectedItem();
 	}
 	,onClearButtonClick: function(e) {
 		e.preventDefault();
 		this.input.value = "";
 		this.filterUsingInputValue();
 	}
+	,chooseSelection: function(selection) {
+		this.input.value = selection;
+		this.input.blur();
+	}
 };
 var fancy_Suggestions = function(options) {
 	var _g = this;
 	this.parent = options.parent;
 	this.classes = options.classes;
+	this.onChooseSelection = options.onChooseSelection;
 	if(options.suggestions != null) this.suggestions = options.suggestions; else this.suggestions = [];
 	this.filtered = this.suggestions.slice();
 	this.selected = "";
@@ -122,26 +127,21 @@ var fancy_Suggestions = function(options) {
 		acc.set(curr,fancy_util_Dom.create("li." + _g.classes.suggestionItem + "." + _g.classes.suggestionItemMatch,null,null,curr));
 		return acc;
 	},new haxe_ds_StringMap());
-	var $it0 = this.elements.keys();
-	while( $it0.hasNext() ) {
-		var elName = $it0.next();
-		var elName1 = [elName];
-		fancy_util_Dom.on(fancy_util_Dom.on(this.elements.get(elName1[0]),"mouseover",(function(elName1) {
-			return function(_) {
-				_g.selectItem(elName1[0]);
-			};
-		})(elName1)),"mouseout",(function() {
-			return function(_1) {
-				_g.selectItem();
-			};
-		})());
-	}
+	thx_Iterators.map(this.elements.keys(),function(elName) {
+		fancy_util_Dom.on(fancy_util_Dom.on(fancy_util_Dom.on(_g.elements.get(elName),"mouseover",function(_) {
+			_g.selectItem(elName);
+		}),"mousedown",function(_1) {
+			_g.chooseSelectedItem();
+		}),"mouseout",function(_2) {
+			_g.selectItem();
+		});
+	});
 	this.el = fancy_util_Dom.create("div." + this.classes.suggestionContainer + "." + this.classes.suggestionsClosed,null,[fancy_util_Dom.create("ul." + this.classes.suggestionList,null,(function($this) {
 		var $r;
 		var _g3 = [];
-		var $it1 = $this.elements.iterator();
-		while( $it1.hasNext() ) {
-			var item = $it1.next();
+		var $it0 = $this.elements.iterator();
+		while( $it0.hasNext() ) {
+			var item = $it0.next();
 			_g3.push(item);
 		}
 		$r = _g3;
@@ -198,6 +198,9 @@ fancy_Suggestions.prototype = {
 		var targetIndex;
 		if(currentIndex + 1 == this.filtered.length) targetIndex = 0; else targetIndex = currentIndex + 1;
 		this.selectItem(this.filtered[targetIndex]);
+	}
+	,chooseSelectedItem: function() {
+		this.onChooseSelection(this.selected);
 	}
 };
 var fancy_util_Dom = function() { };
@@ -316,6 +319,15 @@ thx_Arrays.contains = function(array,element,eq) {
 thx_Arrays.reduce = function(array,callback,initial) {
 	return array.reduce(callback,initial);
 };
+var thx_Iterators = function() { };
+thx_Iterators.map = function(it,f) {
+	var acc = [];
+	while( it.hasNext() ) {
+		var v = it.next();
+		acc.push(f(v));
+	}
+	return acc;
+};
 var thx_Objects = function() { };
 thx_Objects.combine = function(first,second) {
 	var to = { };
@@ -385,6 +397,7 @@ var __map_reserved = {}
         };
       }
     ;
+fancy_util_Keys.ENTER = 13;
 fancy_util_Keys.ESCAPE = 27;
 fancy_util_Keys.UP = 38;
 fancy_util_Keys.DOWN = 40;

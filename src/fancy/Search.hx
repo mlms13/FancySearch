@@ -27,7 +27,8 @@ typedef FancySearchClassNames = {
 typedef FancySearchKeyboardShortcuts = {
   ?closeMenu : Array<Int>,
   ?selectionUp : Array<Int>,
-  ?selectionDown : Array<Int>
+  ?selectionDown : Array<Int>,
+  ?selectionChoose : Array<Int>
 };
 
 typedef FancySearchOptions = {
@@ -36,7 +37,8 @@ typedef FancySearchOptions = {
   ?filter : Suggestions.FilterFunction,
   ?clearBtn : Bool,
   ?classes : FancySearchClassNames,
-  ?keys : FancySearchKeyboardShortcuts
+  ?keys : FancySearchKeyboardShortcuts,
+  ?onChooseSelection : Suggestions.SelectionChooseFunction
 };
 
 class Search {
@@ -47,13 +49,12 @@ class Search {
   public var keys : FancySearchKeyboardShortcuts;
 
   public function new(el : InputElement, ?options : FancySearchOptions) {
-    var container : Element;
-
     // initialize all of the options
     input = el;
     options = options != null ? options : {};
-    container = options.container != null ? options.container : input.parentElement;
-    options.clearBtn = options.clearBtn != null ? options.clearBtn : true;
+    if (options.container == null) options.container = input.parentElement;
+    if (options.clearBtn == null) options.clearBtn = true;
+    if (options.onChooseSelection == null) options.onChooseSelection = chooseSelection;
     options.classes = options.classes != null ? options.classes : {};
     options.keys = options.keys != null ? options.keys : {};
 
@@ -74,7 +75,8 @@ class Search {
     keys = Objects.merge({
       closeMenu : [Keys.ESCAPE],
       selectionUp : [Keys.UP],
-      selectionDown : [Keys.DOWN]
+      selectionDown : [Keys.DOWN],
+      selectionChoose : [Keys.ENTER]
     }, options.keys);
 
     // create sibling elements
@@ -82,13 +84,14 @@ class Search {
     clearBtn.on('mousedown', onClearButtonClick);
 
     if (options.clearBtn) {
-      container.appendChild(clearBtn);
+      options.container.appendChild(clearBtn);
     }
 
     list = new Suggestions({
-      parent : container,
+      parent : options.container,
       suggestions : options.suggestions,
       filterFn : options.filter,
+      onChooseSelection : options.onChooseSelection,
       classes : {
         suggestionContainer : classes.suggestionContainer,
         suggestionsOpen : classes.suggestionsOpen,
@@ -149,6 +152,8 @@ class Search {
       list.moveSelectionUp();
     } else if (keys.selectionDown.contains(code) && list.isOpen) {
       list.moveSelectionDown();
+    } else if (keys.selectionChoose.contains(code) && list.selected != "") {
+      list.chooseSelectedItem();
     }
   }
 
@@ -156,5 +161,10 @@ class Search {
     e.preventDefault();
     input.value = "";
     filterUsingInputValue();
+  }
+
+  function chooseSelection(selection : String) {
+    input.value = selection;
+    input.blur();
   }
 }

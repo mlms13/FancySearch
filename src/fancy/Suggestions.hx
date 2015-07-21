@@ -4,9 +4,12 @@ import js.html.Element;
 import haxe.ds.StringMap;
 using thx.Arrays;
 using thx.Functions;
+using thx.Iterators;
 using fancy.util.Dom;
 
 typedef FilterFunction = String -> String -> Bool;
+
+typedef SelectionChooseFunction = String ->  Void;
 
 typedef SuggestionBoxClassNames = {
   suggestionContainer : String,
@@ -22,6 +25,7 @@ typedef SuggestionBoxClassNames = {
 typedef SuggestionOptions = {
   parent : Element,
   classes : SuggestionBoxClassNames,
+  onChooseSelection : SelectionChooseFunction,
   ?suggestions : Array<String>,
   ?filterFn : FilterFunction,
 };
@@ -29,6 +33,7 @@ typedef SuggestionOptions = {
 class Suggestions {
   public var parent(default, null) : Element;
   public var classes(default, null) : SuggestionBoxClassNames;
+  public var onChooseSelection(default, null) : SelectionChooseFunction;
   public var suggestions(default, null) : Array<String>;
   public var filtered(default, null) : Array<String>;
   public var elements(default, null) : StringMap<Element>;
@@ -41,6 +46,7 @@ class Suggestions {
     // defaults
     parent = options.parent;
     classes = options.classes;
+    onChooseSelection = options.onChooseSelection;
     suggestions = options.suggestions != null ? options.suggestions : [];
     filtered = suggestions.copy();
     selected = '';
@@ -52,15 +58,18 @@ class Suggestions {
     }, new StringMap<Element>());
 
     // set up the dom
-    for (elName in elements.keys()) {
+    elements.keys().map(function (elName) {
       elements.get(elName)
         .on('mouseover', function (_) {
           selectItem(elName);
         })
+        .on('mousedown', function (_) {
+          chooseSelectedItem();
+        })
         .on('mouseout', function (_) {
           selectItem(); // select none
         });
-    }
+    });
 
     el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [
       Dom.create(
@@ -129,7 +138,10 @@ class Suggestions {
       targetIndex = (currentIndex + 1) == filtered.length ? 0 : currentIndex + 1;
 
     selectItem(filtered[targetIndex]);
+  }
 
+  public function chooseSelectedItem() {
+    onChooseSelection(selected);
   }
 
   static function defaultFilterer(suggestion : String, search : String) {
