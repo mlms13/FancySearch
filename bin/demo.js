@@ -38,8 +38,7 @@ HxOverrides.iter = function(a) {
 var Main = function() { };
 Main.main = function() {
 	var options = { suggestions : ["Apple","Banana","Carrot","Peach","Pear","Turnip"]};
-	var input = window.document.querySelector("input.fancify");
-	var search = new fancy_Search(input,options);
+	var search = fancy_Search.createFromSelector(".fancy-container input",options);
 };
 var Reflect = function() { };
 Reflect.field = function(o,field) {
@@ -82,6 +81,9 @@ var fancy_Search = function(el,options) {
 	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
 	fancy_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
 	fancy_util_Dom.on(this.input,"keyup",$bind(this,this.onSearchKeyup));
+};
+fancy_Search.createFromSelector = function(selector,options) {
+	return new fancy_Search(window.document.querySelector(selector),options);
 };
 fancy_Search.prototype = {
 	onSearchFocus: function(e) {

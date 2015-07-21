@@ -167,4 +167,14 @@ class Search {
     input.value = selection;
     input.blur();
   }
+
+  public static function createFromSelector(selector : String, options : FancySearchOptions) {
+    return new Search(cast js.Browser.document.querySelector(selector), options);
+  }
+
+  public static function createFromContainer(container : Element, options : FancySearchOptions) {
+    return new Search(cast container.querySelector('input'), Objects.merge(options, {
+      container : container
+    }));
+  }
 }
