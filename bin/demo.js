@@ -69,12 +69,12 @@ var fancy_Search = function(el,options) {
 	if(options.onChooseSelection == null) options.onChooseSelection = $bind(this,this.chooseSelection);
 	if(options.classes != null) options.classes = options.classes; else options.classes = { };
 	if(options.keys != null) options.keys = options.keys; else options.keys = { };
-	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
+	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemMatch : "fs-suggestion-item-positive", suggestionItemFail : "fs-suggestion-item-negative", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN], selectionChoose : [fancy_util_Keys.ENTER]},options.keys);
 	this.clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
 	fancy_util_Dom.on(this.clearBtn,"mousedown",$bind(this,this.onClearButtonClick));
 	if(options.clearBtn) options.container.appendChild(this.clearBtn);
-	this.list = new fancy_Suggestions({ parent : options.container, suggestions : options.suggestions, filterFn : options.filter, onChooseSelection : options.onChooseSelection, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
+	this.list = new fancy_Suggestions({ parent : options.container, suggestions : options.suggestions, filterFn : options.filter, onChooseSelection : options.onChooseSelection, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemMatch : this.classes.suggestionItemMatch, suggestionItemFail : this.classes.suggestionItemFail, suggestionItemSelected : this.classes.suggestionItemSelected}});
 	fancy_util_Dom.addClass(fancy_util_Dom.addClass(this.input,this.classes.input),this.classes.inputEmpty);
 	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
@@ -157,6 +157,7 @@ fancy_Suggestions.defaultFilterer = function(suggestion,search) {
 fancy_Suggestions.prototype = {
 	filter: function(search) {
 		var _g = this;
+		var matchFound = false;
 		this.filtered = this.suggestions.filter(function(_) {
 			return _g.filterFn(_,search);
 		});
@@ -165,7 +166,10 @@ fancy_Suggestions.prototype = {
 		while(_g1 < _g11.length) {
 			var sugg = _g11[_g1];
 			++_g1;
-			if(thx_Arrays.contains(this.filtered,sugg)) fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemFail),this.classes.suggestionItemMatch); else {
+			if(thx_Arrays.contains(this.filtered,sugg)) {
+				matchFound = true;
+				fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemFail),this.classes.suggestionItemMatch);
+			} else {
 				fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemMatch),this.classes.suggestionItemFail);
 				if(this.selected == sugg) {
 					fancy_util_Dom.removeClass(this.elements.get(sugg),this.classes.suggestionItemSelected);
@@ -173,6 +177,7 @@ fancy_Suggestions.prototype = {
 				}
 			}
 		}
+		if(matchFound) fancy_util_Dom.removeClass(this.el,this.classes.suggestionsEmpty); else fancy_util_Dom.addClass(this.el,this.classes.suggestionsEmpty);
 	}
 	,open: function() {
 		this.isOpen = true;

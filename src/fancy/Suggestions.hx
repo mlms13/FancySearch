@@ -16,6 +16,7 @@ typedef SuggestionBoxClassNames = {
   suggestionsOpen : String,
   suggestionsClosed : String,
   suggestionList : String,
+  suggestionsEmpty : String,
   suggestionItem : String,
   suggestionItemMatch : String,
   suggestionItemFail : String,
@@ -82,9 +83,11 @@ class Suggestions {
   }
 
   public function filter(search : String) {
+    var matchFound = false;
     filtered = suggestions.filter.fn(filterFn(_, search));
     for (sugg in suggestions) {
       if (filtered.contains(sugg)) {
+        matchFound = true;
         elements.get(sugg)
           .removeClass(classes.suggestionItemFail)
           .addClass(classes.suggestionItemMatch);
@@ -100,6 +103,12 @@ class Suggestions {
           selected = "";
         }
       }
+    }
+
+    if (matchFound) {
+      el.removeClass(classes.suggestionsEmpty);
+    } else {
+      el.addClass(classes.suggestionsEmpty);
     }
   }
 
