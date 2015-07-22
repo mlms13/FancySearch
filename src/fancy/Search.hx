@@ -119,9 +119,9 @@ class Search {
   }
 
   function onSearchFocus(e : Event) {
-    // reopen suggestion list if suggestions are filtered, but some exist
-    if (list.filtered.length < list.suggestions.length && list.filtered.length > 0) {
-      list.open();
+    // filter and reopen suggestion list if input is not empty
+    if (input.value.length > 0) {
+      filterUsingInputValue();
     }
   }
 

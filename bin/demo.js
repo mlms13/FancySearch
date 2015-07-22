@@ -88,7 +88,7 @@ fancy_Search.createFromSelector = function(selector,options) {
 };
 fancy_Search.prototype = {
 	onSearchFocus: function(e) {
-		if(this.list.filtered.length < this.list.suggestions.length && this.list.filtered.length > 0) this.list.open();
+		if(this.input.value.length > 0) this.filterUsingInputValue();
 	}
 	,onSearchBlur: function(e) {
 		this.list.close();
