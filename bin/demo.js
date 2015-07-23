@@ -66,6 +66,7 @@ var fancy_Search = function(el,options) {
 	if(options != null) options = options; else options = { };
 	if(options.classes != null) options.classes = options.classes; else options.classes = { };
 	if(options.keys != null) options.keys = options.keys; else options.keys = { };
+	if(options.minLength != null) this.minLength = options.minLength; else this.minLength = 1;
 	if(options.clearBtn == null) options.clearBtn = true;
 	if(options.container == null) options.container = this.input.parentElement;
 	if(options.limit == null) options.limit = 5;
@@ -76,7 +77,7 @@ var fancy_Search = function(el,options) {
 	fancy_util_Dom.on(this.clearBtn,"mousedown",$bind(this,this.onClearButtonClick));
 	if(options.clearBtn) options.container.appendChild(this.clearBtn);
 	this.list = new fancy_Suggestions({ filterFn : options.filter, limit : options.limit, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemSelected : this.classes.suggestionItemSelected}, onChooseSelection : options.onChooseSelection, parent : options.container, suggestions : options.suggestions});
-	fancy_util_Dom.addClass(fancy_util_Dom.addClass(this.input,this.classes.input),this.classes.inputEmpty);
+	fancy_util_Dom.addClass(this.input,this.classes.input);
 	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
 	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
@@ -88,17 +89,17 @@ fancy_Search.createFromSelector = function(selector,options) {
 };
 fancy_Search.prototype = {
 	onSearchFocus: function(e) {
-		if(this.input.value.length > 0) this.filterUsingInputValue();
+		this.filterUsingInputValue();
 	}
 	,onSearchBlur: function(e) {
 		this.list.close();
 	}
 	,filterUsingInputValue: function() {
-		if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty); else fancy_util_Dom.removeClass(this.input,this.classes.inputEmpty);
 		this.list.filter(this.input.value);
-		this.list.open();
+		if(this.input.value.length >= this.minLength) this.list.open(); else this.list.close();
 	}
 	,onSearchInput: function(e) {
+		if(this.input.value.length > 0) fancy_util_Dom.removeClass(this.input,this.classes.inputEmpty); else fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 		this.filterUsingInputValue();
 	}
 	,onSearchKeyup: function(e) {

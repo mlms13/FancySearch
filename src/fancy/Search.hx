@@ -37,6 +37,7 @@ typedef FancySearchOptions = {
   ?filter : Suggestions.FilterFunction,
   ?keys : FancySearchKeyboardShortcuts,
   ?limit : Int,
+  ?minLength : Int,
   ?onChooseSelection : Suggestions.SelectionChooseFunction,
   ?suggestions : Array<String>,
 };
@@ -45,6 +46,7 @@ class Search {
   public var input : InputElement;
   public var clearBtn : Element;
   public var list : Suggestions;
+  public var minLength : Int;
   public var classes : FancySearchClassNames;
   public var keys : FancySearchKeyboardShortcuts;
 
@@ -54,6 +56,7 @@ class Search {
     options = options != null ? options : {};
     options.classes = options.classes != null ? options.classes : {};
     options.keys = options.keys != null ? options.keys : {};
+    minLength = options.minLength != null ? options.minLength : 1;
     if (options.clearBtn == null) options.clearBtn = true;
     if (options.container == null) options.container = input.parentElement;
     if (options.limit == null) options.limit = 5;
@@ -105,7 +108,7 @@ class Search {
     });
 
     // apply classes
-    input.addClass(classes.input).addClass(classes.inputEmpty);
+    input.addClass(classes.input);
 
     if (input.value.length < 1) {
       input.addClass(classes.inputEmpty);
@@ -120,9 +123,7 @@ class Search {
 
   function onSearchFocus(e : Event) {
     // filter and reopen suggestion list if input is not empty
-    if (input.value.length > 0) {
-      filterUsingInputValue();
-    }
+    filterUsingInputValue();
   }
 
   function onSearchBlur(e: Event) {
@@ -130,16 +131,20 @@ class Search {
   }
 
   function filterUsingInputValue() {
-    if (input.value.length < 1) {
-      input.addClass(classes.inputEmpty);
-    } else {
-      input.removeClass(classes.inputEmpty);
-    }
     list.filter(input.value);
-    list.open();
+    if (input.value.length >= minLength) {
+      list.open();
+    } else {
+      list.close();
+    }
   }
 
   function onSearchInput(e : Event) {
+    if (input.value.length > 0) {
+      input.removeClass(classes.inputEmpty);
+    } else {
+      input.addClass(classes.inputEmpty);
+    }
     filterUsingInputValue();
   }
 
