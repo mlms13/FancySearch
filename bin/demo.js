@@ -82,7 +82,7 @@ var fancy_Search = function(el,options) {
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
 	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
 	fancy_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
-	fancy_util_Dom.on(this.input,"keyup",$bind(this,this.onSearchKeyup));
+	fancy_util_Dom.on(this.input,"keydown",$bind(this,this.onSearchKeydown));
 };
 fancy_Search.createFromSelector = function(selector,options) {
 	return new fancy_Search(window.document.querySelector(selector),options);
@@ -102,10 +102,16 @@ fancy_Search.prototype = {
 		if(this.input.value.length > 0) fancy_util_Dom.removeClass(this.input,this.classes.inputEmpty); else fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 		this.filterUsingInputValue();
 	}
-	,onSearchKeyup: function(e) {
+	,onSearchKeydown: function(e) {
 		var code;
 		if(e.which != null) code = e.which; else code = e.keyCode;
-		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.list.close(); else if(thx_Arrays.contains(this.keys.selectionUp,code) && this.list.isOpen) this.list.moveSelectionUp(); else if(thx_Arrays.contains(this.keys.selectionDown,code) && this.list.isOpen) this.list.moveSelectionDown(); else if(thx_Arrays.contains(this.keys.selectionChoose,code) && this.list.selected != "") this.list.chooseSelectedItem();
+		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.list.close(); else if(thx_Arrays.contains(this.keys.selectionUp,code) && this.list.isOpen) {
+			e.preventDefault();
+			this.list.moveSelectionUp();
+		} else if(thx_Arrays.contains(this.keys.selectionDown,code) && this.list.isOpen) {
+			e.preventDefault();
+			this.list.moveSelectionDown();
+		} else if(thx_Arrays.contains(this.keys.selectionChoose,code) && this.list.selected != "") this.list.chooseSelectedItem();
 	}
 	,onClearButtonClick: function(e) {
 		e.preventDefault();

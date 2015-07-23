@@ -118,7 +118,7 @@ class Search {
     input.on('focus', onSearchFocus);
     input.on('blur', onSearchBlur);
     input.on('input', onSearchInput);
-    input.on('keyup', cast onSearchKeyup);
+    input.on('keydown', cast onSearchKeydown);
   }
 
   function onSearchFocus(e : Event) {
@@ -148,14 +148,16 @@ class Search {
     filterUsingInputValue();
   }
 
-  function onSearchKeyup(e : KeyboardEvent) {
+  function onSearchKeydown(e : KeyboardEvent) {
     var code = e.which != null ? e.which : e.keyCode;
 
     if (keys.closeMenu.contains(code)) {
       list.close();
     } else if (keys.selectionUp.contains(code) && list.isOpen) {
+      e.preventDefault();
       list.moveSelectionUp();
     } else if (keys.selectionDown.contains(code) && list.isOpen) {
+      e.preventDefault();
       list.moveSelectionDown();
     } else if (keys.selectionChoose.contains(code) && list.selected != "") {
       list.chooseSelectedItem();
