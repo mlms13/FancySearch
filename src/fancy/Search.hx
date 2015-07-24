@@ -39,6 +39,7 @@ typedef FancySearchOptions = {
   ?limit : Int,
   ?minLength : Int,
   ?onChooseSelection : Suggestions.SelectionChooseFunction,
+  ?onClearButtonClick : Event -> Void,
   ?suggestions : Array<String>,
 };
 
@@ -61,6 +62,7 @@ class Search {
     if (options.container == null) options.container = input.parentElement;
     if (options.limit == null) options.limit = 5;
     if (options.onChooseSelection == null) options.onChooseSelection = chooseSelection;
+    if (options.onClearButtonClick == null) options.onClearButtonClick = onClearButtonClick;
 
     classes = Objects.merge({
       input : 'fs-search-input',
@@ -84,7 +86,7 @@ class Search {
 
     // create sibling elements
     clearBtn = Dom.create('button.${classes.clearButton}', '\u00D7');
-    clearBtn.on('mousedown', onClearButtonClick);
+    clearBtn.on('mousedown', options.onClearButtonClick);
 
     if (options.clearBtn) {
       options.container.appendChild(clearBtn);

@@ -71,10 +71,11 @@ var fancy_Search = function(el,options) {
 	if(options.container == null) options.container = this.input.parentElement;
 	if(options.limit == null) options.limit = 5;
 	if(options.onChooseSelection == null) options.onChooseSelection = $bind(this,this.chooseSelection);
+	if(options.onClearButtonClick == null) options.onClearButtonClick = $bind(this,this.onClearButtonClick);
 	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN], selectionChoose : [fancy_util_Keys.ENTER]},options.keys);
 	this.clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
-	fancy_util_Dom.on(this.clearBtn,"mousedown",$bind(this,this.onClearButtonClick));
+	fancy_util_Dom.on(this.clearBtn,"mousedown",options.onClearButtonClick);
 	if(options.clearBtn) options.container.appendChild(this.clearBtn);
 	this.list = new fancy_Suggestions({ filterFn : options.filter, limit : options.limit, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemSelected : this.classes.suggestionItemSelected}, onChooseSelection : options.onChooseSelection, parent : options.container, suggestions : options.suggestions});
 	fancy_util_Dom.addClass(this.input,this.classes.input);
