@@ -6,9 +6,10 @@ using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;
 using fancy.util.Dom;
+using thx.Tuple;
 
 typedef FilterFunction = Array<String> -> String -> Array<String>;
-
+typedef HighlightLetters = Array<String> -> String -> Array<Tuple2<Int, Int>>;
 typedef SelectionChooseFunction = String -> Void;
 
 typedef SuggestionBoxClassNames = {
@@ -24,6 +25,7 @@ typedef SuggestionBoxClassNames = {
 typedef SuggestionOptions = {
   classes : SuggestionBoxClassNames,
   ?filterFn : FilterFunction,
+  ?highlightLettersFn : HighlightLetters,
   limit : Int,
   onChooseSelection : SelectionChooseFunction,
   parent : Element,
@@ -40,6 +42,7 @@ class Suggestions {
   public var elements(default, null) : StringMap<Element>;
   public var selected(default, null) : String; // selected item in `filtered`
   public var filterFn : FilterFunction;
+  public var highlightLettersFn : HighlightLetters;
   public var isOpen : Bool;
   var el : Element;
   var list : Element;
@@ -54,6 +57,9 @@ class Suggestions {
     filtered = suggestions.copy();
     selected = '';
     filterFn = options.filterFn != null ? options.filterFn : defaultFilterer;
+    highlightLettersFn = options.highlightLettersFn != null ?
+      options.highlightLettersFn :
+      defaultHighlightLetters;
     isOpen = false;
     elements = suggestions.reduce(function (acc : StringMap<Element>, curr) {
       acc.set(curr, Dom.create('li.${classes.suggestionItem}', curr));
@@ -84,10 +90,29 @@ class Suggestions {
   }
 
   public function filter(search : String) {
+    search = search.toLowerCase();
     filtered = filterFn(suggestions, search).slice(0, limit);
-    list.empty();
+    var wordParts = highlightLettersFn(filtered, search);
 
-    filtered.map.fn(list.appendChild(elements.get(_)));
+    filtered.reducei(function (list, str, index) {
+      var el = elements.get(str).empty(),
+          wordRange = wordParts[index];
+
+      // if the highlighted range isn't at the beginning, span it
+      if (wordRange.left != 0)
+        el.appendChild(Dom.create('span', str.substr(0, wordRange.left)));
+
+      // if the range to highlight has a non-zero length, strong it
+      if (wordRange.right > 0)
+        el.appendChild(Dom.create('strong', str.substr(wordRange.left, wordRange.right)));
+
+      // if the range didn't end at the end of the string, span the rest
+      if (wordRange.left + wordRange.right < str.length)
+        el.appendChild(Dom.create('span', str.substr(wordRange.right + wordRange.left)));
+
+      list.appendChild(el);
+      return list;
+    }, list.empty());
 
     if (!filtered.contains(selected)) {
       selected = "";
@@ -154,5 +179,9 @@ class Suggestions {
         else
           posA - posB;
       });
+  }
+
+  static function defaultHighlightLetters(filtered : Array<String>, search :String) {
+    return filtered.map.fn(new Tuple2(_.toLowerCase().indexOf(search), search.length));
   }
 }

@@ -16,6 +16,16 @@ EReg.prototype = {
 	}
 };
 var HxOverrides = function() { };
+HxOverrides.substr = function(s,pos,len) {
+	if(len == null) len = s.length; else if(len < 0) {
+		if(pos == 0) len = s.length + len; else return "";
+	}
+	if(pos < 0) {
+		pos = s.length + pos;
+		if(pos < 0) pos = 0;
+	}
+	return s.substr(pos,len);
+};
 HxOverrides.indexOf = function(a,obj,i) {
 	var len = a.length;
 	if(i < 0) {
@@ -77,7 +87,7 @@ var fancy_Search = function(el,options) {
 	this.clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
 	fancy_util_Dom.on(this.clearBtn,"mousedown",options.onClearButtonClick);
 	if(options.clearBtn) options.container.appendChild(this.clearBtn);
-	this.list = new fancy_Suggestions({ filterFn : options.filter, limit : options.limit, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemSelected : this.classes.suggestionItemSelected}, onChooseSelection : options.onChooseSelection, parent : options.container, suggestions : options.suggestions});
+	this.list = new fancy_Suggestions({ filterFn : options.filter, highlightLettersFn : options.highlightLetters, limit : options.limit, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemSelected : this.classes.suggestionItemSelected}, onChooseSelection : options.onChooseSelection, parent : options.container, suggestions : options.suggestions});
 	fancy_util_Dom.addClass(this.input,this.classes.input);
 	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
@@ -134,6 +144,7 @@ var fancy_Suggestions = function(options) {
 	this.filtered = this.suggestions.slice();
 	this.selected = "";
 	if(options.filterFn != null) this.filterFn = options.filterFn; else this.filterFn = fancy_Suggestions.defaultFilterer;
+	if(options.highlightLettersFn != null) this.highlightLettersFn = options.highlightLettersFn; else this.highlightLettersFn = fancy_Suggestions.defaultHighlightLetters;
 	this.isOpen = false;
 	this.elements = thx_Arrays.reduce(this.suggestions,function(acc,curr) {
 		acc.set(curr,fancy_util_Dom.create("li." + _g.classes.suggestionItem,null,null,curr));
@@ -174,14 +185,27 @@ fancy_Suggestions.defaultFilterer = function(suggestions,search) {
 		} else return posA - posB;
 	});
 };
+fancy_Suggestions.defaultHighlightLetters = function(filtered,search) {
+	return filtered.map(function(_) {
+		var _0 = _.toLowerCase().indexOf(search);
+		return { _0 : _0, _1 : search.length};
+	});
+};
 fancy_Suggestions.prototype = {
 	filter: function(search) {
 		var _g = this;
+		search = search.toLowerCase();
 		this.filtered = this.filterFn(this.suggestions,search).slice(0,this.limit);
-		fancy_util_Dom.empty(this.list);
-		this.filtered.map(function(_) {
-			return _g.list.appendChild(_g.elements.get(_));
-		});
+		var wordParts = this.highlightLettersFn(this.filtered,search);
+		thx_Arrays.reducei(this.filtered,function(list,str,index) {
+			var el = fancy_util_Dom.empty(_g.elements.get(str));
+			var wordRange = wordParts[index];
+			if(wordRange._0 != 0) el.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,0,wordRange._0)));
+			if(wordRange._1 > 0) el.appendChild(fancy_util_Dom.create("strong",null,null,HxOverrides.substr(str,wordRange._0,wordRange._1)));
+			if(wordRange._0 + wordRange._1 < str.length) el.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,wordRange._1 + wordRange._0,null)));
+			list.appendChild(el);
+			return list;
+		},fancy_util_Dom.empty(this.list));
 		if(!thx_Arrays.contains(this.filtered,this.selected)) this.selected = "";
 		if(this.filtered.length == 0) fancy_util_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_util_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
 	}
@@ -339,6 +363,9 @@ thx_Arrays.order = function(array,sort) {
 	return n;
 };
 thx_Arrays.reduce = function(array,callback,initial) {
+	return array.reduce(callback,initial);
+};
+thx_Arrays.reducei = function(array,callback,initial) {
 	return array.reduce(callback,initial);
 };
 var thx_Iterators = function() { };

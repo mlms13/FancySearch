@@ -35,6 +35,7 @@ typedef FancySearchOptions = {
   ?clearBtn : Bool,
   ?container : Element,
   ?filter : Suggestions.FilterFunction,
+  ?highlightLetters : Suggestions.HighlightLetters,
   ?keys : FancySearchKeyboardShortcuts,
   ?limit : Int,
   ?minLength : Int,
@@ -94,6 +95,7 @@ class Search {
 
     list = new Suggestions({
       filterFn : options.filter,
+      highlightLettersFn : options.highlightLetters,
       limit : options.limit,
       classes : {
         suggestionContainer : classes.suggestionContainer,
