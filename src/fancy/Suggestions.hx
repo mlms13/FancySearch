@@ -9,7 +9,7 @@ using fancy.util.Dom;
 using thx.Tuple;
 
 typedef FilterFunction = Array<String> -> String -> Array<String>;
-typedef HighlightLetters = Array<String> -> String -> Array<Tuple2<Int, Int>>;
+typedef HighlightLetters = Array<String> -> String -> Array<Array<Tuple2<Int, Int>>>;
 typedef SelectionChooseFunction = String -> Void;
 
 typedef SuggestionBoxClassNames = {
@@ -95,20 +95,21 @@ class Suggestions {
     var wordParts = highlightLettersFn(filtered, search);
 
     filtered.reducei(function (list, str, index) {
-      var el = elements.get(str).empty(),
-          wordRange = wordParts[index];
+      var el = elements.get(str).empty();
 
-      // if the highlighted range isn't at the beginning, span it
-      if (wordRange.left != 0)
-        el.appendChild(Dom.create('span', str.substr(0, wordRange.left)));
+      wordRanges.map(function (range) {
+        // if the highlighted range isn't at the beginning, span it
+        if (range.left != 0)
+          el.appendChild(Dom.create('span', str.substr(0, range.left)));
 
-      // if the range to highlight has a non-zero length, strong it
-      if (wordRange.right > 0)
-        el.appendChild(Dom.create('strong', str.substr(wordRange.left, wordRange.right)));
+        // if the range to highlight has a non-zero length, strong it
+        if (range.right > 0)
+          el.appendChild(Dom.create('strong', str.substr(range.left, range.right)));
 
-      // if the range didn't end at the end of the string, span the rest
-      if (wordRange.left + wordRange.right < str.length)
-        el.appendChild(Dom.create('span', str.substr(wordRange.right + wordRange.left)));
+        // if the range didn't end at the end of the string, span the rest
+        if (range.left + range.right < str.length)
+          el.appendChild(Dom.create('span', str.substr(range.right + range.left)));
+      });
 
       list.appendChild(el);
       return list;
@@ -182,6 +183,6 @@ class Suggestions {
   }
 
   static function defaultHighlightLetters(filtered : Array<String>, search :String) {
-    return filtered.map.fn(new Tuple2(_.toLowerCase().indexOf(search), search.length));
+    return filtered.map.fn([new Tuple2(_.toLowerCase().indexOf(search), search.length)]);
   }
 }

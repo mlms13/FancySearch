@@ -187,8 +187,12 @@ fancy_Suggestions.defaultFilterer = function(suggestions,search) {
 };
 fancy_Suggestions.defaultHighlightLetters = function(filtered,search) {
 	return filtered.map(function(_) {
-		var _0 = _.toLowerCase().indexOf(search);
-		return { _0 : _0, _1 : search.length};
+		return [(function($this) {
+			var $r;
+			var _0 = _.toLowerCase().indexOf(search);
+			$r = { _0 : _0, _1 : search.length};
+			return $r;
+		}(this))];
 	});
 };
 fancy_Suggestions.prototype = {
@@ -199,10 +203,18 @@ fancy_Suggestions.prototype = {
 		var wordParts = this.highlightLettersFn(this.filtered,search);
 		thx_Arrays.reducei(this.filtered,function(list,str,index) {
 			var el = fancy_util_Dom.empty(_g.elements.get(str));
-			var wordRange = wordParts[index];
-			if(wordRange._0 != 0) el.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,0,wordRange._0)));
-			if(wordRange._1 > 0) el.appendChild(fancy_util_Dom.create("strong",null,null,HxOverrides.substr(str,wordRange._0,wordRange._1)));
-			if(wordRange._0 + wordRange._1 < str.length) el.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,wordRange._1 + wordRange._0,null)));
+			var wordRanges = ((function(_e) {
+				return function(sort) {
+					return thx_Arrays.order(_e,sort);
+				};
+			})(wordParts[index]))(function(_0,_1) {
+				return _0._1 - _1._1;
+			});
+			wordRanges.map(function(range) {
+				if(range._0 != 0) el.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
+				if(range._1 > 0) el.appendChild(fancy_util_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
+				if(range._0 + range._1 < str.length) el.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
+			});
 			list.appendChild(el);
 			return list;
 		},fancy_util_Dom.empty(this.list));
