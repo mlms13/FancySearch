@@ -97,7 +97,11 @@ class Suggestions {
     filtered.reducei(function (list, str, index) {
       var el = elements.get(str).empty();
 
-      wordRanges.map(function (range) {
+      // each filtered word has an array of ranges to highlight
+      // first we sort them be start index, then we iterate over them,
+      // splitting the suggestion into spans and strongs.
+      // NOTE: for now, we expect your ranges to not overlap each other.
+      wordParts[index].order.fn(_0.right - _1.right).map(function (range) {
         // if the highlighted range isn't at the beginning, span it
         if (range.left != 0)
           el.appendChild(Dom.create('span', str.substr(0, range.left)));
