@@ -53,20 +53,30 @@ class Suggestions {
     classes = options.classes;
     limit = options.limit;
     onChooseSelection = options.onChooseSelection;
-    suggestions = options.suggestions != null ? options.suggestions : [];
-    filtered = suggestions.copy();
+    filtered = [];
     selected = '';
     filterFn = options.filterFn != null ? options.filterFn : defaultFilterer;
     highlightLettersFn = options.highlightLettersFn != null ?
       options.highlightLettersFn :
       defaultHighlightLetters;
     isOpen = false;
+
+    // create all elements and set initial suggestions
+    list = Dom.create('ul.${classes.suggestionList}');
+    el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [list]);
+    setSuggestions(options.suggestions != null ? options.suggestions : []);
+    parent.appendChild(el);
+  }
+
+  public function setSuggestions(suggestions : Array<String>) {
+    this.suggestions = suggestions;
+    list.empty();
+
     elements = suggestions.reduce(function (acc : StringMap<Element>, curr) {
       acc.set(curr, Dom.create('li.${classes.suggestionItem}', curr));
       return acc;
     }, new StringMap<Element>());
 
-    // set up the dom
     elements.keys().map(function (elName) {
       elements.get(elName)
         .on('mouseover', function (_) {
@@ -79,14 +89,6 @@ class Suggestions {
           selectItem(); // select none
         });
     });
-
-    list = Dom.create(
-      'ul.${classes.suggestionList}',
-      [for (item in elements) item]
-    );
-    el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [list]);
-
-    parent.appendChild(el);
   }
 
   public function filter(search : String) {

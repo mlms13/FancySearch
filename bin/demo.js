@@ -135,42 +135,18 @@ fancy_Search.prototype = {
 	}
 };
 var fancy_Suggestions = function(options) {
-	var _g = this;
 	this.parent = options.parent;
 	this.classes = options.classes;
 	this.limit = options.limit;
 	this.onChooseSelection = options.onChooseSelection;
-	if(options.suggestions != null) this.suggestions = options.suggestions; else this.suggestions = [];
-	this.filtered = this.suggestions.slice();
+	this.filtered = [];
 	this.selected = "";
 	if(options.filterFn != null) this.filterFn = options.filterFn; else this.filterFn = fancy_Suggestions.defaultFilterer;
 	if(options.highlightLettersFn != null) this.highlightLettersFn = options.highlightLettersFn; else this.highlightLettersFn = fancy_Suggestions.defaultHighlightLetters;
 	this.isOpen = false;
-	this.elements = thx_Arrays.reduce(this.suggestions,function(acc,curr) {
-		acc.set(curr,fancy_util_Dom.create("li." + _g.classes.suggestionItem,null,null,curr));
-		return acc;
-	},new haxe_ds_StringMap());
-	thx_Iterators.map(this.elements.keys(),function(elName) {
-		fancy_util_Dom.on(fancy_util_Dom.on(fancy_util_Dom.on(_g.elements.get(elName),"mouseover",function(_) {
-			_g.selectItem(elName);
-		}),"mousedown",function(_1) {
-			_g.chooseSelectedItem();
-		}),"mouseout",function(_2) {
-			_g.selectItem();
-		});
-	});
-	this.list = fancy_util_Dom.create("ul." + this.classes.suggestionList,null,(function($this) {
-		var $r;
-		var _g1 = [];
-		var $it0 = $this.elements.iterator();
-		while( $it0.hasNext() ) {
-			var item = $it0.next();
-			_g1.push(item);
-		}
-		$r = _g1;
-		return $r;
-	}(this)));
+	this.list = fancy_util_Dom.create("ul." + this.classes.suggestionList);
 	this.el = fancy_util_Dom.create("div." + this.classes.suggestionContainer + "." + this.classes.suggestionsClosed,null,[this.list]);
+	this.setSuggestions(options.suggestions != null?options.suggestions:[]);
 	this.parent.appendChild(this.el);
 };
 fancy_Suggestions.defaultFilterer = function(suggestions,search) {
@@ -196,21 +172,38 @@ fancy_Suggestions.defaultHighlightLetters = function(filtered,search) {
 	});
 };
 fancy_Suggestions.prototype = {
-	filter: function(search) {
+	setSuggestions: function(suggestions) {
+		var _g = this;
+		this.suggestions = suggestions;
+		fancy_util_Dom.empty(this.list);
+		this.elements = thx_Arrays.reduce(suggestions,function(acc,curr) {
+			acc.set(curr,fancy_util_Dom.create("li." + _g.classes.suggestionItem,null,null,curr));
+			return acc;
+		},new haxe_ds_StringMap());
+		thx_Iterators.map(this.elements.keys(),function(elName) {
+			fancy_util_Dom.on(fancy_util_Dom.on(fancy_util_Dom.on(_g.elements.get(elName),"mouseover",function(_) {
+				_g.selectItem(elName);
+			}),"mousedown",function(_1) {
+				_g.chooseSelectedItem();
+			}),"mouseout",function(_2) {
+				_g.selectItem();
+			});
+		});
+	}
+	,filter: function(search) {
 		var _g = this;
 		search = search.toLowerCase();
 		this.filtered = this.filterFn(this.suggestions,search).slice(0,this.limit);
 		var wordParts = this.highlightLettersFn(this.filtered,search);
 		thx_Arrays.reducei(this.filtered,function(list,str,index) {
 			var el = fancy_util_Dom.empty(_g.elements.get(str));
-			var wordRanges = ((function(_e) {
+			((function(_e) {
 				return function(sort) {
 					return thx_Arrays.order(_e,sort);
 				};
 			})(wordParts[index]))(function(_0,_1) {
 				return _0._1 - _1._1;
-			});
-			wordRanges.map(function(range) {
+			}).map(function(range) {
 				if(range._0 != 0) el.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
 				if(range._1 > 0) el.appendChild(fancy_util_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
 				if(range._0 + range._1 < str.length) el.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
@@ -304,20 +297,6 @@ fancy_util_Dom.empty = function(el) {
 };
 var fancy_util_Keys = function() { };
 var haxe_IMap = function() { };
-var haxe_ds__$StringMap_StringMapIterator = function(map,keys) {
-	this.map = map;
-	this.keys = keys;
-	this.index = 0;
-	this.count = keys.length;
-};
-haxe_ds__$StringMap_StringMapIterator.prototype = {
-	hasNext: function() {
-		return this.index < this.count;
-	}
-	,next: function() {
-		return this.map.get(this.keys[this.index++]);
-	}
-};
 var haxe_ds_StringMap = function() {
 	this.h = { };
 };
@@ -352,9 +331,6 @@ haxe_ds_StringMap.prototype = {
 			}
 		}
 		return out;
-	}
-	,iterator: function() {
-		return new haxe_ds__$StringMap_StringMapIterator(this,this.arrayKeys());
 	}
 };
 var thx_Arrays = function() { };
