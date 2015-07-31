@@ -47,7 +47,7 @@ HxOverrides.iter = function(a) {
 };
 var Main = function() { };
 Main.main = function() {
-	var options = { limit : 6, suggestions : ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"]};
+	var options = { limit : 6, minLength : 0, suggestions : ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"]};
 	var search = fancy_Search.createFromSelector(".fancy-container input",options);
 };
 var Reflect = function() { };
@@ -103,14 +103,18 @@ fancy_Search.prototype = {
 		this.filterUsingInputValue();
 	}
 	,onSearchBlur: function(e) {
+		this.checkEmptyStatus();
 		this.list.close();
 	}
 	,filterUsingInputValue: function() {
 		this.list.filter(this.input.value);
 		if(this.input.value.length >= this.minLength) this.list.open(); else this.list.close();
 	}
-	,onSearchInput: function(e) {
+	,checkEmptyStatus: function() {
 		if(this.input.value.length > 0) fancy_util_Dom.removeClass(this.input,this.classes.inputEmpty); else fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
+	}
+	,onSearchInput: function(e) {
+		this.checkEmptyStatus();
 		this.filterUsingInputValue();
 	}
 	,onSearchKeydown: function(e) {

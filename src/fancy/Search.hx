@@ -131,6 +131,9 @@ class Search {
   }
 
   function onSearchBlur(e: Event) {
+    // choosing a suggestion doesn't trigger an `input` event, but it does
+    // cause a `blur`, so we check the status of the input here
+    checkEmptyStatus();
     list.close();
   }
 
@@ -143,12 +146,16 @@ class Search {
     }
   }
 
-  function onSearchInput(e : Event) {
+  function checkEmptyStatus() {
     if (input.value.length > 0) {
       input.removeClass(classes.inputEmpty);
     } else {
       input.addClass(classes.inputEmpty);
     }
+  }
+
+  function onSearchInput(e : Event) {
+    checkEmptyStatus();
     filterUsingInputValue();
   }
 
