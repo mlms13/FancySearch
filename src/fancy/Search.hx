@@ -82,7 +82,7 @@ class Search {
       closeMenu : [Keys.ESCAPE],
       selectionUp : [Keys.UP],
       selectionDown : [Keys.DOWN],
-      selectionChoose : [Keys.ENTER]
+      selectionChoose : [Keys.ENTER, Keys.TAB]
     }, options.keys);
 
     // create sibling elements
