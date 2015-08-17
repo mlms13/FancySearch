@@ -8,41 +8,17 @@ using thx.Iterators;
 using fancy.util.Dom;
 using thx.Tuple;
 
-typedef FilterFunction = Array<String> -> String -> Array<String>;
-typedef HighlightLetters = Array<String> -> String -> Array<Array<Tuple2<Int, Int>>>;
-typedef SelectionChooseFunction = String -> Void;
-
-typedef SuggestionBoxClassNames = {
-  suggestionContainer : String,
-  suggestionsOpen : String,
-  suggestionsClosed : String,
-  suggestionList : String,
-  suggestionsEmpty : String,
-  suggestionItem : String,
-  suggestionItemSelected : String,
-};
-
-typedef SuggestionOptions = {
-  classes : SuggestionBoxClassNames,
-  ?filterFn : FilterFunction,
-  ?highlightLettersFn : HighlightLetters,
-  limit : Int,
-  onChooseSelection : SelectionChooseFunction,
-  parent : Element,
-  ?suggestions : Array<String>,
-};
-
 class Suggestions {
   public var parent(default, null) : Element;
-  public var classes(default, null) : SuggestionBoxClassNames;
+  public var classes(default, null) : SuggestionClassNames;
   public var limit(default, null) : Int;
-  public var onChooseSelection(default, null) : SelectionChooseFunction;
+  public var onChooseSelection(default, null) : SuggestionOptions.SelectionChooseFunction;
   public var suggestions(default, null) : Array<String>;
   public var filtered(default, null) : Array<String>;
   public var elements(default, null) : StringMap<Element>;
   public var selected(default, null) : String; // selected item in `filtered`
-  public var filterFn : FilterFunction;
-  public var highlightLettersFn : HighlightLetters;
+  public var filterFn : SuggestionOptions.FilterFunction;
+  public var highlightLettersFn : SuggestionOptions.HighlightLetters;
   public var isOpen : Bool;
   var el : Element;
   var list : Element;

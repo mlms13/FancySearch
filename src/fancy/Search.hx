@@ -10,40 +10,6 @@ using thx.Objects;
 using thx.Arrays;
 using fancy.util.Dom;
 
-typedef FancySearchClassNames = {
-  ?input : String,
-  ?inputEmpty : String,
-  ?clearButton : String,
-  ?suggestionContainer : String,
-  ?suggestionsOpen : String,
-  ?suggestionsClosed : String,
-  ?suggestionsEmpty : String,
-  ?suggestionList : String,
-  ?suggestionItem : String,
-  ?suggestionItemSelected : String
-};
-
-typedef FancySearchKeyboardShortcuts = {
-  ?closeMenu : Array<Int>,
-  ?selectionUp : Array<Int>,
-  ?selectionDown : Array<Int>,
-  ?selectionChoose : Array<Int>
-};
-
-typedef FancySearchOptions = {
-  ?classes : FancySearchClassNames,
-  ?clearBtn : Bool,
-  ?container : Element,
-  ?filter : Suggestions.FilterFunction,
-  ?highlightLetters : Suggestions.HighlightLetters,
-  ?keys : FancySearchKeyboardShortcuts,
-  ?limit : Int,
-  ?minLength : Int,
-  ?onChooseSelection : Suggestions.SelectionChooseFunction,
-  ?onClearButtonClick : Event -> Void,
-  ?suggestions : Array<String>,
-};
-
 class Search {
   public var input : InputElement;
   public var clearBtn : Element;
