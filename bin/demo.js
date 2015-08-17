@@ -139,19 +139,13 @@ fancy_Search.prototype = {
 	}
 };
 var fancy_Suggestions = function(options) {
-	this.parent = options.parent;
-	this.classes = options.classes;
-	this.limit = options.limit;
-	this.onChooseSelection = options.onChooseSelection;
+	this.initializeOptions(options);
 	this.filtered = [];
 	this.selected = "";
-	if(options.filterFn != null) this.filterFn = options.filterFn; else this.filterFn = fancy_Suggestions.defaultFilterer;
-	if(options.highlightLettersFn != null) this.highlightLettersFn = options.highlightLettersFn; else this.highlightLettersFn = fancy_Suggestions.defaultHighlightLetters;
 	this.isOpen = false;
-	this.list = fancy_util_Dom.create("ul." + this.classes.suggestionList);
-	this.el = fancy_util_Dom.create("div." + this.classes.suggestionContainer + "." + this.classes.suggestionsClosed,null,[this.list]);
-	this.setSuggestions(options.suggestions != null?options.suggestions:[]);
-	this.parent.appendChild(this.el);
+	this.list = fancy_util_Dom.create("ul." + this.opts.classes.suggestionList);
+	this.el = fancy_util_Dom.create("div." + this.opts.classes.suggestionContainer + "." + this.opts.classes.suggestionsClosed,null,[this.list]);
+	this.opts.parent.appendChild(this.el);
 };
 fancy_Suggestions.defaultFilterer = function(suggestions,search) {
 	search = search.toLowerCase();
@@ -176,12 +170,18 @@ fancy_Suggestions.defaultHighlightLetters = function(filtered,search) {
 	});
 };
 fancy_Suggestions.prototype = {
-	setSuggestions: function(suggestions) {
+	initializeOptions: function(options) {
+		this.opts = options;
+		this.setSuggestions(this.opts.suggestions != null?this.opts.suggestions:[]);
+		if(this.opts.filterFn != null) this.opts.filterFn = this.opts.filterFn; else this.opts.filterFn = fancy_Suggestions.defaultFilterer;
+		if(this.opts.highlightLettersFn != null) this.opts.highlightLettersFn = this.opts.highlightLettersFn; else this.opts.highlightLettersFn = fancy_Suggestions.defaultHighlightLetters;
+	}
+	,setSuggestions: function(s) {
 		var _g = this;
-		this.suggestions = suggestions;
+		this.opts.suggestions = s;
 		fancy_util_Dom.empty(this.list);
-		this.elements = thx_Arrays.reduce(suggestions,function(acc,curr) {
-			acc.set(curr,fancy_util_Dom.create("li." + _g.classes.suggestionItem,null,null,curr));
+		this.elements = thx_Arrays.reduce(this.opts.suggestions,function(acc,curr) {
+			acc.set(curr,fancy_util_Dom.create("li." + _g.opts.classes.suggestionItem,null,null,curr));
 			return acc;
 		},new haxe_ds_StringMap());
 		thx_Iterators.map(this.elements.keys(),function(elName) {
@@ -197,8 +197,8 @@ fancy_Suggestions.prototype = {
 	,filter: function(search) {
 		var _g = this;
 		search = search.toLowerCase();
-		this.filtered = this.filterFn(this.suggestions,search).slice(0,this.limit);
-		var wordParts = this.highlightLettersFn(this.filtered,search);
+		this.filtered = this.opts.filterFn(this.opts.suggestions,search).slice(0,this.opts.limit);
+		var wordParts = this.opts.highlightLettersFn(this.filtered,search);
 		thx_Arrays.reducei(this.filtered,function(list,str,index) {
 			var el = fancy_util_Dom.empty(_g.elements.get(str));
 			((function(_e) {
@@ -216,22 +216,22 @@ fancy_Suggestions.prototype = {
 			return list;
 		},fancy_util_Dom.empty(this.list));
 		if(!thx_Arrays.contains(this.filtered,this.selected)) this.selected = "";
-		if(this.filtered.length == 0) fancy_util_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_util_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
+		if(this.filtered.length == 0) fancy_util_Dom.addClass(this.el,this.opts.classes.suggestionsEmpty); else fancy_util_Dom.removeClass(this.el,this.opts.classes.suggestionsEmpty);
 	}
 	,open: function() {
 		this.isOpen = true;
-		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsClosed),this.classes.suggestionsOpen);
+		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.opts.classes.suggestionsClosed),this.opts.classes.suggestionsOpen);
 	}
 	,close: function() {
 		this.isOpen = false;
 		this.selectItem();
-		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsOpen),this.classes.suggestionsClosed);
+		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.opts.classes.suggestionsOpen),this.opts.classes.suggestionsClosed);
 	}
 	,selectItem: function(key) {
 		if(key == null) key = "";
-		if(this.selected != "") fancy_util_Dom.removeClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
+		if(this.selected != "") fancy_util_Dom.removeClass(this.elements.get(this.selected),this.opts.classes.suggestionItemSelected);
 		this.selected = key;
-		if(this.elements.get(this.selected) != null) fancy_util_Dom.addClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
+		if(this.elements.get(this.selected) != null) fancy_util_Dom.addClass(this.elements.get(this.selected),this.opts.classes.suggestionItemSelected);
 	}
 	,moveSelectionUp: function() {
 		var currentIndex = HxOverrides.indexOf(this.filtered,this.selected,0);
@@ -246,7 +246,7 @@ fancy_Suggestions.prototype = {
 		this.selectItem(this.filtered[targetIndex]);
 	}
 	,chooseSelectedItem: function() {
-		this.onChooseSelection(this.selected);
+		this.opts.onChooseSelection(this.selected);
 	}
 };
 var fancy_util_Dom = function() { };

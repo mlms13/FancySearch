@@ -9,47 +9,45 @@ using fancy.util.Dom;
 using thx.Tuple;
 
 class Suggestions {
-  public var parent(default, null) : Element;
-  public var classes(default, null) : SuggestionClassNames;
-  public var limit(default, null) : Int;
-  public var onChooseSelection(default, null) : SuggestionOptions.SelectionChooseFunction;
-  public var suggestions(default, null) : Array<String>;
+  public var opts(default, null) : SuggestionOptions;
   public var filtered(default, null) : Array<String>;
   public var elements(default, null) : StringMap<Element>;
   public var selected(default, null) : String; // selected item in `filtered`
-  public var filterFn : SuggestionOptions.FilterFunction;
-  public var highlightLettersFn : SuggestionOptions.HighlightLetters;
-  public var isOpen : Bool;
+  public var isOpen(default, null) : Bool;
   var el : Element;
   var list : Element;
 
   public function new(options : SuggestionOptions) {
     // defaults
-    parent = options.parent;
-    classes = options.classes;
-    limit = options.limit;
-    onChooseSelection = options.onChooseSelection;
+    initializeOptions(options);
     filtered = [];
     selected = '';
-    filterFn = options.filterFn != null ? options.filterFn : defaultFilterer;
-    highlightLettersFn = options.highlightLettersFn != null ?
-      options.highlightLettersFn :
-      defaultHighlightLetters;
     isOpen = false;
 
     // create all elements and set initial suggestions
-    list = Dom.create('ul.${classes.suggestionList}');
-    el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [list]);
-    setSuggestions(options.suggestions != null ? options.suggestions : []);
-    parent.appendChild(el);
+    list = Dom.create('ul.${opts.classes.suggestionList}');
+    el = Dom.create('div.${opts.classes.suggestionContainer}.${opts.classes.suggestionsClosed}', [list]);
+    opts.parent.appendChild(el);
   }
 
-  public function setSuggestions(suggestions : Array<String>) {
-    this.suggestions = suggestions;
+  function initializeOptions(options : SuggestionOptions) {
+    // FIXME: this is bad
+    // TODO: make onChooseSelection optional and static. it's only fair.
+    this.opts = options;
+    // TODO: use merge for these next options
+    setSuggestions(opts.suggestions != null ? opts.suggestions : []);
+    opts.filterFn = opts.filterFn != null ? opts.filterFn : defaultFilterer;
+    opts.highlightLettersFn = opts.highlightLettersFn != null ?
+      opts.highlightLettersFn :
+      defaultHighlightLetters;
+  }
+
+  public function setSuggestions(s : Array<String>) {
+    opts.suggestions = s;
     list.empty();
 
-    elements = suggestions.reduce(function (acc : StringMap<Element>, curr) {
-      acc.set(curr, Dom.create('li.${classes.suggestionItem}', curr));
+    elements = opts.suggestions.reduce(function (acc : StringMap<Element>, curr) {
+      acc.set(curr, Dom.create('li.${opts.classes.suggestionItem}', curr));
       return acc;
     }, new StringMap<Element>());
 
@@ -69,8 +67,8 @@ class Suggestions {
 
   public function filter(search : String) {
     search = search.toLowerCase();
-    filtered = filterFn(suggestions, search).slice(0, limit);
-    var wordParts = highlightLettersFn(filtered, search);
+    filtered = opts.filterFn(opts.suggestions, search).slice(0, opts.limit);
+    var wordParts = opts.highlightLettersFn(filtered, search);
 
     filtered.reducei(function (list, str, index) {
       var el = elements.get(str).empty();
@@ -102,33 +100,33 @@ class Suggestions {
     }
 
     if (filtered.length == 0) {
-      el.addClass(classes.suggestionsEmpty);
+      el.addClass(opts.classes.suggestionsEmpty);
     } else {
-      el.removeClass(classes.suggestionsEmpty);
+      el.removeClass(opts.classes.suggestionsEmpty);
     }
   }
 
   public function open() {
     isOpen = true;
-    el.removeClass(classes.suggestionsClosed)
-      .addClass(classes.suggestionsOpen);
+    el.removeClass(opts.classes.suggestionsClosed)
+      .addClass(opts.classes.suggestionsOpen);
   }
 
   public function close() {
     isOpen = false;
     selectItem();
-    el.removeClass(classes.suggestionsOpen)
-      .addClass(classes.suggestionsClosed);
+    el.removeClass(opts.classes.suggestionsOpen)
+      .addClass(opts.classes.suggestionsClosed);
   }
 
   public function selectItem(?key : String = '') {
     if (selected != '') {
-      elements.get(selected).removeClass(classes.suggestionItemSelected);
+      elements.get(selected).removeClass(opts.classes.suggestionItemSelected);
     }
 
     selected = key;
     if (elements.get(selected) != null)
-      elements.get(selected).addClass(classes.suggestionItemSelected);
+      elements.get(selected).addClass(opts.classes.suggestionItemSelected);
   }
 
   public function moveSelectionUp() {
@@ -146,7 +144,7 @@ class Suggestions {
   }
 
   public function chooseSelectedItem() {
-    onChooseSelection(selected);
+    opts.onChooseSelection(selected);
   }
 
   static function defaultFilterer(suggestions : Array<String>, search : String) {
