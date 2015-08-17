@@ -81,8 +81,8 @@ class Search {
     keys = Objects.merge({
       closeMenu : [Keys.ESCAPE],
       selectionUp : [Keys.UP],
-      selectionDown : [Keys.DOWN],
-      selectionChoose : [Keys.ENTER, Keys.TAB]
+      selectionDown : [Keys.DOWN, Keys.TAB],
+      selectionChoose : [Keys.ENTER]
     }, options.keys);
 
     // create sibling elements
