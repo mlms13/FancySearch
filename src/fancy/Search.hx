@@ -28,7 +28,6 @@ class Search {
     if (options.clearBtn == null) options.clearBtn = true;
     if (options.container == null) options.container = input.parentElement;
     if (options.limit == null) options.limit = 5;
-    if (options.onChooseSelection == null) options.onChooseSelection = chooseSelection;
     if (options.onClearButtonClick == null) options.onClearButtonClick = onClearButtonClick;
 
     classes = Objects.merge({
@@ -73,6 +72,7 @@ class Search {
         suggestionItemSelected : classes.suggestionItemSelected
       },
       onChooseSelection : options.onChooseSelection,
+      input : input,
       parent : options.container,
       suggestions : options.suggestions,
     });
@@ -145,11 +145,6 @@ class Search {
     e.preventDefault();
     input.value = "";
     filterUsingInputValue();
-  }
-
-  function chooseSelection(selection : String) {
-    input.value = selection;
-    input.blur();
   }
 
   public static function createFromSelector(selector : String, options : FancySearchOptions) {

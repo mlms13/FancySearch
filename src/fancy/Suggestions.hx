@@ -1,6 +1,7 @@
 package fancy;
 
 import js.html.Element;
+import js.html.InputElement;
 import haxe.ds.StringMap;
 using thx.Arrays;
 using thx.Functions;
@@ -28,14 +29,15 @@ class Suggestions {
     list = Dom.create('ul.${opts.classes.suggestionList}');
     el = Dom.create('div.${opts.classes.suggestionContainer}.${opts.classes.suggestionsClosed}', [list]);
     opts.parent.appendChild(el);
+
+    setSuggestions(opts.suggestions != null ? opts.suggestions : []);
   }
 
   function initializeOptions(options : SuggestionOptions) {
     // FIXME: this is bad
-    // TODO: make onChooseSelection optional and static. it's only fair.
     this.opts = options;
     // TODO: use merge for these next options
-    setSuggestions(opts.suggestions != null ? opts.suggestions : []);
+    opts.onChooseSelection = opts.onChooseSelection != null ? opts.onChooseSelection : defaultChooseSelection;
     opts.filterFn = opts.filterFn != null ? opts.filterFn : defaultFilterer;
     opts.highlightLettersFn = opts.highlightLettersFn != null ?
       opts.highlightLettersFn :
@@ -144,7 +146,13 @@ class Suggestions {
   }
 
   public function chooseSelectedItem() {
-    opts.onChooseSelection(selected);
+    opts.onChooseSelection(opts.input, selected);
+  }
+
+
+  static function defaultChooseSelection(input : InputElement, selection : String) {
+    input.value = selection;
+    input.blur();
   }
 
   static function defaultFilterer(suggestions : Array<String>, search : String) {

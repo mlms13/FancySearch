@@ -80,14 +80,13 @@ var fancy_Search = function(el,options) {
 	if(options.clearBtn == null) options.clearBtn = true;
 	if(options.container == null) options.container = this.input.parentElement;
 	if(options.limit == null) options.limit = 5;
-	if(options.onChooseSelection == null) options.onChooseSelection = $bind(this,this.chooseSelection);
 	if(options.onClearButtonClick == null) options.onClearButtonClick = $bind(this,this.onClearButtonClick);
 	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN,fancy_util_Keys.TAB], selectionChoose : [fancy_util_Keys.ENTER]},options.keys);
 	this.clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
 	fancy_util_Dom.on(this.clearBtn,"mousedown",options.onClearButtonClick);
 	if(options.clearBtn) options.container.appendChild(this.clearBtn);
-	this.list = new fancy_Suggestions({ filterFn : options.filter, highlightLettersFn : options.highlightLetters, limit : options.limit, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemSelected : this.classes.suggestionItemSelected}, onChooseSelection : options.onChooseSelection, parent : options.container, suggestions : options.suggestions});
+	this.list = new fancy_Suggestions({ filterFn : options.filter, highlightLettersFn : options.highlightLetters, limit : options.limit, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemSelected : this.classes.suggestionItemSelected}, onChooseSelection : options.onChooseSelection, input : this.input, parent : options.container, suggestions : options.suggestions});
 	fancy_util_Dom.addClass(this.input,this.classes.input);
 	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
@@ -133,10 +132,6 @@ fancy_Search.prototype = {
 		this.input.value = "";
 		this.filterUsingInputValue();
 	}
-	,chooseSelection: function(selection) {
-		this.input.value = selection;
-		this.input.blur();
-	}
 };
 var fancy_Suggestions = function(options) {
 	this.initializeOptions(options);
@@ -146,6 +141,11 @@ var fancy_Suggestions = function(options) {
 	this.list = fancy_util_Dom.create("ul." + this.opts.classes.suggestionList);
 	this.el = fancy_util_Dom.create("div." + this.opts.classes.suggestionContainer + "." + this.opts.classes.suggestionsClosed,null,[this.list]);
 	this.opts.parent.appendChild(this.el);
+	this.setSuggestions(this.opts.suggestions != null?this.opts.suggestions:[]);
+};
+fancy_Suggestions.defaultChooseSelection = function(input,selection) {
+	input.value = selection;
+	input.blur();
 };
 fancy_Suggestions.defaultFilterer = function(suggestions,search) {
 	search = search.toLowerCase();
@@ -172,7 +172,7 @@ fancy_Suggestions.defaultHighlightLetters = function(filtered,search) {
 fancy_Suggestions.prototype = {
 	initializeOptions: function(options) {
 		this.opts = options;
-		this.setSuggestions(this.opts.suggestions != null?this.opts.suggestions:[]);
+		if(this.opts.onChooseSelection != null) this.opts.onChooseSelection = this.opts.onChooseSelection; else this.opts.onChooseSelection = fancy_Suggestions.defaultChooseSelection;
 		if(this.opts.filterFn != null) this.opts.filterFn = this.opts.filterFn; else this.opts.filterFn = fancy_Suggestions.defaultFilterer;
 		if(this.opts.highlightLettersFn != null) this.opts.highlightLettersFn = this.opts.highlightLettersFn; else this.opts.highlightLettersFn = fancy_Suggestions.defaultHighlightLetters;
 	}
@@ -246,7 +246,7 @@ fancy_Suggestions.prototype = {
 		this.selectItem(this.filtered[targetIndex]);
 	}
 	,chooseSelectedItem: function() {
-		this.opts.onChooseSelection(this.selected);
+		this.opts.onChooseSelection(this.opts.input,this.selected);
 	}
 };
 var fancy_util_Dom = function() { };
