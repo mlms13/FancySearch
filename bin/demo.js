@@ -74,13 +74,7 @@ Reflect.fields = function(o) {
 var fancy_Search = function(el,options) {
 	this.input = el;
 	if(options != null) options = options; else options = { };
-	if(options.classes != null) options.classes = options.classes; else options.classes = { };
-	if(options.keys != null) options.keys = options.keys; else options.keys = { };
-	if(options.minLength != null) this.minLength = options.minLength; else this.minLength = 1;
-	if(options.clearBtn == null) options.clearBtn = true;
-	if(options.container == null) options.container = this.input.parentElement;
-	if(options.limit == null) options.limit = 5;
-	if(options.onClearButtonClick == null) options.onClearButtonClick = $bind(this,this.onClearButtonClick);
+	options = thx_Objects.combine({ classes : { }, keys : { }, minLength : 1, clearBtn : true, container : this.input.parentElement, limit : 5, onClearButtonClick : $bind(this,this.onClearButtonClick)},options);
 	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN,fancy_util_Keys.TAB], selectionChoose : [fancy_util_Keys.ENTER]},options.keys);
 	this.clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
@@ -141,7 +135,7 @@ var fancy_Suggestions = function(options) {
 	this.list = fancy_util_Dom.create("ul." + this.opts.classes.suggestionList);
 	this.el = fancy_util_Dom.create("div." + this.opts.classes.suggestionContainer + "." + this.opts.classes.suggestionsClosed,null,[this.list]);
 	this.opts.parent.appendChild(this.el);
-	this.setSuggestions(this.opts.suggestions != null?this.opts.suggestions:[]);
+	this.setSuggestions(this.opts.suggestions);
 };
 fancy_Suggestions.defaultChooseSelection = function(input,selection) {
 	input.value = selection;
@@ -171,10 +165,9 @@ fancy_Suggestions.defaultHighlightLetters = function(filtered,search) {
 };
 fancy_Suggestions.prototype = {
 	initializeOptions: function(options) {
-		this.opts = options;
-		if(this.opts.onChooseSelection != null) this.opts.onChooseSelection = this.opts.onChooseSelection; else this.opts.onChooseSelection = fancy_Suggestions.defaultChooseSelection;
-		if(this.opts.filterFn != null) this.opts.filterFn = this.opts.filterFn; else this.opts.filterFn = fancy_Suggestions.defaultFilterer;
-		if(this.opts.highlightLettersFn != null) this.opts.highlightLettersFn = this.opts.highlightLettersFn; else this.opts.highlightLettersFn = fancy_Suggestions.defaultHighlightLetters;
+		this.opts = thx_Objects.assign({ suggestions : [], onChooseSelection : fancy_Suggestions.defaultChooseSelection, filterFn : fancy_Suggestions.defaultFilterer, highlightLettersFn : fancy_Suggestions.defaultHighlightLetters},options,function(_,toVal,fromVal) {
+			if(fromVal == null) return toVal; else return fromVal;
+		});
 	}
 	,setSuggestions: function(s) {
 		var _g = this;
@@ -385,6 +378,20 @@ thx_Objects.combine = function(first,second) {
 		var field1 = _g11[_g2];
 		++_g2;
 		Reflect.setField(to,field1,Reflect.field(second,field1));
+	}
+	return to;
+};
+thx_Objects.assign = function(to,from,replacef) {
+	if(null == replacef) replacef = function(field,oldv,newv) {
+		return newv;
+	};
+	var _g = 0;
+	var _g1 = Reflect.fields(from);
+	while(_g < _g1.length) {
+		var field1 = _g1[_g];
+		++_g;
+		var newv1 = Reflect.field(from,field1);
+		if(Object.prototype.hasOwnProperty.call(to,field1)) Reflect.setField(to,field1,replacef(field1,Reflect.field(to,field1),newv1)); else to[field1] = newv1;
 	}
 	return to;
 };

@@ -22,13 +22,16 @@ class Search {
     // initialize all of the options
     input = el;
     options = options != null ? options : {};
-    options.classes = options.classes != null ? options.classes : {};
-    options.keys = options.keys != null ? options.keys : {};
-    minLength = options.minLength != null ? options.minLength : 1;
-    if (options.clearBtn == null) options.clearBtn = true;
-    if (options.container == null) options.container = input.parentElement;
-    if (options.limit == null) options.limit = 5;
-    if (options.onClearButtonClick == null) options.onClearButtonClick = onClearButtonClick;
+
+    options = Objects.merge({
+      classes : {},
+      keys : {},
+      minLength : 1,
+      clearBtn : true,
+      container : input.parentElement,
+      limit : 5,
+      onClearButtonClick : onClearButtonClick
+    }, options);
 
     classes = Objects.merge({
       input : 'fs-search-input',

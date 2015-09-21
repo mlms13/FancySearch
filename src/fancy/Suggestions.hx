@@ -8,6 +8,7 @@ using thx.Functions;
 using thx.Iterators;
 using fancy.util.Dom;
 using thx.Tuple;
+using thx.Objects;
 
 class Suggestions {
   public var opts(default, null) : SuggestionOptions;
@@ -30,18 +31,21 @@ class Suggestions {
     el = Dom.create('div.${opts.classes.suggestionContainer}.${opts.classes.suggestionsClosed}', [list]);
     opts.parent.appendChild(el);
 
-    setSuggestions(opts.suggestions != null ? opts.suggestions : []);
+    setSuggestions(opts.suggestions);
   }
 
   function initializeOptions(options : SuggestionOptions) {
-    // FIXME: this is bad
-    this.opts = options;
-    // TODO: use merge for these next options
-    opts.onChooseSelection = opts.onChooseSelection != null ? opts.onChooseSelection : defaultChooseSelection;
-    opts.filterFn = opts.filterFn != null ? opts.filterFn : defaultFilterer;
-    opts.highlightLettersFn = opts.highlightLettersFn != null ?
-      opts.highlightLettersFn :
-      defaultHighlightLetters;
+    // TODO: merge isn't working because the null values in `options`
+    // are wiping out our defaults. Assign has to be cast because it
+    // doesn't preserve the type of the original objects
+    this.opts = cast Objects.assign({
+      suggestions : [],
+      onChooseSelection : defaultChooseSelection,
+      filterFn : defaultFilterer,
+      highlightLettersFn : defaultHighlightLetters
+    }, options, function (_, toVal, fromVal) {
+      return fromVal == null ? toVal : fromVal;
+    });
   }
 
   public function setSuggestions(s : Array<String>) {
