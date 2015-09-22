@@ -14,26 +14,29 @@ class Search {
   public var input : InputElement;
   public var clearBtn : Element;
   public var list : Suggestions;
-  public var minLength : Int;
-  public var classes : FancySearchClassNames;
+  public var opts : FancySearchOptions;
   public var keys : FancySearchKeyboardShortcuts;
 
   public function new(el : InputElement, ?options : FancySearchOptions) {
     // initialize all of the options
     input = el;
-    options = options != null ? options : {};
-
-    options = Objects.merge({
+    opts = Objects.merge({
       classes : {},
       keys : {},
       minLength : 1,
       clearBtn : true,
       container : input.parentElement,
-      limit : 5,
-      onClearButtonClick : onClearButtonClick
+      onClearButtonClick : onClearButtonClick,
+      suggestionOptions : {}
     }, options);
 
-    classes = Objects.merge({
+    if (opts.suggestionOptions.input == null)
+      opts.suggestionOptions.input = input;
+
+    if (opts.suggestionOptions.parent == null)
+      opts.suggestionOptions.parent = opts.container;
+
+    opts.classes = Objects.merge({
       input : 'fs-search-input',
       inputEmpty : 'fs-search-input-empty',
       clearButton : 'fs-clear-input-button',
@@ -44,47 +47,30 @@ class Search {
       suggestionList : 'fs-suggestion-list',
       suggestionItem : 'fs-suggestion-item',
       suggestionItemSelected : 'fs-suggestion-item-selected'
-    }, options.classes);
+    }, opts.classes);
 
     keys = Objects.merge({
       closeMenu : [Keys.ESCAPE],
       selectionUp : [Keys.UP],
       selectionDown : [Keys.DOWN, Keys.TAB],
       selectionChoose : [Keys.ENTER]
-    }, options.keys);
+    }, opts.keys);
 
     // create sibling elements
-    clearBtn = Dom.create('button.${classes.clearButton}', '\u00D7');
-    clearBtn.on('mousedown', options.onClearButtonClick);
+    clearBtn = Dom.create('button.${opts.classes.clearButton}', '\u00D7');
+    clearBtn.on('mousedown', opts.onClearButtonClick);
 
-    if (options.clearBtn) {
-      options.container.appendChild(clearBtn);
+    if (opts.clearBtn) {
+      opts.container.appendChild(clearBtn);
     }
 
-    list = new Suggestions({
-      filterFn : options.filter,
-      highlightLettersFn : options.highlightLetters,
-      limit : options.limit,
-      classes : {
-        suggestionContainer : classes.suggestionContainer,
-        suggestionsOpen : classes.suggestionsOpen,
-        suggestionsClosed : classes.suggestionsClosed,
-        suggestionsEmpty : classes.suggestionsEmpty,
-        suggestionList : classes.suggestionList,
-        suggestionItem : classes.suggestionItem,
-        suggestionItemSelected : classes.suggestionItemSelected
-      },
-      onChooseSelection : options.onChooseSelection,
-      input : input,
-      parent : options.container,
-      suggestions : options.suggestions,
-    });
+    list = new Suggestions(opts.suggestionOptions, opts.classes);
 
     // apply classes
-    input.addClass(classes.input);
+    input.addClass(opts.classes.input);
 
     if (input.value.length < 1) {
-      input.addClass(classes.inputEmpty);
+      input.addClass(opts.classes.inputEmpty);
     }
 
     // apply event listeners
@@ -108,7 +94,7 @@ class Search {
 
   function filterUsingInputValue() {
     list.filter(input.value);
-    if (input.value.length >= minLength) {
+    if (input.value.length >= opts.minLength) {
       list.open();
     } else {
       list.close();
@@ -117,9 +103,9 @@ class Search {
 
   function checkEmptyStatus() {
     if (input.value.length > 0) {
-      input.removeClass(classes.inputEmpty);
+      input.removeClass(opts.classes.inputEmpty);
     } else {
-      input.addClass(classes.inputEmpty);
+      input.addClass(opts.classes.inputEmpty);
     }
   }
 

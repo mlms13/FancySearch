@@ -11,7 +11,8 @@ using thx.Tuple;
 using thx.Objects;
 
 class Suggestions {
-  public var opts(default, null) : SuggestionOptions;
+  var opts : SuggestionOptions;
+  var classes : FancySearchClassNames;
   public var filtered(default, null) : Array<String>;
   public var elements(default, null) : StringMap<Element>;
   public var selected(default, null) : String; // selected item in `filtered`
@@ -19,16 +20,17 @@ class Suggestions {
   var el : Element;
   var list : Element;
 
-  public function new(options : SuggestionOptions) {
+  public function new(options : SuggestionOptions, classes : FancySearchClassNames) {
     // defaults
+    this.classes = classes;
     initializeOptions(options);
     filtered = [];
     selected = '';
     isOpen = false;
 
     // create all elements and set initial suggestions
-    list = Dom.create('ul.${opts.classes.suggestionList}');
-    el = Dom.create('div.${opts.classes.suggestionContainer}.${opts.classes.suggestionsClosed}', [list]);
+    list = Dom.create('ul.${classes.suggestionList}');
+    el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [list]);
     opts.parent.appendChild(el);
 
     setSuggestions(opts.suggestions);
@@ -38,14 +40,13 @@ class Suggestions {
     // TODO: merge isn't working because the null values in `options`
     // are wiping out our defaults. Assign has to be cast because it
     // doesn't preserve the type of the original objects
-    this.opts = cast Objects.assign({
-      suggestions : [],
-      onChooseSelection : defaultChooseSelection,
+    this.opts = Objects.merge({
       filterFn : defaultFilterer,
-      highlightLettersFn : defaultHighlightLetters
-    }, options, function (_, toVal, fromVal) {
-      return fromVal == null ? toVal : fromVal;
-    });
+      highlightLettersFn : defaultHighlightLetters,
+      limit : 5,
+      onChooseSelection : defaultChooseSelection,
+      suggestions : [],
+    }, options);
   }
 
   public function setSuggestions(s : Array<String>) {
@@ -53,7 +54,7 @@ class Suggestions {
     list.empty();
 
     elements = opts.suggestions.reduce(function (acc : StringMap<Element>, curr) {
-      acc.set(curr, Dom.create('li.${opts.classes.suggestionItem}', curr));
+      acc.set(curr, Dom.create('li.${classes.suggestionItem}', curr));
       return acc;
     }, new StringMap<Element>());
 
@@ -106,33 +107,33 @@ class Suggestions {
     }
 
     if (filtered.length == 0) {
-      el.addClass(opts.classes.suggestionsEmpty);
+      el.addClass(classes.suggestionsEmpty);
     } else {
-      el.removeClass(opts.classes.suggestionsEmpty);
+      el.removeClass(classes.suggestionsEmpty);
     }
   }
 
   public function open() {
     isOpen = true;
-    el.removeClass(opts.classes.suggestionsClosed)
-      .addClass(opts.classes.suggestionsOpen);
+    el.removeClass(classes.suggestionsClosed)
+      .addClass(classes.suggestionsOpen);
   }
 
   public function close() {
     isOpen = false;
     selectItem();
-    el.removeClass(opts.classes.suggestionsOpen)
-      .addClass(opts.classes.suggestionsClosed);
+    el.removeClass(classes.suggestionsOpen)
+      .addClass(classes.suggestionsClosed);
   }
 
   public function selectItem(?key : String = '') {
     if (selected != '') {
-      elements.get(selected).removeClass(opts.classes.suggestionItemSelected);
+      elements.get(selected).removeClass(classes.suggestionItemSelected);
     }
 
     selected = key;
     if (elements.get(selected) != null)
-      elements.get(selected).addClass(opts.classes.suggestionItemSelected);
+      elements.get(selected).addClass(classes.suggestionItemSelected);
   }
 
   public function moveSelectionUp() {

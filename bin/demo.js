@@ -47,7 +47,7 @@ HxOverrides.iter = function(a) {
 };
 var Main = function() { };
 Main.main = function() {
-	var options = { limit : 6, minLength : 0, suggestions : ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"]};
+	var options = { minLength : 0, suggestionOptions : { suggestions : ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"], limit : 6}};
 	var search = fancy_Search.createFromSelector(".fancy-container input",options);
 };
 var Reflect = function() { };
@@ -73,16 +73,17 @@ Reflect.fields = function(o) {
 };
 var fancy_Search = function(el,options) {
 	this.input = el;
-	if(options != null) options = options; else options = { };
-	options = thx_Objects.combine({ classes : { }, keys : { }, minLength : 1, clearBtn : true, container : this.input.parentElement, limit : 5, onClearButtonClick : $bind(this,this.onClearButtonClick)},options);
-	this.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},options.classes);
-	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN,fancy_util_Keys.TAB], selectionChoose : [fancy_util_Keys.ENTER]},options.keys);
-	this.clearBtn = fancy_util_Dom.create("button." + this.classes.clearButton,null,null,"×");
-	fancy_util_Dom.on(this.clearBtn,"mousedown",options.onClearButtonClick);
-	if(options.clearBtn) options.container.appendChild(this.clearBtn);
-	this.list = new fancy_Suggestions({ filterFn : options.filter, highlightLettersFn : options.highlightLetters, limit : options.limit, classes : { suggestionContainer : this.classes.suggestionContainer, suggestionsOpen : this.classes.suggestionsOpen, suggestionsClosed : this.classes.suggestionsClosed, suggestionsEmpty : this.classes.suggestionsEmpty, suggestionList : this.classes.suggestionList, suggestionItem : this.classes.suggestionItem, suggestionItemSelected : this.classes.suggestionItemSelected}, onChooseSelection : options.onChooseSelection, input : this.input, parent : options.container, suggestions : options.suggestions});
-	fancy_util_Dom.addClass(this.input,this.classes.input);
-	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
+	this.opts = thx_Objects.combine({ classes : { }, keys : { }, minLength : 1, clearBtn : true, container : this.input.parentElement, onClearButtonClick : $bind(this,this.onClearButtonClick), suggestionOptions : { }},options);
+	if(this.opts.suggestionOptions.input == null) this.opts.suggestionOptions.input = this.input;
+	if(this.opts.suggestionOptions.parent == null) this.opts.suggestionOptions.parent = this.opts.container;
+	this.opts.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},this.opts.classes);
+	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN,fancy_util_Keys.TAB], selectionChoose : [fancy_util_Keys.ENTER]},this.opts.keys);
+	this.clearBtn = fancy_util_Dom.create("button." + this.opts.classes.clearButton,null,null,"×");
+	fancy_util_Dom.on(this.clearBtn,"mousedown",this.opts.onClearButtonClick);
+	if(this.opts.clearBtn) this.opts.container.appendChild(this.clearBtn);
+	this.list = new fancy_Suggestions(this.opts.suggestionOptions,this.opts.classes);
+	fancy_util_Dom.addClass(this.input,this.opts.classes.input);
+	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.opts.classes.inputEmpty);
 	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
 	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
 	fancy_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
@@ -101,10 +102,10 @@ fancy_Search.prototype = {
 	}
 	,filterUsingInputValue: function() {
 		this.list.filter(this.input.value);
-		if(this.input.value.length >= this.minLength) this.list.open(); else this.list.close();
+		if(this.input.value.length >= this.opts.minLength) this.list.open(); else this.list.close();
 	}
 	,checkEmptyStatus: function() {
-		if(this.input.value.length > 0) fancy_util_Dom.removeClass(this.input,this.classes.inputEmpty); else fancy_util_Dom.addClass(this.input,this.classes.inputEmpty);
+		if(this.input.value.length > 0) fancy_util_Dom.removeClass(this.input,this.opts.classes.inputEmpty); else fancy_util_Dom.addClass(this.input,this.opts.classes.inputEmpty);
 	}
 	,onSearchInput: function(e) {
 		this.checkEmptyStatus();
@@ -127,13 +128,14 @@ fancy_Search.prototype = {
 		this.filterUsingInputValue();
 	}
 };
-var fancy_Suggestions = function(options) {
+var fancy_Suggestions = function(options,classes) {
+	this.classes = classes;
 	this.initializeOptions(options);
 	this.filtered = [];
 	this.selected = "";
 	this.isOpen = false;
-	this.list = fancy_util_Dom.create("ul." + this.opts.classes.suggestionList);
-	this.el = fancy_util_Dom.create("div." + this.opts.classes.suggestionContainer + "." + this.opts.classes.suggestionsClosed,null,[this.list]);
+	this.list = fancy_util_Dom.create("ul." + classes.suggestionList);
+	this.el = fancy_util_Dom.create("div." + classes.suggestionContainer + "." + classes.suggestionsClosed,null,[this.list]);
 	this.opts.parent.appendChild(this.el);
 	this.setSuggestions(this.opts.suggestions);
 };
@@ -165,16 +167,14 @@ fancy_Suggestions.defaultHighlightLetters = function(filtered,search) {
 };
 fancy_Suggestions.prototype = {
 	initializeOptions: function(options) {
-		this.opts = thx_Objects.assign({ suggestions : [], onChooseSelection : fancy_Suggestions.defaultChooseSelection, filterFn : fancy_Suggestions.defaultFilterer, highlightLettersFn : fancy_Suggestions.defaultHighlightLetters},options,function(_,toVal,fromVal) {
-			if(fromVal == null) return toVal; else return fromVal;
-		});
+		this.opts = thx_Objects.combine({ filterFn : fancy_Suggestions.defaultFilterer, highlightLettersFn : fancy_Suggestions.defaultHighlightLetters, limit : 5, onChooseSelection : fancy_Suggestions.defaultChooseSelection, suggestions : []},options);
 	}
 	,setSuggestions: function(s) {
 		var _g = this;
 		this.opts.suggestions = s;
 		fancy_util_Dom.empty(this.list);
 		this.elements = thx_Arrays.reduce(this.opts.suggestions,function(acc,curr) {
-			acc.set(curr,fancy_util_Dom.create("li." + _g.opts.classes.suggestionItem,null,null,curr));
+			acc.set(curr,fancy_util_Dom.create("li." + _g.classes.suggestionItem,null,null,curr));
 			return acc;
 		},new haxe_ds_StringMap());
 		thx_Iterators.map(this.elements.keys(),function(elName) {
@@ -209,22 +209,22 @@ fancy_Suggestions.prototype = {
 			return list;
 		},fancy_util_Dom.empty(this.list));
 		if(!thx_Arrays.contains(this.filtered,this.selected)) this.selected = "";
-		if(this.filtered.length == 0) fancy_util_Dom.addClass(this.el,this.opts.classes.suggestionsEmpty); else fancy_util_Dom.removeClass(this.el,this.opts.classes.suggestionsEmpty);
+		if(this.filtered.length == 0) fancy_util_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_util_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
 	}
 	,open: function() {
 		this.isOpen = true;
-		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.opts.classes.suggestionsClosed),this.opts.classes.suggestionsOpen);
+		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsClosed),this.classes.suggestionsOpen);
 	}
 	,close: function() {
 		this.isOpen = false;
 		this.selectItem();
-		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.opts.classes.suggestionsOpen),this.opts.classes.suggestionsClosed);
+		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsOpen),this.classes.suggestionsClosed);
 	}
 	,selectItem: function(key) {
 		if(key == null) key = "";
-		if(this.selected != "") fancy_util_Dom.removeClass(this.elements.get(this.selected),this.opts.classes.suggestionItemSelected);
+		if(this.selected != "") fancy_util_Dom.removeClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
 		this.selected = key;
-		if(this.elements.get(this.selected) != null) fancy_util_Dom.addClass(this.elements.get(this.selected),this.opts.classes.suggestionItemSelected);
+		if(this.elements.get(this.selected) != null) fancy_util_Dom.addClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
 	}
 	,moveSelectionUp: function() {
 		var currentIndex = HxOverrides.indexOf(this.filtered,this.selected,0);
@@ -378,20 +378,6 @@ thx_Objects.combine = function(first,second) {
 		var field1 = _g11[_g2];
 		++_g2;
 		Reflect.setField(to,field1,Reflect.field(second,field1));
-	}
-	return to;
-};
-thx_Objects.assign = function(to,from,replacef) {
-	if(null == replacef) replacef = function(field,oldv,newv) {
-		return newv;
-	};
-	var _g = 0;
-	var _g1 = Reflect.fields(from);
-	while(_g < _g1.length) {
-		var field1 = _g1[_g];
-		++_g;
-		var newv1 = Reflect.field(from,field1);
-		if(Object.prototype.hasOwnProperty.call(to,field1)) Reflect.setField(to,field1,replacef(field1,Reflect.field(to,field1),newv1)); else to[field1] = newv1;
 	}
 	return to;
 };
