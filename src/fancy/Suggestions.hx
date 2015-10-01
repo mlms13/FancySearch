@@ -1,78 +1,59 @@
 package fancy;
 
 import js.html.Element;
+import js.html.InputElement;
 import haxe.ds.StringMap;
 using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;
 using fancy.util.Dom;
 using thx.Tuple;
-
-typedef FilterFunction = Array<String> -> String -> Array<String>;
-typedef HighlightLetters = Array<String> -> String -> Array<Array<Tuple2<Int, Int>>>;
-typedef SelectionChooseFunction = String -> Void;
-
-typedef SuggestionBoxClassNames = {
-  suggestionContainer : String,
-  suggestionsOpen : String,
-  suggestionsClosed : String,
-  suggestionList : String,
-  suggestionsEmpty : String,
-  suggestionItem : String,
-  suggestionItemSelected : String,
-};
-
-typedef SuggestionOptions = {
-  classes : SuggestionBoxClassNames,
-  ?filterFn : FilterFunction,
-  ?highlightLettersFn : HighlightLetters,
-  limit : Int,
-  onChooseSelection : SelectionChooseFunction,
-  parent : Element,
-  ?suggestions : Array<String>,
-};
+using thx.Objects;
 
 class Suggestions {
-  public var parent(default, null) : Element;
-  public var classes(default, null) : SuggestionBoxClassNames;
-  public var limit(default, null) : Int;
-  public var onChooseSelection(default, null) : SelectionChooseFunction;
-  public var suggestions(default, null) : Array<String>;
+  var opts : SuggestionOptions;
+  var classes : FancySearchClassNames;
   public var filtered(default, null) : Array<String>;
   public var elements(default, null) : StringMap<Element>;
   public var selected(default, null) : String; // selected item in `filtered`
-  public var filterFn : FilterFunction;
-  public var highlightLettersFn : HighlightLetters;
-  public var isOpen : Bool;
+  public var isOpen(default, null) : Bool;
   var el : Element;
   var list : Element;
 
-  public function new(options : SuggestionOptions) {
+  public function new(options : SuggestionOptions, classes : FancySearchClassNames) {
     // defaults
-    parent = options.parent;
-    classes = options.classes;
-    limit = options.limit;
-    onChooseSelection = options.onChooseSelection;
+    this.classes = classes;
+    initializeOptions(options);
     filtered = [];
     selected = '';
-    filterFn = options.filterFn != null ? options.filterFn : defaultFilterer;
-    highlightLettersFn = options.highlightLettersFn != null ?
-      options.highlightLettersFn :
-      defaultHighlightLetters;
     isOpen = false;
 
     // create all elements and set initial suggestions
     list = Dom.create('ul.${classes.suggestionList}');
     el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [list]);
-    setSuggestions(options.suggestions != null ? options.suggestions : []);
-    parent.appendChild(el);
+    opts.parent.appendChild(el);
+
+    setSuggestions(opts.suggestions);
   }
 
-  public function setSuggestions(suggestions : Array<String>) {
-    this.suggestions = suggestions;
+  function initializeOptions(options : SuggestionOptions) {
+    // TODO: merge isn't working because the null values in `options`
+    // are wiping out our defaults. Assign has to be cast because it
+    // doesn't preserve the type of the original objects
+    this.opts = Objects.merge({
+      filterFn : defaultFilterer,
+      highlightLettersFn : defaultHighlightLetters,
+      limit : 5,
+      onChooseSelection : defaultChooseSelection,
+      suggestions : [],
+    }, options);
+  }
+
+  public function setSuggestions(s : Array<String>) {
+    opts.suggestions = s;
     list.empty();
 
-    elements = suggestions.reduce(function (acc : StringMap<Element>, curr) {
+    elements = opts.suggestions.reduce(function (acc : StringMap<Element>, curr) {
       acc.set(curr, Dom.create('li.${classes.suggestionItem}', curr));
       return acc;
     }, new StringMap<Element>());
@@ -93,8 +74,8 @@ class Suggestions {
 
   public function filter(search : String) {
     search = search.toLowerCase();
-    filtered = filterFn(suggestions, search).slice(0, limit);
-    var wordParts = highlightLettersFn(filtered, search);
+    filtered = opts.filterFn(opts.suggestions, search).slice(0, opts.limit);
+    var wordParts = opts.highlightLettersFn(filtered, search);
 
     filtered.reducei(function (list, str, index) {
       var el = elements.get(str).empty();
@@ -170,7 +151,13 @@ class Suggestions {
   }
 
   public function chooseSelectedItem() {
-    onChooseSelection(selected);
+    opts.onChooseSelection(opts.input, selected);
+  }
+
+
+  static function defaultChooseSelection(input : InputElement, selection : String) {
+    input.value = selection;
+    input.blur();
   }
 
   static function defaultFilterer(suggestions : Array<String>, search : String) {
