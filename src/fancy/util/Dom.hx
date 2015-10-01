@@ -63,6 +63,10 @@ class Dom {
     return el;
   }
 
+  public static function prependChild(el : Element, child : Element) {
+    el.insertBefore(child, el.firstChild);
+  }
+
   public static function empty(el : Element) {
     while (el.firstChild != null) {
       el.removeChild(el.firstChild);

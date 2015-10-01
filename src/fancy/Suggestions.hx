@@ -6,6 +6,7 @@ import haxe.ds.StringMap;
 using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;
+using thx.OrderedMap;
 using fancy.util.Dom;
 using thx.Tuple;
 using thx.Objects;
@@ -14,7 +15,7 @@ class Suggestions {
   var opts : SuggestionOptions;
   var classes : FancySearchClassNames;
   public var filtered(default, null) : Array<String>;
-  public var elements(default, null) : StringMap<Element>;
+  public var elements(default, null) : OrderedMap<String, Element>;
   public var selected(default, null) : String; // selected item in `filtered`
   public var isOpen(default, null) : Bool;
   var el : Element;
@@ -37,26 +38,42 @@ class Suggestions {
   }
 
   function initializeOptions(options : SuggestionOptions) {
-    // TODO: merge isn't working because the null values in `options`
-    // are wiping out our defaults. Assign has to be cast because it
-    // doesn't preserve the type of the original objects
     this.opts = Objects.merge({
       filterFn : defaultFilterer,
       highlightLettersFn : defaultHighlightLetters,
       limit : 5,
       onChooseSelection : defaultChooseSelection,
+      showSearchLiteralItem : false,
+      searchLiteralIndex : 0,
+      searchLiteralValue : function (inpt) return inpt.value,
+      searchLiteralPrefix : "Search for: ",
       suggestions : [],
     }, options);
+  }
+
+  function insertLiteralItem() {
+    var literalValue = opts.searchLiteralValue(opts.input),
+        containsLiteral = opts.suggestions.map.fn(_.toLowerCase()).indexOf(literalValue) >= 0;
+
+    if (opts.showSearchLiteralItem && !containsLiteral) {
+      elements.insert(
+        opts.searchLiteralIndex,
+        literalValue,
+        Dom.create('li.${classes.suggestionItem}', opts.searchLiteralPrefix + literalValue)
+      );
+    }
   }
 
   public function setSuggestions(s : Array<String>) {
     opts.suggestions = s;
     list.empty();
 
-    elements = opts.suggestions.reduce(function (acc : StringMap<Element>, curr) {
+    elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
       acc.set(curr, Dom.create('li.${classes.suggestionItem}', curr));
       return acc;
-    }, new StringMap<Element>());
+    }, OrderedMap.createString());
+
+    insertLiteralItem();
 
     elements.keys().map(function (elName) {
       elements.get(elName)
