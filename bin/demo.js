@@ -270,18 +270,17 @@ fancy_Suggestions.prototype = {
 			list.appendChild(el);
 			return list;
 		},fancy_util_Dom.empty(this.list));
-		if(search != "" && this.createLiteralItem()) {
-			var pos = this.getLiteralItemIndex();
-			var x = this.opts.searchLiteralValue(this.opts.input);
-			this.filtered.splice(pos,0,x);
-			fancy_util_Dom.insertChildAtIndex(this.list,(function($this) {
-				var $r;
-				var key = $this.opts.searchLiteralValue($this.opts.input);
-				$r = $this.elements.get(key);
-				return $r;
-			}(this)),this.getLiteralItemIndex());
-		}
 		if(!thx_Arrays.contains(this.filtered,this.selected)) this.selected = "";
+		if(search != "" && this.createLiteralItem()) {
+			var literalElement;
+			var key = this.opts.searchLiteralValue(this.opts.input);
+			literalElement = this.elements.get(key);
+			var literalValue = this.opts.searchLiteralValue(this.opts.input);
+			var pos = this.getLiteralItemIndex();
+			this.filtered.splice(pos,0,literalValue);
+			fancy_util_Dom.insertChildAtIndex(this.list,literalElement,this.getLiteralItemIndex());
+			if(this.selected == "") this.selectItem(literalValue);
+		}
 		if(this.filtered.length == 0) fancy_util_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_util_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
 	}
 	,open: function() {

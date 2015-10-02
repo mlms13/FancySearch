@@ -134,18 +134,19 @@ class Suggestions {
       return list;
     }, list.empty());
 
+    if (!filtered.contains(selected)) {
+      selected = "";
+    }
+
     // replace the existing literal item, if the options request it
     // and add inject the literal search text as a key in `filtered`
     if (search != '' && createLiteralItem()) {
-      filtered.insert(getLiteralItemIndex(), opts.searchLiteralValue(opts.input));
-      list.insertChildAtIndex(
-        elements.get(opts.searchLiteralValue(opts.input)),
-        getLiteralItemIndex()
-      );
-    }
+      var literalElement = elements.get(opts.searchLiteralValue(opts.input)),
+          literalValue = opts.searchLiteralValue(opts.input);
 
-    if (!filtered.contains(selected)) {
-      selected = "";
+      filtered.insert(getLiteralItemIndex(), literalValue);
+      list.insertChildAtIndex(literalElement, getLiteralItemIndex());
+      if (selected == "") selectItem(literalValue);
     }
 
     if (filtered.length == 0) {
