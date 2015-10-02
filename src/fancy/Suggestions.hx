@@ -136,7 +136,7 @@ class Suggestions {
 
     // replace the existing literal item, if the options request it
     // and add inject the literal search text as a key in `filtered`
-    if (createLiteralItem()) {
+    if (search != '' && createLiteralItem()) {
       filtered.insert(getLiteralItemIndex(), opts.searchLiteralValue(opts.input));
       list.insertChildAtIndex(
         elements.get(opts.searchLiteralValue(opts.input)),

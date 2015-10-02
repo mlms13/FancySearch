@@ -270,7 +270,7 @@ fancy_Suggestions.prototype = {
 			list.appendChild(el);
 			return list;
 		},fancy_util_Dom.empty(this.list));
-		if(this.createLiteralItem()) {
+		if(search != "" && this.createLiteralItem()) {
 			var pos = this.getLiteralItemIndex();
 			var x = this.opts.searchLiteralValue(this.opts.input);
 			this.filtered.splice(pos,0,x);
