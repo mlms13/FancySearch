@@ -44,24 +44,52 @@ class Suggestions {
       limit : 5,
       onChooseSelection : defaultChooseSelection,
       showSearchLiteralItem : false,
-      searchLiteralIndex : 0,
+      searchLiteralPosition : SuggestionOptions.LiteralPosition.First,
       searchLiteralValue : function (inpt) return inpt.value,
       searchLiteralPrefix : "Search for: ",
       suggestions : [],
     }, options);
   }
 
-  function insertLiteralItem() {
+  function createSuggestionItem(label : String, ?value : String) : Element {
+    if (value == null) value = label;
+    var el = Dom.create('li.${classes.suggestionItem}', label);
+
+    return el
+      .on('mouseover', function (_) {
+        selectItem(value);
+      })
+      .on('mousedown', function (_) {
+        chooseSelectedItem();
+      })
+      .on('mouseout', function (_) {
+        selectItem(); // select none
+      });
+  }
+
+  function getLiteralItemIndex() : Int {
+    return opts.searchLiteralPosition == Last ? elements.length - 1 : 0;
+  }
+
+  // returns `true` or `false` depending on whether the item was created
+  function createLiteralItem(?replaceExisting = true) : Bool {
     var literalValue = opts.searchLiteralValue(opts.input),
         containsLiteral = opts.suggestions.map.fn(_.toLowerCase()).indexOf(literalValue) >= 0;
 
+    // if we're supposed to show the "Search for <literal>" option and the
+    // current search text doesn't exactly match a
     if (opts.showSearchLiteralItem && !containsLiteral) {
-      elements.insert(
-        opts.searchLiteralIndex,
-        literalValue,
-        Dom.create('li.${classes.suggestionItem}', opts.searchLiteralPrefix + literalValue)
-      );
+      var literalPosition = getLiteralItemIndex(),
+          el = createSuggestionItem(opts.searchLiteralPrefix + literalValue, literalValue);
+
+      if (replaceExisting) {
+        elements.removeAt(literalPosition);
+      }
+
+      elements.insert(literalPosition, literalValue, el);
+      return true;
     }
+    return false;
   }
 
   public function setSuggestions(s : Array<String>) {
@@ -69,30 +97,17 @@ class Suggestions {
     list.empty();
 
     elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
-      acc.set(curr, Dom.create('li.${classes.suggestionItem}', curr));
+      acc.set(curr, createSuggestionItem(curr));
       return acc;
     }, OrderedMap.createString());
 
-    insertLiteralItem();
-
-    elements.keys().map(function (elName) {
-      elements.get(elName)
-        .on('mouseover', function (_) {
-          selectItem(elName);
-        })
-        .on('mousedown', function (_) {
-          chooseSelectedItem();
-        })
-        .on('mouseout', function (_) {
-          selectItem(); // select none
-        });
-    });
+    createLiteralItem(false);
   }
 
   public function filter(search : String) {
     search = search.toLowerCase();
     filtered = opts.filterFn(opts.suggestions, search).slice(0, opts.limit);
-    var wordParts = opts.highlightLettersFn(filtered, search);
+    var wordParts = opts.highlightLettersFn(filtered.copy(), search);
 
     filtered.reducei(function (list, str, index) {
       var el = elements.get(str).empty();
@@ -119,6 +134,16 @@ class Suggestions {
       return list;
     }, list.empty());
 
+    // replace the existing literal item, if the options request it
+    // and add inject the literal search text as a key in `filtered`
+    if (createLiteralItem()) {
+      filtered.insert(getLiteralItemIndex(), opts.searchLiteralValue(opts.input));
+      list.insertChildAtIndex(
+        elements.get(opts.searchLiteralValue(opts.input)),
+        getLiteralItemIndex()
+      );
+    }
+
     if (!filtered.contains(selected)) {
       selected = "";
     }
@@ -144,12 +169,15 @@ class Suggestions {
   }
 
   public function selectItem(?key : String = '') {
-    if (selected != '') {
+    // if a selection already existed, clear it
+    if (selected != '')
       elements.get(selected).removeClass(classes.suggestionItemSelected);
-    }
 
+    // set the selection to the current key
     selected = key;
-    if (elements.get(selected) != null)
+
+    // and if there's a corresponding element for that key, select the element
+    if (key != '' && elements.get(selected) != null)
       elements.get(selected).addClass(classes.suggestionItemSelected);
   }
 
