@@ -6,6 +6,7 @@ import haxe.ds.StringMap;
 using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;
+using thx.OrderedMap;
 using fancy.util.Dom;
 using thx.Tuple;
 using thx.Objects;
@@ -14,7 +15,7 @@ class Suggestions {
   var opts : SuggestionOptions;
   var classes : FancySearchClassNames;
   public var filtered(default, null) : Array<String>;
-  public var elements(default, null) : StringMap<Element>;
+  public var elements(default, null) : OrderedMap<String, Element>;
   public var selected(default, null) : String; // selected item in `filtered`
   public var isOpen(default, null) : Bool;
   var el : Element;
@@ -37,45 +38,76 @@ class Suggestions {
   }
 
   function initializeOptions(options : SuggestionOptions) {
-    // TODO: merge isn't working because the null values in `options`
-    // are wiping out our defaults. Assign has to be cast because it
-    // doesn't preserve the type of the original objects
     this.opts = Objects.merge({
       filterFn : defaultFilterer,
       highlightLettersFn : defaultHighlightLetters,
       limit : 5,
       onChooseSelection : defaultChooseSelection,
+      showSearchLiteralItem : false,
+      searchLiteralPosition : SuggestionOptions.LiteralPosition.First,
+      searchLiteralValue : function (inpt) return inpt.value,
+      searchLiteralPrefix : "Search for: ",
       suggestions : [],
     }, options);
+  }
+
+  function createSuggestionItem(label : String, ?value : String) : Element {
+    if (value == null) value = label;
+    var el = Dom.create('li.${classes.suggestionItem}', label);
+
+    return el
+      .on('mouseover', function (_) {
+        selectItem(value);
+      })
+      .on('mousedown', function (_) {
+        chooseSelectedItem();
+      })
+      .on('mouseout', function (_) {
+        selectItem(); // select none
+      });
+  }
+
+  function getLiteralItemIndex() : Int {
+    return opts.searchLiteralPosition == Last ? elements.length - 1 : 0;
+  }
+
+  // returns `true` or `false` depending on whether the item was created
+  function createLiteralItem(?replaceExisting = true) : Bool {
+    var literalValue = opts.searchLiteralValue(opts.input),
+        containsLiteral = opts.suggestions.map.fn(_.toLowerCase()).indexOf(literalValue) >= 0;
+
+    // if we're supposed to show the "Search for <literal>" option and the
+    // current search text doesn't exactly match a
+    if (opts.showSearchLiteralItem && !containsLiteral) {
+      var literalPosition = getLiteralItemIndex(),
+          el = createSuggestionItem(opts.searchLiteralPrefix + literalValue, literalValue);
+
+      if (replaceExisting) {
+        elements.removeAt(literalPosition);
+      }
+
+      elements.insert(literalPosition, literalValue, el);
+      return true;
+    }
+    return false;
   }
 
   public function setSuggestions(s : Array<String>) {
     opts.suggestions = s;
     list.empty();
 
-    elements = opts.suggestions.reduce(function (acc : StringMap<Element>, curr) {
-      acc.set(curr, Dom.create('li.${classes.suggestionItem}', curr));
+    elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
+      acc.set(curr, createSuggestionItem(curr));
       return acc;
-    }, new StringMap<Element>());
+    }, OrderedMap.createString());
 
-    elements.keys().map(function (elName) {
-      elements.get(elName)
-        .on('mouseover', function (_) {
-          selectItem(elName);
-        })
-        .on('mousedown', function (_) {
-          chooseSelectedItem();
-        })
-        .on('mouseout', function (_) {
-          selectItem(); // select none
-        });
-    });
+    createLiteralItem(false);
   }
 
   public function filter(search : String) {
     search = search.toLowerCase();
     filtered = opts.filterFn(opts.suggestions, search).slice(0, opts.limit);
-    var wordParts = opts.highlightLettersFn(filtered, search);
+    var wordParts = opts.highlightLettersFn(filtered.copy(), search);
 
     filtered.reducei(function (list, str, index) {
       var el = elements.get(str).empty();
@@ -106,6 +138,17 @@ class Suggestions {
       selected = "";
     }
 
+    // replace the existing literal item, if the options request it
+    // and add inject the literal search text as a key in `filtered`
+    if (search != '' && createLiteralItem()) {
+      var literalElement = elements.get(opts.searchLiteralValue(opts.input)),
+          literalValue = opts.searchLiteralValue(opts.input);
+
+      filtered.insert(getLiteralItemIndex(), literalValue);
+      list.insertChildAtIndex(literalElement, getLiteralItemIndex());
+      if (selected == "") selectItem(literalValue);
+    }
+
     if (filtered.length == 0) {
       el.addClass(classes.suggestionsEmpty);
     } else {
@@ -127,12 +170,15 @@ class Suggestions {
   }
 
   public function selectItem(?key : String = '') {
-    if (selected != '') {
+    // if a selection already existed, clear it
+    if (selected != '')
       elements.get(selected).removeClass(classes.suggestionItemSelected);
-    }
 
+    // set the selection to the current key
     selected = key;
-    if (elements.get(selected) != null)
+
+    // and if there's a corresponding element for that key, select the element
+    if (key != '' && elements.get(selected) != null)
       elements.get(selected).addClass(classes.suggestionItemSelected);
   }
 

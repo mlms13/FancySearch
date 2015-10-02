@@ -9,7 +9,8 @@ class Main {
           "Cucumber", "Dates", "Eggplant", "Fava Beans", "Kale", "Lettuce", "Lime",
           "Lima Bean", "Mango", "Melon", "Orange", "Peach", "Pear", "Pepper",
           "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"],
-        limit : 6
+        limit : 6,
+        showSearchLiteralItem : true
       }
     };
     var search = Search.createFromSelector('.fancy-container input', options);
