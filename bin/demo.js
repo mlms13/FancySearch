@@ -299,10 +299,8 @@ fancy_Suggestions.prototype = {
 		},fancy_util_Dom.empty(this.list));
 		if(!thx_Arrays.contains(this.filtered,this.selected)) this.selected = "";
 		if(search != "" && this.createLiteralItem()) {
-			var literalElement;
-			var key = StringTools.trim(this.opts.searchLiteralValue(this.opts.input));
-			literalElement = this.elements.get(key);
-			var literalValue = this.opts.searchLiteralValue(this.opts.input);
+			var literalValue = StringTools.trim(this.opts.searchLiteralValue(this.opts.input));
+			var literalElement = this.elements.get(literalValue);
 			var pos = this.getLiteralItemIndex();
 			this.filtered.splice(pos,0,literalValue);
 			fancy_util_Dom.insertChildAtIndex(this.list,literalElement,this.getLiteralItemIndex());
