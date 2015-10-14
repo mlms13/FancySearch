@@ -282,7 +282,7 @@ fancy_Suggestions.prototype = {
 		this.filtered = this.opts.filterFn(this.opts.suggestions,search).slice(0,this.opts.limit);
 		var wordParts = this.opts.highlightLettersFn(this.filtered.slice(),search);
 		thx_Arrays.reducei(this.filtered,function(list,str,index) {
-			var el = fancy_util_Dom.empty(_g.elements.get(str));
+			var listItem = fancy_util_Dom.empty(_g.elements.get(str));
 			((function(_e) {
 				return function(sort) {
 					return thx_Arrays.order(_e,sort);
@@ -290,17 +290,17 @@ fancy_Suggestions.prototype = {
 			})(wordParts[index]))(function(_0,_1) {
 				return _0._1 - _1._1;
 			}).map(function(range) {
-				if(range._0 != 0) el.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
-				if(range._1 > 0) el.appendChild(fancy_util_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
-				if(range._0 + range._1 < str.length) el.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
+				if(range._0 != 0) listItem.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
+				if(range._1 > 0) listItem.appendChild(fancy_util_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
+				if(range._0 + range._1 < str.length) listItem.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
 			});
-			list.appendChild(el);
+			list.appendChild(listItem);
 			return list;
 		},fancy_util_Dom.empty(this.list));
 		if(!thx_Arrays.contains(this.filtered,this.selected)) this.selected = "";
 		if(search != "" && this.createLiteralItem()) {
 			var literalElement;
-			var key = this.opts.searchLiteralValue(this.opts.input);
+			var key = StringTools.trim(this.opts.searchLiteralValue(this.opts.input));
 			literalElement = this.elements.get(key);
 			var literalValue = this.opts.searchLiteralValue(this.opts.input);
 			var pos = this.getLiteralItemIndex();

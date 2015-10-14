@@ -110,7 +110,7 @@ class Suggestions {
     var wordParts = opts.highlightLettersFn(filtered.copy(), search);
 
     filtered.reducei(function (list, str, index) {
-      var el = elements.get(str).empty();
+      var listItem = elements.get(str).empty();
 
       // each filtered word has an array of ranges to highlight
       // first we sort them be start index, then we iterate over them,
@@ -119,18 +119,18 @@ class Suggestions {
       wordParts[index].order.fn(_0.right - _1.right).map(function (range) {
         // if the highlighted range isn't at the beginning, span it
         if (range.left != 0)
-          el.appendChild(Dom.create('span', str.substr(0, range.left)));
+          listItem.appendChild(Dom.create('span', str.substr(0, range.left)));
 
         // if the range to highlight has a non-zero length, strong it
         if (range.right > 0)
-          el.appendChild(Dom.create('strong', str.substr(range.left, range.right)));
+          listItem.appendChild(Dom.create('strong', str.substr(range.left, range.right)));
 
         // if the range didn't end at the end of the string, span the rest
         if (range.left + range.right < str.length)
-          el.appendChild(Dom.create('span', str.substr(range.right + range.left)));
+          listItem.appendChild(Dom.create('span', str.substr(range.right + range.left)));
       });
 
-      list.appendChild(el);
+      list.appendChild(listItem);
       return list;
     }, list.empty());
 
@@ -141,7 +141,7 @@ class Suggestions {
     // replace the existing literal item, if the options request it
     // and add inject the literal search text as a key in `filtered`
     if (search != '' && createLiteralItem()) {
-      var literalElement = elements.get(opts.searchLiteralValue(opts.input)),
+      var literalElement = elements.get(opts.searchLiteralValue(opts.input).trim()),
           literalValue = opts.searchLiteralValue(opts.input);
 
       filtered.insert(getLiteralItemIndex(), literalValue);
@@ -150,9 +150,9 @@ class Suggestions {
     }
 
     if (filtered.length == 0) {
-      el.addClass(classes.suggestionsEmpty);
+      this.el.addClass(classes.suggestionsEmpty);
     } else {
-      el.removeClass(classes.suggestionsEmpty);
+      this.el.removeClass(classes.suggestionsEmpty);
     }
   }
 
