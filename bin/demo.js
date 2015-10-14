@@ -25,6 +25,11 @@ EReg.prototype = {
 };
 var HxOverrides = function() { };
 HxOverrides.__name__ = true;
+HxOverrides.cca = function(s,index) {
+	var x = s.charCodeAt(index);
+	if(x != x) return undefined;
+	return x;
+};
 HxOverrides.substr = function(s,pos,len) {
 	if(len == null) len = s.length; else if(len < 0) {
 		if(pos == 0) len = s.length + len; else return "";
@@ -88,6 +93,27 @@ Reflect.fields = function(o) {
 		}
 	}
 	return a;
+};
+var StringTools = function() { };
+StringTools.__name__ = true;
+StringTools.isSpace = function(s,pos) {
+	var c = HxOverrides.cca(s,pos);
+	return c > 8 && c < 14 || c == 32;
+};
+StringTools.ltrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,r)) r++;
+	if(r > 0) return HxOverrides.substr(s,r,l - r); else return s;
+};
+StringTools.rtrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,l - r - 1)) r++;
+	if(r > 0) return HxOverrides.substr(s,0,l - r); else return s;
+};
+StringTools.trim = function(s) {
+	return StringTools.ltrim(StringTools.rtrim(s));
 };
 var fancy_Search = function(el,options) {
 	this.input = el;
@@ -215,14 +241,15 @@ fancy_Suggestions.prototype = {
 	}
 	,createLiteralItem: function(replaceExisting) {
 		if(replaceExisting == null) replaceExisting = true;
-		var literalValue = this.opts.searchLiteralValue(this.opts.input);
+		var literalValue = StringTools.trim(this.opts.searchLiteralValue(this.opts.input));
 		var containsLiteral;
 		containsLiteral = (function($this) {
 			var $r;
 			var _this = $this.opts.suggestions.map(function(_) {
 				return _.toLowerCase();
 			});
-			$r = HxOverrides.indexOf(_this,literalValue,0);
+			var x = literalValue.toLowerCase();
+			$r = HxOverrides.indexOf(_this,x,0);
 			return $r;
 		}(this)) >= 0;
 		if(this.opts.showSearchLiteralItem && !containsLiteral) {

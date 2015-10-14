@@ -2,14 +2,14 @@ package fancy;
 
 import js.html.Element;
 import js.html.InputElement;
-import haxe.ds.StringMap;
+using fancy.util.Dom;
 using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;
-using thx.OrderedMap;
-using fancy.util.Dom;
-using thx.Tuple;
 using thx.Objects;
+using thx.OrderedMap;
+using thx.Strings;
+using thx.Tuple;
 
 class Suggestions {
   var opts : SuggestionOptions;
@@ -73,8 +73,8 @@ class Suggestions {
 
   // returns `true` or `false` depending on whether the item was created
   function createLiteralItem(?replaceExisting = true) : Bool {
-    var literalValue = opts.searchLiteralValue(opts.input),
-        containsLiteral = opts.suggestions.map.fn(_.toLowerCase()).indexOf(literalValue) >= 0;
+    var literalValue = opts.searchLiteralValue(opts.input).trim(),
+        containsLiteral = opts.suggestions.map.fn(_.toLowerCase()).indexOf(literalValue.toLowerCase()) >= 0;
 
     // if we're supposed to show the "Search for <literal>" option and the
     // current search text doesn't exactly match a
