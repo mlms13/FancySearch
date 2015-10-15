@@ -263,7 +263,7 @@ fancy_Suggestions.prototype = {
 	}
 	,setSuggestions: function(s) {
 		var _g = this;
-		this.opts.suggestions = s;
+		this.opts.suggestions = thx_Arrays.distinct(s);
 		fancy_util_Dom.empty(this.list);
 		this.elements = thx_Arrays.reduce(this.opts.suggestions,function(acc,curr) {
 			acc.set(curr,_g.createSuggestionItem(curr));
@@ -517,6 +517,15 @@ js_Boot.__string_rec = function(o,s) {
 };
 var thx_Arrays = function() { };
 thx_Arrays.__name__ = true;
+thx_Arrays.any = function(arr,predicate) {
+	var _g = 0;
+	while(_g < arr.length) {
+		var element = arr[_g];
+		++_g;
+		if(predicate(element)) return true;
+	}
+	return false;
+};
 thx_Arrays.contains = function(array,element,eq) {
 	if(null == eq) return HxOverrides.indexOf(array,element,0) >= 0; else {
 		var _g1 = 0;
@@ -528,6 +537,23 @@ thx_Arrays.contains = function(array,element,eq) {
 		return false;
 	}
 };
+thx_Arrays.distinct = function(array,predicate) {
+	var result = [];
+	if(array.length <= 1) return array;
+	if(null == predicate) predicate = thx_Functions.equality;
+	var _g = 0;
+	while(_g < array.length) {
+		var v = [array[_g]];
+		++_g;
+		var keep = !thx_Arrays.any(result,(function(v) {
+			return function(r) {
+				return predicate(r,v[0]);
+			};
+		})(v));
+		if(keep) result.push(v[0]);
+	}
+	return result;
+};
 thx_Arrays.order = function(array,sort) {
 	var n = array.slice();
 	n.sort(sort);
@@ -538,6 +564,11 @@ thx_Arrays.reduce = function(array,callback,initial) {
 };
 thx_Arrays.reducei = function(array,callback,initial) {
 	return array.reduce(callback,initial);
+};
+var thx_Functions = function() { };
+thx_Functions.__name__ = true;
+thx_Functions.equality = function(a,b) {
+	return a == b;
 };
 var thx_Iterators = function() { };
 thx_Iterators.__name__ = true;

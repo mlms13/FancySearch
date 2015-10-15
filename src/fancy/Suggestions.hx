@@ -93,7 +93,7 @@ class Suggestions {
   }
 
   public function setSuggestions(s : Array<String>) {
-    opts.suggestions = s;
+    opts.suggestions = s.distinct();
     list.empty();
 
     elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
