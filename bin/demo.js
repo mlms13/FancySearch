@@ -319,7 +319,14 @@ fancy_Suggestions.prototype = {
 	}
 	,selectItem: function(key) {
 		if(key == null) key = "";
-		if(this.selected != "") fancy_util_Dom.removeClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
+		var _g = this;
+		((function(_e) {
+			return function(f) {
+				return thx_Iterators.map(_e,f);
+			};
+		})(this.elements.iterator()))(function(_) {
+			return fancy_util_Dom.removeClass(_,_g.classes.suggestionItemSelected);
+		});
 		this.selected = key;
 		if(key != "" && this.elements.get(this.selected) != null) fancy_util_Dom.addClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
 	}
@@ -532,6 +539,16 @@ thx_Arrays.reduce = function(array,callback,initial) {
 thx_Arrays.reducei = function(array,callback,initial) {
 	return array.reduce(callback,initial);
 };
+var thx_Iterators = function() { };
+thx_Iterators.__name__ = true;
+thx_Iterators.map = function(it,f) {
+	var acc = [];
+	while( it.hasNext() ) {
+		var v = it.next();
+		acc.push(f(v));
+	}
+	return acc;
+};
 var thx_Objects = function() { };
 thx_Objects.__name__ = true;
 thx_Objects.combine = function(first,second) {
@@ -593,6 +610,21 @@ thx_OrderedMapImpl.prototype = {
 		HxOverrides.remove(this.arr,key);
 		this.length--;
 		return true;
+	}
+	,iterator: function() {
+		var _this = this.toArray();
+		return HxOverrides.iter(_this);
+	}
+	,toArray: function() {
+		var values = [];
+		var _g = 0;
+		var _g1 = this.arr;
+		while(_g < _g1.length) {
+			var k = _g1[_g];
+			++_g;
+			values.push(this.map.get(k));
+		}
+		return values;
 	}
 };
 var thx_StringOrderedMap = function() {

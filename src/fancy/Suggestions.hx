@@ -171,8 +171,7 @@ class Suggestions {
 
   public function selectItem(?key : String = '') {
     // if a selection already existed, clear it
-    if (selected != '')
-      elements.get(selected).removeClass(classes.suggestionItemSelected);
+    elements.iterator().map.fn(_.removeClass(classes.suggestionItemSelected));
 
     // set the selection to the current key
     selected = key;
