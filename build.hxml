@@ -1,6 +1,15 @@
 -lib thx.core
 -cp src
 -cp demo
--dce full
 -main Main
 -js bin/demo.js
+--each
+
+--next
+-D doc-gen
+--macro include('fancy')
+--no-output
+-xml docs/gen.xml
+
+--next
+-dce full
