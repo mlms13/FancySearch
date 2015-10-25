@@ -11,6 +11,11 @@ using thx.OrderedMap;
 using thx.Strings;
 using thx.Tuple;
 
+/**
+  The `Suggestions` class owns the suggestion list and controls its behavior.
+  Public methods exist to modify suggestions, show and hide the menu, move the
+  selection and choose the selected option, filter on demand, and more.
+**/
 class Suggestions {
   var opts : SuggestionOptions;
   var classes : FancySearchClassNames;
@@ -21,6 +26,11 @@ class Suggestions {
   var el : Element;
   var list : Element;
 
+  /**
+    When you create an instance of `Search`, it comes with a public `list` field
+    that is an instance of `Suggestions`. In most cases, you will not need to
+    create an instance of `Suggestions` directly.
+  **/
   public function new(options : SuggestionOptions, classes : FancySearchClassNames) {
     // defaults
     this.classes = classes;
@@ -92,6 +102,10 @@ class Suggestions {
     return false;
   }
 
+  /**
+    `list.setSuggestions` allows you to modify the String list of suggested
+    items on the fly.
+  **/
   public function setSuggestions(s : Array<String>) {
     opts.suggestions = s.distinct();
     list.empty();
@@ -104,6 +118,15 @@ class Suggestions {
     createLiteralItem(false);
   }
 
+  /**
+    Filtering the list happens automatically when the search input is focues, as
+    well as when its value changes. Filtering happens using the provided filter
+    function, then the DOM is updated accordingly.
+
+    In many cases, you will not need to manually call `filter`, but this
+    method may be useful if your list can be filtered by means outside of the
+    FancySearch input.
+  **/
   public function filter(search : String) {
     search = search.toLowerCase();
     filtered = opts.filterFn(opts.suggestions, search).slice(0, opts.limit);
@@ -156,12 +179,18 @@ class Suggestions {
     }
   }
 
+  /**
+    Show the suggestion list by changing its class.
+  **/
   public function open() {
     isOpen = true;
     el.removeClass(classes.suggestionsClosed)
       .addClass(classes.suggestionsOpen);
   }
 
+  /**
+    Hide the suggestion list by changing its class.
+  **/
   public function close() {
     isOpen = false;
     selectItem();
@@ -169,6 +198,10 @@ class Suggestions {
       .addClass(classes.suggestionsClosed);
   }
 
+  /**
+    Move the selection highlight class to a specific item (found using the
+    item's string key). If no key is provided, this method clears the selection.
+  **/
   public function selectItem(?key : String = '') {
     // if a selection already existed, clear it
     elements.iterator().map.fn(_.removeClass(classes.suggestionItemSelected));
@@ -181,6 +214,9 @@ class Suggestions {
       elements.get(selected).addClass(classes.suggestionItemSelected);
   }
 
+  /**
+    Move the selection highlight to the previous suggestion.
+  **/
   public function moveSelectionUp() {
     var currentIndex = filtered.indexOf(selected),
       targetIndex = currentIndex > 0 ? currentIndex - 1 : filtered.length - 1;
@@ -188,6 +224,9 @@ class Suggestions {
     selectItem(filtered[targetIndex]);
   }
 
+  /**
+    Move the selection highlight to the next suggestion.
+  **/
   public function moveSelectionDown() {
     var currentIndex = filtered.indexOf(selected),
       targetIndex = (currentIndex + 1) == filtered.length ? 0 : currentIndex + 1;
@@ -195,6 +234,10 @@ class Suggestions {
     selectItem(filtered[targetIndex]);
   }
 
+  /**
+    Triggers the provided or default function when a selected item has been
+    chosen (e.g. ENTER key or mouse click).
+  **/
   public function chooseSelectedItem() {
     opts.onChooseSelection(opts.input, selected);
   }

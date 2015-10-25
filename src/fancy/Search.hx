@@ -10,13 +10,34 @@ using thx.Objects;
 using thx.Arrays;
 using fancy.util.Dom;
 
-class Search {
-  public var input : InputElement;
-  public var clearBtn : Element;
-  public var list : Suggestions;
-  public var opts : FancySearchOptions;
-  public var keys : FancySearchKeyboardShortcuts;
+/**
+  The `Search` class is the main entry point. It wires up event handlers along
+  with the connection to the suggestion list.
 
+  A new FancySearch can be created using the constructor or one of the static
+  factories below. In all cases, some means of accessing an input element must
+  be provided, but all options may be omitted.
+
+  Apart from the constructor and factories, no public methods exist on this
+  class. It does provide public access to its suggestion list in the form of:
+
+  ```haxe
+  myFancySearch.list;
+  ```
+**/
+class Search {
+  public var list : Suggestions;
+  var input : InputElement;
+  var clearBtn : Element;
+  var opts : FancySearchOptions;
+  var keys : FancySearchKeyboardShortcuts;
+
+  /**
+    The constructor requires an input element which will be converted into a
+    fancy search input (with appropriate event handlers bound to it). All other
+    options are not required, but they allow you to modify the behavior of both
+    the search input and the suggestion list.
+  **/
   public function new(el : InputElement, ?options : FancySearchOptions) {
     // initialize all of the options
     input = el;
@@ -136,10 +157,20 @@ class Search {
     filterUsingInputValue();
   }
 
+  /**
+    This static method creates and returns a new FancySearch given a CSS-style
+    selector string. This is convenient if you have no other references to the
+    input element in your code.
+  **/
   public static function createFromSelector(selector : String, options : FancySearchOptions) {
     return new Search(cast js.Browser.document.querySelector(selector), options);
   }
 
+  /**
+    This static method creates and returns a new FancySearch given a container
+    element surrounding the input that will be used for your FancySearch. This
+    assumes that the container has exactly one `input` child.
+  **/
   public static function createFromContainer(container : Element, options : FancySearchOptions) {
     return new Search(cast container.querySelector('input'), Objects.merge(options, {
       container : container
