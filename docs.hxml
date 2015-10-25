@@ -1,0 +1,22 @@
+# cleanup
+-cmd echo "Go time"
+-cmd rm -rf ./docs/xml
+-cmd rm -rf ./docs/pages
+-cmd mkdir -p ./docs/pages
+
+# build without output
+-cp src
+-cp docs
+-lib thx.core
+-D doc-gen
+-D dox
+-dce no
+--no-output
+ImportFancy
+-xml docs/xml/fancy.xml
+-js _
+-cmd echo "Done building"
+
+# generate documentation
+-cmd echo "Starting generation"
+-cmd haxelib run dox -i docs/xml/fancy.xml -o docs/pages --title "Fancy Search"
