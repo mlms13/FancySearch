@@ -3,6 +3,7 @@ package fancy;
 import js.html.Element;
 import js.html.InputElement;
 using fancy.util.Dom;
+import fancy.util.Types;
 using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;
@@ -54,7 +55,7 @@ class Suggestions {
       limit : 5,
       onChooseSelection : defaultChooseSelection,
       showSearchLiteralItem : false,
-      searchLiteralPosition : SuggestionOptions.LiteralPosition.First,
+      searchLiteralPosition : LiteralPosition.First,
       searchLiteralValue : function (inpt) return inpt.value,
       searchLiteralPrefix : "Search for: ",
       suggestions : [],

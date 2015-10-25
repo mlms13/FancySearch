@@ -5,6 +5,7 @@ import js.html.InputElement;
 import js.html.Event;
 import js.html.KeyboardEvent;
 import fancy.util.Keys;
+import fancy.util.Types;
 
 using thx.Objects;
 using thx.Arrays;

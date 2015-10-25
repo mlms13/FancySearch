@@ -173,13 +173,6 @@ fancy_Search.prototype = {
 		this.filterUsingInputValue();
 	}
 };
-var fancy_LiteralPosition = { __ename__ : true, __constructs__ : ["First","Last"] };
-fancy_LiteralPosition.First = ["First",0];
-fancy_LiteralPosition.First.toString = $estr;
-fancy_LiteralPosition.First.__enum__ = fancy_LiteralPosition;
-fancy_LiteralPosition.Last = ["Last",1];
-fancy_LiteralPosition.Last.toString = $estr;
-fancy_LiteralPosition.Last.__enum__ = fancy_LiteralPosition;
 var fancy_Suggestions = function(options,classes) {
 	this.classes = classes;
 	this.initializeOptions(options);
@@ -220,7 +213,7 @@ fancy_Suggestions.defaultHighlightLetters = function(filtered,search) {
 };
 fancy_Suggestions.prototype = {
 	initializeOptions: function(options) {
-		this.opts = thx_Objects.combine({ filterFn : fancy_Suggestions.defaultFilterer, highlightLettersFn : fancy_Suggestions.defaultHighlightLetters, limit : 5, onChooseSelection : fancy_Suggestions.defaultChooseSelection, showSearchLiteralItem : false, searchLiteralPosition : fancy_LiteralPosition.First, searchLiteralValue : function(inpt) {
+		this.opts = thx_Objects.combine({ filterFn : fancy_Suggestions.defaultFilterer, highlightLettersFn : fancy_Suggestions.defaultHighlightLetters, limit : 5, onChooseSelection : fancy_Suggestions.defaultChooseSelection, showSearchLiteralItem : false, searchLiteralPosition : fancy_util_LiteralPosition.First, searchLiteralValue : function(inpt) {
 			return inpt.value;
 		}, searchLiteralPrefix : "Search for: ", suggestions : []},options);
 	}
@@ -237,7 +230,7 @@ fancy_Suggestions.prototype = {
 		});
 	}
 	,getLiteralItemIndex: function() {
-		if(this.opts.searchLiteralPosition == fancy_LiteralPosition.Last) return this.elements.length - 1; else return 0;
+		if(this.opts.searchLiteralPosition == fancy_util_LiteralPosition.Last) return this.elements.length - 1; else return 0;
 	}
 	,createLiteralItem: function(replaceExisting) {
 		if(replaceExisting == null) replaceExisting = true;
@@ -403,6 +396,13 @@ fancy_util_Dom.empty = function(el) {
 };
 var fancy_util_Keys = function() { };
 fancy_util_Keys.__name__ = true;
+var fancy_util_LiteralPosition = { __ename__ : true, __constructs__ : ["First","Last"] };
+fancy_util_LiteralPosition.First = ["First",0];
+fancy_util_LiteralPosition.First.toString = $estr;
+fancy_util_LiteralPosition.First.__enum__ = fancy_util_LiteralPosition;
+fancy_util_LiteralPosition.Last = ["Last",1];
+fancy_util_LiteralPosition.Last.toString = $estr;
+fancy_util_LiteralPosition.Last.__enum__ = fancy_util_LiteralPosition;
 var haxe_IMap = function() { };
 haxe_IMap.__name__ = true;
 var haxe_ds_StringMap = function() {
