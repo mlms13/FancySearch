@@ -1,8 +1,3 @@
-# cleanup
--cmd rm -rf ./docs/xml
--cmd rm -rf ./docs/pages
--cmd mkdir -p ./docs/pages
-
 # build without output
 -cp src
 -cp docs
@@ -14,7 +9,3 @@
 ImportFancy
 -xml docs/xml/fancy.xml
 -js _
-
-# generate documentation
-# this isn't working from the hxml, but you can run it manually
-# -cmd haxelib run dox -i docs/xml/fancy.xml -o docs/pages --title "Fancy Search" -in "fancy"
