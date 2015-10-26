@@ -2,6 +2,10 @@
 
 Fancy Search is a [typeahead search](https://en.wikipedia.org/wiki/Incremental_search) implementation for the web. It is written in [Haxe](http://haxe.org/) and compiles to a JavaScript target. The library can be imported and used directly in Haxe projects, or it can be bundled into JavaScript projects using CommonJS (coming soon).
 
+The result may look something like the following, or you can just try out a [live demo](https://rawgit.com/mlms13/FancySearch/master/bin/index.html).
+
+![Fancy Search screen capture](https://cloud.githubusercontent.com/assets/1105543/10721933/85faa584-7b70-11e5-8407-3b451bacdb9d.gif)
+
 ### Getting Started
 
 #### With Haxe
