@@ -1,9 +1,9 @@
-package fancy;
+package fancy.search;
 
 import js.html.Element;
 import js.html.InputElement;
-using fancy.util.Dom;
-import fancy.util.Types;
+using fancy.search.util.Dom;
+import fancy.search.util.Types;
 using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;

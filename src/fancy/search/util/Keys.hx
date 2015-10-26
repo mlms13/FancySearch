@@ -1,4 +1,4 @@
-package fancy.util;
+package fancy.search.util;
 
 class Keys {
   public static var TAB(default, null) = 9;

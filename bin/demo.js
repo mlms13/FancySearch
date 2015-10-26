@@ -122,17 +122,17 @@ var fancy_Search = function(el,options) {
 	if(this.opts.suggestionOptions.input == null) this.opts.suggestionOptions.input = this.input;
 	if(this.opts.suggestionOptions.parent == null) this.opts.suggestionOptions.parent = this.opts.container;
 	this.opts.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},this.opts.classes);
-	this.keys = thx_Objects.combine({ closeMenu : [fancy_util_Keys.ESCAPE], selectionUp : [fancy_util_Keys.UP], selectionDown : [fancy_util_Keys.DOWN,fancy_util_Keys.TAB], selectionChoose : [fancy_util_Keys.ENTER]},this.opts.keys);
-	this.clearBtn = fancy_util_Dom.create("button." + this.opts.classes.clearButton,null,null,"×");
-	fancy_util_Dom.on(this.clearBtn,"mousedown",this.opts.onClearButtonClick);
+	this.keys = thx_Objects.combine({ closeMenu : [fancy_search_util_Keys.ESCAPE], selectionUp : [fancy_search_util_Keys.UP], selectionDown : [fancy_search_util_Keys.DOWN,fancy_search_util_Keys.TAB], selectionChoose : [fancy_search_util_Keys.ENTER]},this.opts.keys);
+	this.clearBtn = fancy_search_util_Dom.create("button." + this.opts.classes.clearButton,null,null,"×");
+	fancy_search_util_Dom.on(this.clearBtn,"mousedown",this.opts.onClearButtonClick);
 	if(this.opts.clearBtn) this.opts.container.appendChild(this.clearBtn);
-	this.list = new fancy_Suggestions(this.opts.suggestionOptions,this.opts.classes);
-	fancy_util_Dom.addClass(this.input,this.opts.classes.input);
-	if(this.input.value.length < 1) fancy_util_Dom.addClass(this.input,this.opts.classes.inputEmpty);
-	fancy_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
-	fancy_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
-	fancy_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
-	fancy_util_Dom.on(this.input,"keydown",$bind(this,this.onSearchKeydown));
+	this.list = new fancy_search_Suggestions(this.opts.suggestionOptions,this.opts.classes);
+	fancy_search_util_Dom.addClass(this.input,this.opts.classes.input);
+	if(this.input.value.length < 1) fancy_search_util_Dom.addClass(this.input,this.opts.classes.inputEmpty);
+	fancy_search_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
+	fancy_search_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
+	fancy_search_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
+	fancy_search_util_Dom.on(this.input,"keydown",$bind(this,this.onSearchKeydown));
 };
 fancy_Search.__name__ = true;
 fancy_Search.createFromSelector = function(selector,options) {
@@ -151,7 +151,7 @@ fancy_Search.prototype = {
 		if(this.input.value.length >= this.opts.minLength) this.list.open(); else this.list.close();
 	}
 	,checkEmptyStatus: function() {
-		if(this.input.value.length > 0) fancy_util_Dom.removeClass(this.input,this.opts.classes.inputEmpty); else fancy_util_Dom.addClass(this.input,this.opts.classes.inputEmpty);
+		if(this.input.value.length > 0) fancy_search_util_Dom.removeClass(this.input,this.opts.classes.inputEmpty); else fancy_search_util_Dom.addClass(this.input,this.opts.classes.inputEmpty);
 	}
 	,onSearchInput: function(e) {
 		this.checkEmptyStatus();
@@ -174,24 +174,24 @@ fancy_Search.prototype = {
 		this.filterUsingInputValue();
 	}
 };
-var fancy_Suggestions = function(options,classes) {
+var fancy_search_Suggestions = function(options,classes) {
 	if(options.parent == null || options.input == null) throw new js__$Boot_HaxeError("Cannot create `Suggestions` without input or parent element");
 	this.classes = classes;
 	this.initializeOptions(options);
 	this.filtered = [];
 	this.selected = "";
 	this.isOpen = false;
-	this.list = fancy_util_Dom.create("ul." + classes.suggestionList);
-	this.el = fancy_util_Dom.create("div." + classes.suggestionContainer + "." + classes.suggestionsClosed,null,[this.list]);
+	this.list = fancy_search_util_Dom.create("ul." + classes.suggestionList);
+	this.el = fancy_search_util_Dom.create("div." + classes.suggestionContainer + "." + classes.suggestionsClosed,null,[this.list]);
 	this.opts.parent.appendChild(this.el);
 	this.setSuggestions(this.opts.suggestions);
 };
-fancy_Suggestions.__name__ = true;
-fancy_Suggestions.defaultChooseSelection = function(input,selection) {
+fancy_search_Suggestions.__name__ = true;
+fancy_search_Suggestions.defaultChooseSelection = function(input,selection) {
 	input.value = selection;
 	input.blur();
 };
-fancy_Suggestions.defaultFilterer = function(suggestions,search) {
+fancy_search_Suggestions.defaultFilterer = function(suggestions,search) {
 	search = search.toLowerCase();
 	return thx_Arrays.order(suggestions.filter(function(_) {
 		return _.toLowerCase().indexOf(search) >= 0;
@@ -203,7 +203,7 @@ fancy_Suggestions.defaultFilterer = function(suggestions,search) {
 		} else return posA - posB;
 	});
 };
-fancy_Suggestions.defaultHighlightLetters = function(filtered,search) {
+fancy_search_Suggestions.defaultHighlightLetters = function(filtered,search) {
 	return filtered.map(function(_) {
 		return [(function($this) {
 			var $r;
@@ -213,17 +213,17 @@ fancy_Suggestions.defaultHighlightLetters = function(filtered,search) {
 		}(this))];
 	});
 };
-fancy_Suggestions.prototype = {
+fancy_search_Suggestions.prototype = {
 	initializeOptions: function(options) {
-		this.opts = thx_Objects.combine({ filterFn : fancy_Suggestions.defaultFilterer, highlightLettersFn : fancy_Suggestions.defaultHighlightLetters, limit : 5, onChooseSelection : fancy_Suggestions.defaultChooseSelection, showSearchLiteralItem : false, searchLiteralPosition : fancy_util_LiteralPosition.First, searchLiteralValue : function(inpt) {
+		this.opts = thx_Objects.combine({ filterFn : fancy_search_Suggestions.defaultFilterer, highlightLettersFn : fancy_search_Suggestions.defaultHighlightLetters, limit : 5, onChooseSelection : fancy_search_Suggestions.defaultChooseSelection, showSearchLiteralItem : false, searchLiteralPosition : fancy_search_util_LiteralPosition.First, searchLiteralValue : function(inpt) {
 			return inpt.value;
 		}, searchLiteralPrefix : "Search for: ", suggestions : []},options);
 	}
 	,createSuggestionItem: function(label,value) {
 		var _g = this;
 		if(value == null) value = label;
-		var el = fancy_util_Dom.create("li." + this.classes.suggestionItem,null,null,label);
-		return fancy_util_Dom.on(fancy_util_Dom.on(fancy_util_Dom.on(el,"mouseover",function(_) {
+		var el = fancy_search_util_Dom.create("li." + this.classes.suggestionItem,null,null,label);
+		return fancy_search_util_Dom.on(fancy_search_util_Dom.on(fancy_search_util_Dom.on(el,"mouseover",function(_) {
 			_g.selectItem(value);
 		}),"mousedown",function(_1) {
 			_g.chooseSelectedItem();
@@ -232,7 +232,7 @@ fancy_Suggestions.prototype = {
 		});
 	}
 	,getLiteralItemIndex: function() {
-		if(this.opts.searchLiteralPosition == fancy_util_LiteralPosition.Last) return this.elements.length - 1; else return 0;
+		if(this.opts.searchLiteralPosition == fancy_search_util_LiteralPosition.Last) return this.elements.length - 1; else return 0;
 	}
 	,createLiteralItem: function(replaceExisting) {
 		if(replaceExisting == null) replaceExisting = true;
@@ -259,7 +259,7 @@ fancy_Suggestions.prototype = {
 	,setSuggestions: function(s) {
 		var _g = this;
 		this.opts.suggestions = thx_Arrays.distinct(s);
-		fancy_util_Dom.empty(this.list);
+		fancy_search_util_Dom.empty(this.list);
 		this.elements = thx_Arrays.reduce(this.opts.suggestions,function(acc,curr) {
 			acc.set(curr,_g.createSuggestionItem(curr));
 			return acc;
@@ -277,7 +277,7 @@ fancy_Suggestions.prototype = {
 		this.filtered = this.opts.filterFn(this.opts.suggestions,search).slice(0,this.opts.limit);
 		var wordParts = this.opts.highlightLettersFn(this.filtered.slice(),search);
 		thx_Arrays.reducei(this.filtered,function(list,str,index) {
-			var listItem = fancy_util_Dom.empty(_g.elements.get(str));
+			var listItem = fancy_search_util_Dom.empty(_g.elements.get(str));
 			((function(_e) {
 				return function(sort) {
 					return thx_Arrays.order(_e,sort);
@@ -285,32 +285,32 @@ fancy_Suggestions.prototype = {
 			})(wordParts[index]))(function(_0,_1) {
 				return _0._1 - _1._1;
 			}).map(function(range) {
-				if(range._0 != 0) listItem.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
-				if(range._1 > 0) listItem.appendChild(fancy_util_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
-				if(range._0 + range._1 < str.length) listItem.appendChild(fancy_util_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
+				if(range._0 != 0) listItem.appendChild(fancy_search_util_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
+				if(range._1 > 0) listItem.appendChild(fancy_search_util_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
+				if(range._0 + range._1 < str.length) listItem.appendChild(fancy_search_util_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
 			});
 			list.appendChild(listItem);
 			return list;
-		},fancy_util_Dom.empty(this.list));
+		},fancy_search_util_Dom.empty(this.list));
 		if(!thx_Arrays.contains(this.filtered,this.selected)) this.selected = "";
 		if(search != "" && this.createLiteralItem()) {
 			var literalValue = StringTools.trim(this.opts.searchLiteralValue(this.opts.input));
 			var literalElement = this.elements.get(literalValue);
 			var pos = this.getLiteralItemIndex();
 			this.filtered.splice(pos,0,literalValue);
-			fancy_util_Dom.insertChildAtIndex(this.list,literalElement,this.getLiteralItemIndex());
+			fancy_search_util_Dom.insertChildAtIndex(this.list,literalElement,this.getLiteralItemIndex());
 			if(this.selected == "") this.selectItem(literalValue);
 		}
-		if(this.filtered.length == 0) fancy_util_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_util_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
+		if(this.filtered.length == 0) fancy_search_util_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_search_util_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
 	}
 	,open: function() {
 		this.isOpen = true;
-		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsClosed),this.classes.suggestionsOpen);
+		fancy_search_util_Dom.addClass(fancy_search_util_Dom.removeClass(this.el,this.classes.suggestionsClosed),this.classes.suggestionsOpen);
 	}
 	,close: function() {
 		this.isOpen = false;
 		this.selectItem();
-		fancy_util_Dom.addClass(fancy_util_Dom.removeClass(this.el,this.classes.suggestionsOpen),this.classes.suggestionsClosed);
+		fancy_search_util_Dom.addClass(fancy_search_util_Dom.removeClass(this.el,this.classes.suggestionsOpen),this.classes.suggestionsClosed);
 	}
 	,selectItem: function(key) {
 		if(key == null) key = "";
@@ -320,10 +320,10 @@ fancy_Suggestions.prototype = {
 				return thx_Iterators.map(_e,f);
 			};
 		})(this.elements.iterator()))(function(_) {
-			return fancy_util_Dom.removeClass(_,_g.classes.suggestionItemSelected);
+			return fancy_search_util_Dom.removeClass(_,_g.classes.suggestionItemSelected);
 		});
 		this.selected = key;
-		if(key != "" && this.elements.get(this.selected) != null) fancy_util_Dom.addClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
+		if(key != "" && this.elements.get(this.selected) != null) fancy_search_util_Dom.addClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
 	}
 	,moveSelectionUp: function() {
 		var currentIndex = HxOverrides.indexOf(this.filtered,this.selected,0);
@@ -341,26 +341,26 @@ fancy_Suggestions.prototype = {
 		this.opts.onChooseSelection(this.opts.input,this.selected);
 	}
 };
-var fancy_util_Dom = function() { };
-fancy_util_Dom.__name__ = true;
-fancy_util_Dom.hasClass = function(el,className) {
+var fancy_search_util_Dom = function() { };
+fancy_search_util_Dom.__name__ = true;
+fancy_search_util_Dom.hasClass = function(el,className) {
 	var regex = new EReg("(?:^|\\s)(" + className + ")(?!\\S)","g");
 	return regex.match(el.className);
 };
-fancy_util_Dom.addClass = function(el,className) {
-	if(!fancy_util_Dom.hasClass(el,className)) el.className += " " + className;
+fancy_search_util_Dom.addClass = function(el,className) {
+	if(!fancy_search_util_Dom.hasClass(el,className)) el.className += " " + className;
 	return el;
 };
-fancy_util_Dom.removeClass = function(el,className) {
+fancy_search_util_Dom.removeClass = function(el,className) {
 	var regex = new EReg("(?:^|\\s)(" + className + ")(?!\\S)","g");
 	el.className = regex.replace(el.className,"");
 	return el;
 };
-fancy_util_Dom.on = function(el,eventName,callback) {
+fancy_search_util_Dom.on = function(el,eventName,callback) {
 	el.addEventListener(eventName,callback);
 	return el;
 };
-fancy_util_Dom.create = function(name,attrs,children,textContent) {
+fancy_search_util_Dom.create = function(name,attrs,children,textContent) {
 	if(attrs == null) attrs = { };
 	if(children == null) children = [];
 	var classNames;
@@ -388,23 +388,23 @@ fancy_util_Dom.create = function(name,attrs,children,textContent) {
 	if(textContent != null) el.appendChild(window.document.createTextNode(textContent));
 	return el;
 };
-fancy_util_Dom.insertChildAtIndex = function(el,child,index) {
+fancy_search_util_Dom.insertChildAtIndex = function(el,child,index) {
 	el.insertBefore(child,el.children[index]);
 	return el;
 };
-fancy_util_Dom.empty = function(el) {
+fancy_search_util_Dom.empty = function(el) {
 	while(el.firstChild != null) el.removeChild(el.firstChild);
 	return el;
 };
-var fancy_util_Keys = function() { };
-fancy_util_Keys.__name__ = true;
-var fancy_util_LiteralPosition = { __ename__ : true, __constructs__ : ["First","Last"] };
-fancy_util_LiteralPosition.First = ["First",0];
-fancy_util_LiteralPosition.First.toString = $estr;
-fancy_util_LiteralPosition.First.__enum__ = fancy_util_LiteralPosition;
-fancy_util_LiteralPosition.Last = ["Last",1];
-fancy_util_LiteralPosition.Last.toString = $estr;
-fancy_util_LiteralPosition.Last.__enum__ = fancy_util_LiteralPosition;
+var fancy_search_util_Keys = function() { };
+fancy_search_util_Keys.__name__ = true;
+var fancy_search_util_LiteralPosition = { __ename__ : true, __constructs__ : ["First","Last"] };
+fancy_search_util_LiteralPosition.First = ["First",0];
+fancy_search_util_LiteralPosition.First.toString = $estr;
+fancy_search_util_LiteralPosition.First.__enum__ = fancy_search_util_LiteralPosition;
+fancy_search_util_LiteralPosition.Last = ["Last",1];
+fancy_search_util_LiteralPosition.Last.toString = $estr;
+fancy_search_util_LiteralPosition.Last.__enum__ = fancy_search_util_LiteralPosition;
 var haxe_IMap = function() { };
 haxe_IMap.__name__ = true;
 var haxe_ds_StringMap = function() {
@@ -740,10 +740,10 @@ var __map_reserved = {}
         };
       }
     ;
-fancy_util_Keys.TAB = 9;
-fancy_util_Keys.ENTER = 13;
-fancy_util_Keys.ESCAPE = 27;
-fancy_util_Keys.UP = 38;
-fancy_util_Keys.DOWN = 40;
+fancy_search_util_Keys.TAB = 9;
+fancy_search_util_Keys.ENTER = 13;
+fancy_search_util_Keys.ESCAPE = 27;
+fancy_search_util_Keys.UP = 38;
+fancy_search_util_Keys.DOWN = 40;
 Main.main();
 })(typeof console != "undefined" ? console : {log:function(){}});

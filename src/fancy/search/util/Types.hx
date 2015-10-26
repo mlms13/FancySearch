@@ -1,4 +1,4 @@
-package fancy.util;
+package fancy.search.util;
 
 import js.html.InputElement;
 
