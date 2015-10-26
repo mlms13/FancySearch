@@ -175,7 +175,7 @@ fancy_Search.prototype = {
 	}
 };
 var fancy_Suggestions = function(options,classes) {
-	if(options.parent == null || options.input == null) throw new js__$Boot_HaxeError("Cannot create Suggestions without input or parent element");
+	if(options.parent == null || options.input == null) throw new js__$Boot_HaxeError("Cannot create `Suggestions` without input or parent element");
 	this.classes = classes;
 	this.initializeOptions(options);
 	this.filtered = [];
@@ -531,9 +531,10 @@ js_Boot.__string_rec = function(o,s) {
 var thx_Arrays = function() { };
 thx_Arrays.__name__ = true;
 thx_Arrays.any = function(arr,predicate) {
-	var $it0 = HxOverrides.iter(arr);
-	while( $it0.hasNext() ) {
-		var element = $it0.next();
+	var _g = 0;
+	while(_g < arr.length) {
+		var element = arr[_g];
+		++_g;
 		if(predicate(element)) return true;
 	}
 	return false;
@@ -551,18 +552,18 @@ thx_Arrays.contains = function(array,element,eq) {
 };
 thx_Arrays.distinct = function(array,predicate) {
 	var result = [];
-	if(array.length <= 1) return thx__$ReadonlyArray_ReadonlyArray_$Impl_$.toArray(array);
+	if(array.length <= 1) return array;
 	if(null == predicate) predicate = thx_Functions.equality;
-	var $it0 = HxOverrides.iter(array);
-	while( $it0.hasNext() ) {
-		var v = $it0.next();
-		var v1 = [v];
-		var keep = !thx_Arrays.any(result,(function(v1) {
+	var _g = 0;
+	while(_g < array.length) {
+		var v = [array[_g]];
+		++_g;
+		var keep = !thx_Arrays.any(result,(function(v) {
 			return function(r) {
-				return predicate(r,v1[0]);
+				return predicate(r,v[0]);
 			};
-		})(v1));
-		if(keep) result.push(v1[0]);
+		})(v));
+		if(keep) result.push(v[0]);
 	}
 	return result;
 };
@@ -677,11 +678,6 @@ thx_StringOrderedMap.__name__ = true;
 thx_StringOrderedMap.__super__ = thx_OrderedMapImpl;
 thx_StringOrderedMap.prototype = $extend(thx_OrderedMapImpl.prototype,{
 });
-var thx__$ReadonlyArray_ReadonlyArray_$Impl_$ = {};
-thx__$ReadonlyArray_ReadonlyArray_$Impl_$.__name__ = true;
-thx__$ReadonlyArray_ReadonlyArray_$Impl_$.toArray = function(this1) {
-	return this1.slice();
-};
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {

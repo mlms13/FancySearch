@@ -27,8 +27,8 @@ using fancy.util.Dom;
   ```
 **/
 class Search {
-  public var list : Suggestions;
-  var input : InputElement;
+  public var list(default, null) : Suggestions;
+  public var input(default, null) : InputElement;
   var clearBtn : Element;
   var opts : FancySearchOptions;
   var keys : FancySearchKeyboardShortcuts;
