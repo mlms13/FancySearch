@@ -1,11 +1,11 @@
 {
-  "name": "fancy",
+  "name": "fancysearch",
   "url" : "https://github.com/mlms13/FancySearch",
   "license" : "MIT",
   "classPath" : "src",
   "tags" : ["browser", "js", "search", "typeahead"],
-  "description" : "",
+  "description" : "A simple typeahead search implementation for Haxe and JavaScript",
   "releasenote" : "",
-  "version" : "1.0.0-alpha",
+  "version" : "1.0.0-alpha.2",
   "contributors" : ["mlms13"]
 }

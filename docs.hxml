@@ -6,6 +6,6 @@
 -D dox
 -dce no
 --no-output
-ImportFancy
+ImportFancySearch
 -xml docs/xml/fancy.xml
 -js _
