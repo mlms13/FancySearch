@@ -33,6 +33,12 @@ class Suggestions {
     create an instance of `Suggestions` directly.
   **/
   public function new(options : SuggestionOptions, classes : FancySearchClassNames) {
+    // `Search` should really provide these things, but they aren't actually
+    // required when `Search` is being given its options.
+    if (options.parent == null || options.input == null) {
+      throw "Cannot create `Suggestions` without input or parent element";
+    }
+
     // defaults
     this.classes = classes;
     initializeOptions(options);

@@ -78,6 +78,7 @@ Reflect.field = function(o,field) {
 	try {
 		return o[field];
 	} catch( e ) {
+		if (e instanceof js__$Boot_HaxeError) e = e.val;
 		return null;
 	}
 };
@@ -174,6 +175,7 @@ fancy_Search.prototype = {
 	}
 };
 var fancy_Suggestions = function(options,classes) {
+	if(options.parent == null || options.input == null) throw new js__$Boot_HaxeError("Cannot create Suggestions without input or parent element");
 	this.classes = classes;
 	this.initializeOptions(options);
 	this.filtered = [];
@@ -446,6 +448,16 @@ haxe_ds_StringMap.prototype = {
 		}
 	}
 };
+var js__$Boot_HaxeError = function(val) {
+	Error.call(this);
+	this.val = val;
+	this.message = String(val);
+	if(Error.captureStackTrace) Error.captureStackTrace(this,js__$Boot_HaxeError);
+};
+js__$Boot_HaxeError.__name__ = true;
+js__$Boot_HaxeError.__super__ = Error;
+js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
+});
 var js_Boot = function() { };
 js_Boot.__name__ = true;
 js_Boot.__string_rec = function(o,s) {
@@ -484,6 +496,7 @@ js_Boot.__string_rec = function(o,s) {
 		try {
 			tostr = o.toString;
 		} catch( e ) {
+			if (e instanceof js__$Boot_HaxeError) e = e.val;
 			return "???";
 		}
 		if(tostr != null && tostr != Object.toString && typeof(tostr) == "function") {
