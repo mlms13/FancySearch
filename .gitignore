@@ -1,3 +1,6 @@
 docs/xml
 node_modules/
 *.zip
+
+# ignore dist for now
+dist/

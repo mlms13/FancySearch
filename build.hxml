@@ -2,5 +2,11 @@
 -cp demo
 -lib thx.core
 -main Main
--js bin/demo.js
 -dce full
+
+--each
+-js bin/demo.js
+
+--next
+-D shallow-expose
+-js dist/fancysearch.js

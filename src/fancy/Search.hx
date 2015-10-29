@@ -27,6 +27,7 @@ using fancy.search.util.Dom;
   myFancySearch.list;
   ```
 **/
+@:expose
 class Search {
   public var list(default, null) : Suggestions;
   public var input(default, null) : InputElement;
