@@ -1,12 +1,13 @@
 -cp src
 -cp demo
 -lib thx.core
--main Main
 -dce full
 
 --each
+-main Main
 -js bin/demo.js
 
 --next
 -D shallow-expose
+fancy.Search
 -js dist/fancysearch.js
