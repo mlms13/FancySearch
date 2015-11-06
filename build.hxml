@@ -1,6 +1,7 @@
 -cp src
 -cp demo
 -lib thx.core
+-lib fancybrowser
 -dce full
 
 --each

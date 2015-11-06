@@ -2,7 +2,7 @@ package fancy.search;
 
 import js.html.Element;
 import js.html.InputElement;
-using fancy.search.util.Dom;
+using fancy.browser.Dom;
 import fancy.search.util.Types;
 using thx.Arrays;
 using thx.Functions;

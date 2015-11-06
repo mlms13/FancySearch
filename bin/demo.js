@@ -122,17 +122,17 @@ var fancy_Search = function(el,options) {
 	if(this.opts.suggestionOptions.input == null) this.opts.suggestionOptions.input = this.input;
 	if(this.opts.suggestionOptions.parent == null) this.opts.suggestionOptions.parent = this.opts.container;
 	this.opts.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},this.opts.classes);
-	this.keys = thx_Objects.combine({ closeMenu : [fancy_search_util_Keys.ESCAPE], selectionUp : [fancy_search_util_Keys.UP], selectionDown : [fancy_search_util_Keys.DOWN,fancy_search_util_Keys.TAB], selectionChoose : [fancy_search_util_Keys.ENTER]},this.opts.keys);
-	this.clearBtn = fancy_search_util_Dom.create("button." + this.opts.classes.clearButton,null,null,"×");
-	fancy_search_util_Dom.on(this.clearBtn,"mousedown",this.opts.onClearButtonClick);
+	this.keys = thx_Objects.combine({ closeMenu : [fancy_browser_Keys.ESCAPE], selectionUp : [fancy_browser_Keys.UP], selectionDown : [fancy_browser_Keys.DOWN,fancy_browser_Keys.TAB], selectionChoose : [fancy_browser_Keys.ENTER]},this.opts.keys);
+	this.clearBtn = fancy_browser_Dom.create("button." + this.opts.classes.clearButton,null,null,"×");
+	fancy_browser_Dom.on(this.clearBtn,"mousedown",this.opts.onClearButtonClick);
 	if(this.opts.clearBtn) this.opts.container.appendChild(this.clearBtn);
 	this.list = new fancy_search_Suggestions(this.opts.suggestionOptions,this.opts.classes);
-	fancy_search_util_Dom.addClass(this.input,this.opts.classes.input);
-	if(this.input.value.length < 1) fancy_search_util_Dom.addClass(this.input,this.opts.classes.inputEmpty);
-	fancy_search_util_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
-	fancy_search_util_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
-	fancy_search_util_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
-	fancy_search_util_Dom.on(this.input,"keydown",$bind(this,this.onSearchKeydown));
+	fancy_browser_Dom.addClass(this.input,this.opts.classes.input);
+	if(this.input.value.length < 1) fancy_browser_Dom.addClass(this.input,this.opts.classes.inputEmpty);
+	fancy_browser_Dom.on(this.input,"focus",$bind(this,this.onSearchFocus));
+	fancy_browser_Dom.on(this.input,"blur",$bind(this,this.onSearchBlur));
+	fancy_browser_Dom.on(this.input,"input",$bind(this,this.onSearchInput));
+	fancy_browser_Dom.on(this.input,"keydown",$bind(this,this.onSearchKeydown));
 };
 fancy_Search.__name__ = true;
 fancy_Search.createFromSelector = function(selector,options) {
@@ -151,7 +151,7 @@ fancy_Search.prototype = {
 		if(this.input.value.length >= this.opts.minLength) this.list.open(); else this.list.close();
 	}
 	,checkEmptyStatus: function() {
-		if(this.input.value.length > 0) fancy_search_util_Dom.removeClass(this.input,this.opts.classes.inputEmpty); else fancy_search_util_Dom.addClass(this.input,this.opts.classes.inputEmpty);
+		if(this.input.value.length > 0) fancy_browser_Dom.removeClass(this.input,this.opts.classes.inputEmpty); else fancy_browser_Dom.addClass(this.input,this.opts.classes.inputEmpty);
 	}
 	,onSearchInput: function(e) {
 		this.checkEmptyStatus();
@@ -174,6 +174,63 @@ fancy_Search.prototype = {
 		this.filterUsingInputValue();
 	}
 };
+var fancy_browser_Dom = function() { };
+fancy_browser_Dom.__name__ = true;
+fancy_browser_Dom.hasClass = function(el,className) {
+	var regex = new EReg("(?:^|\\s)(" + className + ")(?!\\S)","g");
+	return regex.match(el.className);
+};
+fancy_browser_Dom.addClass = function(el,className) {
+	if(!fancy_browser_Dom.hasClass(el,className)) el.className += " " + className;
+	return el;
+};
+fancy_browser_Dom.removeClass = function(el,className) {
+	var regex = new EReg("(?:^|\\s)(" + className + ")(?!\\S)","g");
+	el.className = regex.replace(el.className,"");
+	return el;
+};
+fancy_browser_Dom.on = function(el,eventName,callback) {
+	el.addEventListener(eventName,callback);
+	return el;
+};
+fancy_browser_Dom.create = function(name,attrs,children,textContent) {
+	if(attrs == null) attrs = { };
+	if(children == null) children = [];
+	var classNames;
+	if(Object.prototype.hasOwnProperty.call(attrs,"class")) classNames = Reflect.field(attrs,"class"); else classNames = "";
+	var nameParts = name.split(".");
+	name = nameParts.shift();
+	if(nameParts.length > 0) classNames += " " + nameParts.join(" ");
+	var el = window.document.createElement(name);
+	var _g = 0;
+	var _g1 = Reflect.fields(attrs);
+	while(_g < _g1.length) {
+		var att = _g1[_g];
+		++_g;
+		console.log(att);
+		console.log(Reflect.field(attrs,att));
+		el.setAttribute(att,Reflect.field(attrs,att));
+	}
+	el.className = classNames;
+	var _g2 = 0;
+	while(_g2 < children.length) {
+		var child = children[_g2];
+		++_g2;
+		el.appendChild(child);
+	}
+	if(textContent != null) el.appendChild(window.document.createTextNode(textContent));
+	return el;
+};
+fancy_browser_Dom.insertChildAtIndex = function(el,child,index) {
+	el.insertBefore(child,el.children[index]);
+	return el;
+};
+fancy_browser_Dom.empty = function(el) {
+	while(el.firstChild != null) el.removeChild(el.firstChild);
+	return el;
+};
+var fancy_browser_Keys = function() { };
+fancy_browser_Keys.__name__ = true;
 var fancy_search_Suggestions = function(options,classes) {
 	if(options.parent == null || options.input == null) throw new js__$Boot_HaxeError("Cannot create `Suggestions` without input or parent element");
 	this.classes = classes;
@@ -181,8 +238,8 @@ var fancy_search_Suggestions = function(options,classes) {
 	this.filtered = [];
 	this.selected = "";
 	this.isOpen = false;
-	this.list = fancy_search_util_Dom.create("ul." + classes.suggestionList);
-	this.el = fancy_search_util_Dom.create("div." + classes.suggestionContainer + "." + classes.suggestionsClosed,null,[this.list]);
+	this.list = fancy_browser_Dom.create("ul." + classes.suggestionList);
+	this.el = fancy_browser_Dom.create("div." + classes.suggestionContainer + "." + classes.suggestionsClosed,null,[this.list]);
 	this.opts.parent.appendChild(this.el);
 	this.setSuggestions(this.opts.suggestions);
 };
@@ -222,8 +279,8 @@ fancy_search_Suggestions.prototype = {
 	,createSuggestionItem: function(label,value) {
 		var _g = this;
 		if(value == null) value = label;
-		var el = fancy_search_util_Dom.create("li." + this.classes.suggestionItem,null,null,label);
-		return fancy_search_util_Dom.on(fancy_search_util_Dom.on(fancy_search_util_Dom.on(el,"mouseover",function(_) {
+		var el = fancy_browser_Dom.create("li." + this.classes.suggestionItem,null,null,label);
+		return fancy_browser_Dom.on(fancy_browser_Dom.on(fancy_browser_Dom.on(el,"mouseover",function(_) {
 			_g.selectItem(value);
 		}),"mousedown",function(_1) {
 			_g.chooseSelectedItem();
@@ -259,7 +316,7 @@ fancy_search_Suggestions.prototype = {
 	,setSuggestions: function(s) {
 		var _g = this;
 		this.opts.suggestions = thx_Arrays.distinct(s);
-		fancy_search_util_Dom.empty(this.list);
+		fancy_browser_Dom.empty(this.list);
 		this.elements = thx_Arrays.reduce(this.opts.suggestions,function(acc,curr) {
 			acc.set(curr,_g.createSuggestionItem(curr));
 			return acc;
@@ -277,7 +334,7 @@ fancy_search_Suggestions.prototype = {
 		this.filtered = this.opts.filterFn(this.opts.suggestions,search).slice(0,this.opts.limit);
 		var wordParts = this.opts.highlightLettersFn(this.filtered.slice(),search);
 		thx_Arrays.reducei(this.filtered,function(list,str,index) {
-			var listItem = fancy_search_util_Dom.empty(_g.elements.get(str));
+			var listItem = fancy_browser_Dom.empty(_g.elements.get(str));
 			((function(_e) {
 				return function(sort) {
 					return thx_Arrays.order(_e,sort);
@@ -285,32 +342,32 @@ fancy_search_Suggestions.prototype = {
 			})(wordParts[index]))(function(_0,_1) {
 				return _0._1 - _1._1;
 			}).map(function(range) {
-				if(range._0 != 0) listItem.appendChild(fancy_search_util_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
-				if(range._1 > 0) listItem.appendChild(fancy_search_util_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
-				if(range._0 + range._1 < str.length) listItem.appendChild(fancy_search_util_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
+				if(range._0 != 0) listItem.appendChild(fancy_browser_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
+				if(range._1 > 0) listItem.appendChild(fancy_browser_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
+				if(range._0 + range._1 < str.length) listItem.appendChild(fancy_browser_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
 			});
 			list.appendChild(listItem);
 			return list;
-		},fancy_search_util_Dom.empty(this.list));
+		},fancy_browser_Dom.empty(this.list));
 		if(!thx_Arrays.contains(this.filtered,this.selected)) this.selected = "";
 		if(search != "" && this.createLiteralItem()) {
 			var literalValue = StringTools.trim(this.opts.searchLiteralValue(this.opts.input));
 			var literalElement = this.elements.get(literalValue);
 			var pos = this.getLiteralItemIndex();
 			this.filtered.splice(pos,0,literalValue);
-			fancy_search_util_Dom.insertChildAtIndex(this.list,literalElement,this.getLiteralItemIndex());
+			fancy_browser_Dom.insertChildAtIndex(this.list,literalElement,this.getLiteralItemIndex());
 			if(this.selected == "") this.selectItem(literalValue);
 		}
-		if(this.filtered.length == 0) fancy_search_util_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_search_util_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
+		if(this.filtered.length == 0) fancy_browser_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_browser_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
 	}
 	,open: function() {
 		this.isOpen = true;
-		fancy_search_util_Dom.addClass(fancy_search_util_Dom.removeClass(this.el,this.classes.suggestionsClosed),this.classes.suggestionsOpen);
+		fancy_browser_Dom.addClass(fancy_browser_Dom.removeClass(this.el,this.classes.suggestionsClosed),this.classes.suggestionsOpen);
 	}
 	,close: function() {
 		this.isOpen = false;
 		this.selectItem();
-		fancy_search_util_Dom.addClass(fancy_search_util_Dom.removeClass(this.el,this.classes.suggestionsOpen),this.classes.suggestionsClosed);
+		fancy_browser_Dom.addClass(fancy_browser_Dom.removeClass(this.el,this.classes.suggestionsOpen),this.classes.suggestionsClosed);
 	}
 	,selectItem: function(key) {
 		if(key == null) key = "";
@@ -320,10 +377,10 @@ fancy_search_Suggestions.prototype = {
 				return thx_Iterators.map(_e,f);
 			};
 		})(this.elements.iterator()))(function(_) {
-			return fancy_search_util_Dom.removeClass(_,_g.classes.suggestionItemSelected);
+			return fancy_browser_Dom.removeClass(_,_g.classes.suggestionItemSelected);
 		});
 		this.selected = key;
-		if(key != "" && this.elements.get(this.selected) != null) fancy_search_util_Dom.addClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
+		if(key != "" && this.elements.get(this.selected) != null) fancy_browser_Dom.addClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
 	}
 	,moveSelectionUp: function() {
 		var currentIndex = HxOverrides.indexOf(this.filtered,this.selected,0);
@@ -341,63 +398,6 @@ fancy_search_Suggestions.prototype = {
 		this.opts.onChooseSelection(this.opts.input,this.selected);
 	}
 };
-var fancy_search_util_Dom = function() { };
-fancy_search_util_Dom.__name__ = true;
-fancy_search_util_Dom.hasClass = function(el,className) {
-	var regex = new EReg("(?:^|\\s)(" + className + ")(?!\\S)","g");
-	return regex.match(el.className);
-};
-fancy_search_util_Dom.addClass = function(el,className) {
-	if(!fancy_search_util_Dom.hasClass(el,className)) el.className += " " + className;
-	return el;
-};
-fancy_search_util_Dom.removeClass = function(el,className) {
-	var regex = new EReg("(?:^|\\s)(" + className + ")(?!\\S)","g");
-	el.className = regex.replace(el.className,"");
-	return el;
-};
-fancy_search_util_Dom.on = function(el,eventName,callback) {
-	el.addEventListener(eventName,callback);
-	return el;
-};
-fancy_search_util_Dom.create = function(name,attrs,children,textContent) {
-	if(attrs == null) attrs = { };
-	if(children == null) children = [];
-	var classNames;
-	if(Object.prototype.hasOwnProperty.call(attrs,"class")) classNames = Reflect.field(attrs,"class"); else classNames = "";
-	var nameParts = name.split(".");
-	name = nameParts.shift();
-	if(nameParts.length > 0) classNames += " " + nameParts.join(" ");
-	var el = window.document.createElement(name);
-	var _g = 0;
-	var _g1 = Reflect.fields(attrs);
-	while(_g < _g1.length) {
-		var att = _g1[_g];
-		++_g;
-		console.log(att);
-		console.log(Reflect.field(attrs,att));
-		el.setAttribute(att,Reflect.field(attrs,att));
-	}
-	el.className = classNames;
-	var _g2 = 0;
-	while(_g2 < children.length) {
-		var child = children[_g2];
-		++_g2;
-		el.appendChild(child);
-	}
-	if(textContent != null) el.appendChild(window.document.createTextNode(textContent));
-	return el;
-};
-fancy_search_util_Dom.insertChildAtIndex = function(el,child,index) {
-	el.insertBefore(child,el.children[index]);
-	return el;
-};
-fancy_search_util_Dom.empty = function(el) {
-	while(el.firstChild != null) el.removeChild(el.firstChild);
-	return el;
-};
-var fancy_search_util_Keys = function() { };
-fancy_search_util_Keys.__name__ = true;
 var fancy_search_util_LiteralPosition = { __ename__ : true, __constructs__ : ["First","Last"] };
 fancy_search_util_LiteralPosition.First = ["First",0];
 fancy_search_util_LiteralPosition.First.toString = $estr;
@@ -531,9 +531,10 @@ js_Boot.__string_rec = function(o,s) {
 var thx_Arrays = function() { };
 thx_Arrays.__name__ = true;
 thx_Arrays.any = function(arr,predicate) {
-	var $it0 = HxOverrides.iter(arr);
-	while( $it0.hasNext() ) {
-		var element = $it0.next();
+	var _g = 0;
+	while(_g < arr.length) {
+		var element = arr[_g];
+		++_g;
 		if(predicate(element)) return true;
 	}
 	return false;
@@ -551,18 +552,18 @@ thx_Arrays.contains = function(array,element,eq) {
 };
 thx_Arrays.distinct = function(array,predicate) {
 	var result = [];
-	if(array.length <= 1) return thx__$ReadonlyArray_ReadonlyArray_$Impl_$.toArray(array);
+	if(array.length <= 1) return array;
 	if(null == predicate) predicate = thx_Functions.equality;
-	var $it0 = HxOverrides.iter(array);
-	while( $it0.hasNext() ) {
-		var v = $it0.next();
-		var v1 = [v];
-		var keep = !thx_Arrays.any(result,(function(v1) {
+	var _g = 0;
+	while(_g < array.length) {
+		var v = [array[_g]];
+		++_g;
+		var keep = !thx_Arrays.any(result,(function(v) {
 			return function(r) {
-				return predicate(r,v1[0]);
+				return predicate(r,v[0]);
 			};
-		})(v1));
-		if(keep) result.push(v1[0]);
+		})(v));
+		if(keep) result.push(v[0]);
 	}
 	return result;
 };
@@ -677,11 +678,6 @@ thx_StringOrderedMap.__name__ = true;
 thx_StringOrderedMap.__super__ = thx_OrderedMapImpl;
 thx_StringOrderedMap.prototype = $extend(thx_OrderedMapImpl.prototype,{
 });
-var thx__$ReadonlyArray_ReadonlyArray_$Impl_$ = {};
-thx__$ReadonlyArray_ReadonlyArray_$Impl_$.__name__ = true;
-thx__$ReadonlyArray_ReadonlyArray_$Impl_$.toArray = function(this1) {
-	return this1.slice();
-};
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
@@ -744,10 +740,10 @@ var __map_reserved = {}
         };
       }
     ;
-fancy_search_util_Keys.TAB = 9;
-fancy_search_util_Keys.ENTER = 13;
-fancy_search_util_Keys.ESCAPE = 27;
-fancy_search_util_Keys.UP = 38;
-fancy_search_util_Keys.DOWN = 40;
+fancy_browser_Keys.TAB = 9;
+fancy_browser_Keys.ENTER = 13;
+fancy_browser_Keys.ESCAPE = 27;
+fancy_browser_Keys.UP = 38;
+fancy_browser_Keys.DOWN = 40;
 Main.main();
 })(typeof console != "undefined" ? console : {log:function(){}});

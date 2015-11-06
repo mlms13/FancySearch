@@ -4,13 +4,13 @@ import js.html.Element;
 import js.html.InputElement;
 import js.html.Event;
 import js.html.KeyboardEvent;
-import fancy.search.util.Keys;
+import fancy.browser.Keys;
 import fancy.search.util.Types;
 import fancy.search.*;
 
 using thx.Objects;
 using thx.Arrays;
-using fancy.search.util.Dom;
+using fancy.browser.Dom;
 
 /**
   The `Search` class is the main entry point. It wires up event handlers along
