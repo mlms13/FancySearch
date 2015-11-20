@@ -1,6 +1,6 @@
 {
-  "name": "FancySearch",
-  "version": "0.0.1",
+  "name": "fancysearch",
+  "version": "1.0.0-beta1",
   "description": "",
   "main": "demo/demo.js",
   "bin": {
