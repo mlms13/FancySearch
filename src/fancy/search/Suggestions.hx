@@ -49,7 +49,7 @@ class Suggestions {
     // create all elements and set initial suggestions
     list = Dom.create('ul.${classes.suggestionList}');
     el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [list]);
-    opts.parent.appendChild(el);
+    opts.parent.append(el);
 
     setSuggestions(opts.suggestions);
   }
@@ -139,7 +139,7 @@ class Suggestions {
     filtered = opts.filterFn(opts.suggestions, search).slice(0, opts.limit);
     var wordParts = opts.highlightLettersFn(filtered.copy(), search);
 
-    filtered.reducei(function (list, str, index) {
+    filtered.reducei(function (list : Element, str, index) {
       var listItem = elements.get(str).empty();
 
       // each filtered word has an array of ranges to highlight
@@ -149,18 +149,18 @@ class Suggestions {
       wordParts[index].order.fn(_0.right - _1.right).map(function (range) {
         // if the highlighted range isn't at the beginning, span it
         if (range.left != 0)
-          listItem.appendChild(Dom.create('span', str.substr(0, range.left)));
+          listItem.append(Dom.create('span', str.substr(0, range.left)));
 
         // if the range to highlight has a non-zero length, strong it
         if (range.right > 0)
-          listItem.appendChild(Dom.create('strong', str.substr(range.left, range.right)));
+          listItem.append(Dom.create('strong', str.substr(range.left, range.right)));
 
         // if the range didn't end at the end of the string, span the rest
         if (range.left + range.right < str.length)
-          listItem.appendChild(Dom.create('span', str.substr(range.right + range.left)));
+          listItem.append(Dom.create('span', str.substr(range.right + range.left)));
       });
 
-      list.appendChild(listItem);
+      list.append(listItem);
       return list;
     }, list.empty());
 
@@ -175,7 +175,7 @@ class Suggestions {
       literalElement = elements.get(literalValue);
 
       filtered.insert(getLiteralItemIndex(), literalValue);
-      list.insertChildAtIndex(literalElement, getLiteralItemIndex());
+      list.insertAtIndex(literalElement, getLiteralItemIndex());
       if (selected == "") selectItem(literalValue);
     }
 

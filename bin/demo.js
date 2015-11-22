@@ -125,7 +125,7 @@ var fancy_Search = function(el,options) {
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_browser_Keys.ESCAPE], selectionUp : [fancy_browser_Keys.UP], selectionDown : [fancy_browser_Keys.DOWN,fancy_browser_Keys.TAB], selectionChoose : [fancy_browser_Keys.ENTER]},this.opts.keys);
 	this.clearBtn = fancy_browser_Dom.create("button." + this.opts.classes.clearButton,null,null,"×");
 	fancy_browser_Dom.on(this.clearBtn,"mousedown",this.opts.onClearButtonClick);
-	if(this.opts.clearBtn) this.opts.container.appendChild(this.clearBtn);
+	if(this.opts.clearBtn) fancy_browser_Dom.append(this.opts.container,this.clearBtn);
 	this.list = new fancy_search_Suggestions(this.opts.suggestionOptions,this.opts.classes);
 	fancy_browser_Dom.addClass(this.input,this.opts.classes.input);
 	if(this.input.value.length < 1) fancy_browser_Dom.addClass(this.input,this.opts.classes.inputEmpty);
@@ -207,8 +207,6 @@ fancy_browser_Dom.create = function(name,attrs,children,textContent) {
 	while(_g < _g1.length) {
 		var att = _g1[_g];
 		++_g;
-		console.log(att);
-		console.log(Reflect.field(attrs,att));
 		el.setAttribute(att,Reflect.field(attrs,att));
 	}
 	el.className = classNames;
@@ -221,9 +219,20 @@ fancy_browser_Dom.create = function(name,attrs,children,textContent) {
 	if(textContent != null) el.appendChild(window.document.createTextNode(textContent));
 	return el;
 };
-fancy_browser_Dom.insertChildAtIndex = function(el,child,index) {
+fancy_browser_Dom.insertAtIndex = function(el,child,index) {
 	el.insertBefore(child,el.children[index]);
 	return el;
+};
+fancy_browser_Dom.appendChild = function(el,child) {
+	el.appendChild(child);
+	return el;
+};
+fancy_browser_Dom.appendChildren = function(el,children) {
+	return children.reduce(fancy_browser_Dom.appendChild,el);
+};
+fancy_browser_Dom.append = function(el,child,children) {
+	if(child != null) fancy_browser_Dom.appendChild(el,child);
+	return fancy_browser_Dom.appendChildren(el,children != null?children:[]);
 };
 fancy_browser_Dom.empty = function(el) {
 	while(el.firstChild != null) el.removeChild(el.firstChild);
@@ -240,7 +249,7 @@ var fancy_search_Suggestions = function(options,classes) {
 	this.isOpen = false;
 	this.list = fancy_browser_Dom.create("ul." + classes.suggestionList);
 	this.el = fancy_browser_Dom.create("div." + classes.suggestionContainer + "." + classes.suggestionsClosed,null,[this.list]);
-	this.opts.parent.appendChild(this.el);
+	fancy_browser_Dom.append(this.opts.parent,this.el);
 	this.setSuggestions(this.opts.suggestions);
 };
 fancy_search_Suggestions.__name__ = true;
@@ -342,11 +351,11 @@ fancy_search_Suggestions.prototype = {
 			})(wordParts[index]))(function(_0,_1) {
 				return _0._1 - _1._1;
 			}).map(function(range) {
-				if(range._0 != 0) listItem.appendChild(fancy_browser_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
-				if(range._1 > 0) listItem.appendChild(fancy_browser_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
-				if(range._0 + range._1 < str.length) listItem.appendChild(fancy_browser_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
+				if(range._0 != 0) fancy_browser_Dom.append(listItem,fancy_browser_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
+				if(range._1 > 0) fancy_browser_Dom.append(listItem,fancy_browser_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
+				if(range._0 + range._1 < str.length) fancy_browser_Dom.append(listItem,fancy_browser_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
 			});
-			list.appendChild(listItem);
+			fancy_browser_Dom.append(list,listItem);
 			return list;
 		},fancy_browser_Dom.empty(this.list));
 		if(!thx_Arrays.contains(this.filtered,this.selected)) this.selected = "";
@@ -355,7 +364,7 @@ fancy_search_Suggestions.prototype = {
 			var literalElement = this.elements.get(literalValue);
 			var pos = this.getLiteralItemIndex();
 			this.filtered.splice(pos,0,literalValue);
-			fancy_browser_Dom.insertChildAtIndex(this.list,literalElement,this.getLiteralItemIndex());
+			fancy_browser_Dom.insertAtIndex(this.list,literalElement,this.getLiteralItemIndex());
 			if(this.selected == "") this.selectItem(literalValue);
 		}
 		if(this.filtered.length == 0) fancy_browser_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_browser_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
@@ -531,10 +540,9 @@ js_Boot.__string_rec = function(o,s) {
 var thx_Arrays = function() { };
 thx_Arrays.__name__ = true;
 thx_Arrays.any = function(arr,predicate) {
-	var _g = 0;
-	while(_g < arr.length) {
-		var element = arr[_g];
-		++_g;
+	var $it0 = HxOverrides.iter(arr);
+	while( $it0.hasNext() ) {
+		var element = $it0.next();
 		if(predicate(element)) return true;
 	}
 	return false;
@@ -552,18 +560,18 @@ thx_Arrays.contains = function(array,element,eq) {
 };
 thx_Arrays.distinct = function(array,predicate) {
 	var result = [];
-	if(array.length <= 1) return array;
+	if(array.length <= 1) return thx__$ReadonlyArray_ReadonlyArray_$Impl_$.toArray(array);
 	if(null == predicate) predicate = thx_Functions.equality;
-	var _g = 0;
-	while(_g < array.length) {
-		var v = [array[_g]];
-		++_g;
-		var keep = !thx_Arrays.any(result,(function(v) {
+	var $it0 = HxOverrides.iter(array);
+	while( $it0.hasNext() ) {
+		var v = $it0.next();
+		var v1 = [v];
+		var keep = !thx_Arrays.any(result,(function(v1) {
 			return function(r) {
-				return predicate(r,v[0]);
+				return predicate(r,v1[0]);
 			};
-		})(v));
-		if(keep) result.push(v[0]);
+		})(v1));
+		if(keep) result.push(v1[0]);
 	}
 	return result;
 };
@@ -678,6 +686,11 @@ thx_StringOrderedMap.__name__ = true;
 thx_StringOrderedMap.__super__ = thx_OrderedMapImpl;
 thx_StringOrderedMap.prototype = $extend(thx_OrderedMapImpl.prototype,{
 });
+var thx__$ReadonlyArray_ReadonlyArray_$Impl_$ = {};
+thx__$ReadonlyArray_ReadonlyArray_$Impl_$.__name__ = true;
+thx__$ReadonlyArray_ReadonlyArray_$Impl_$.toArray = function(this1) {
+	return this1.slice();
+};
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {

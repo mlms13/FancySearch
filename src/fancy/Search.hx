@@ -85,7 +85,7 @@ class Search {
     clearBtn.on('mousedown', opts.onClearButtonClick);
 
     if (opts.clearBtn) {
-      opts.container.appendChild(clearBtn);
+      opts.container.append(clearBtn);
     }
 
     list = new Suggestions(opts.suggestionOptions, opts.classes);
