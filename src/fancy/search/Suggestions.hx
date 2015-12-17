@@ -115,7 +115,6 @@ class Suggestions {
   **/
   public function setSuggestions(s : Array<String>) {
     opts.suggestions = s.distinct();
-    list.empty();
 
     elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
       acc.set(curr, createSuggestionItem(curr));
@@ -123,6 +122,9 @@ class Suggestions {
     }, OrderedMap.createString());
 
     createLiteralItem(false);
+
+    if (isOpen)
+      filter(opts.input.value);
   }
 
   /**
