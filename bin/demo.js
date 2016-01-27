@@ -127,7 +127,7 @@ var fancy_Search = function(el,options) {
 	this.opts = thx_Objects.combine({ classes : { }, keys : { }, minLength : 1, clearBtn : true, container : this.input.parentElement, onClearButtonClick : $bind(this,this.onClearButtonClick), suggestionOptions : { }},options);
 	if(this.opts.suggestionOptions.input == null) this.opts.suggestionOptions.input = this.input;
 	if(this.opts.suggestionOptions.parent == null) this.opts.suggestionOptions.parent = this.opts.container;
-	this.opts.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},this.opts.classes);
+	this.opts.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", inputLoading : "fs-input-loading", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},this.opts.classes);
 	this.keys = thx_Objects.combine({ closeMenu : [fancy_browser_Keys.ESCAPE], selectionUp : [fancy_browser_Keys.UP], selectionDown : [fancy_browser_Keys.DOWN,fancy_browser_Keys.TAB], selectionChoose : [fancy_browser_Keys.ENTER]},this.opts.keys);
 	this.clearBtn = fancy_browser_Dom.create("button." + this.opts.classes.clearButton,null,null,"×");
 	fancy_browser_Dom.on(this.clearBtn,"mousedown",this.opts.onClearButtonClick);
@@ -160,8 +160,15 @@ fancy_Search.prototype = {
 		if(this.input.value.length > 0) fancy_browser_Dom.removeClass(this.input,this.opts.classes.inputEmpty); else fancy_browser_Dom.addClass(this.input,this.opts.classes.inputEmpty);
 	}
 	,onSearchInput: function(e) {
+		var _g = this;
 		this.checkEmptyStatus();
 		this.filterUsingInputValue();
+		if(this.opts.populateSuggestions != null) {
+			fancy_browser_Dom.addClass(this.input,this.opts.classes.inputLoading);
+			thx_promise__$Promise_Promise_$Impl_$.always(thx_promise__$Promise_Promise_$Impl_$.success(this.opts.populateSuggestions(this.input.value),($_=this.list,$bind($_,$_.setSuggestions))),function() {
+				fancy_browser_Dom.removeClass(_g.input,_g.opts.classes.inputLoading);
+			});
+		}
 	}
 	,onSearchKeydown: function(e) {
 		var code;
@@ -201,26 +208,23 @@ fancy_browser_Dom.on = function(el,eventName,callback) {
 	return el;
 };
 fancy_browser_Dom.create = function(name,attrs,children,textContent) {
-	if(attrs == null) attrs = { };
+	if(attrs == null) attrs = new haxe_ds_StringMap();
 	if(children == null) children = [];
 	var classNames;
-	if(Object.prototype.hasOwnProperty.call(attrs,"class")) classNames = Reflect.field(attrs,"class"); else classNames = "";
+	if(__map_reserved["class"] != null?attrs.existsReserved("class"):attrs.h.hasOwnProperty("class")) classNames = __map_reserved["class"] != null?attrs.getReserved("class"):attrs.h["class"]; else classNames = "";
 	var nameParts = name.split(".");
 	name = nameParts.shift();
 	if(nameParts.length > 0) classNames += " " + nameParts.join(" ");
 	var el = window.document.createElement(name);
-	var _g = 0;
-	var _g1 = Reflect.fields(attrs);
-	while(_g < _g1.length) {
-		var att = _g1[_g];
-		++_g;
-		el.setAttribute(att,Reflect.field(attrs,att));
-	}
+	thx_Iterators.reduce(attrs.keys(),function(acc,key) {
+		acc.setAttribute(key,__map_reserved[key] != null?attrs.getReserved(key):attrs.h[key]);
+		return acc;
+	},el);
 	el.className = classNames;
-	var _g2 = 0;
-	while(_g2 < children.length) {
-		var child = children[_g2];
-		++_g2;
+	var _g = 0;
+	while(_g < children.length) {
+		var child = children[_g];
+		++_g;
 		el.appendChild(child);
 	}
 	if(textContent != null) el.appendChild(window.document.createTextNode(textContent));
@@ -427,6 +431,11 @@ haxe_IMap.__name__ = true;
 haxe_IMap.prototype = {
 	__class__: haxe_IMap
 };
+var haxe_ds_Option = { __ename__ : true, __constructs__ : ["Some","None"] };
+haxe_ds_Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe_ds_Option; $x.toString = $estr; return $x; };
+haxe_ds_Option.None = ["None",1];
+haxe_ds_Option.None.toString = $estr;
+haxe_ds_Option.None.__enum__ = haxe_ds_Option;
 var haxe_ds_StringMap = function() {
 	this.h = { };
 };
@@ -466,6 +475,22 @@ haxe_ds_StringMap.prototype = {
 			delete(this.h[key]);
 			return true;
 		}
+	}
+	,keys: function() {
+		var _this = this.arrayKeys();
+		return HxOverrides.iter(_this);
+	}
+	,arrayKeys: function() {
+		var out = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) out.push(key);
+		}
+		if(this.rh != null) {
+			for( var key in this.rh ) {
+			if(key.charCodeAt(0) == 36) out.push(key.substr(1));
+			}
+		}
+		return out;
 	}
 	,__class__: haxe_ds_StringMap
 };
@@ -755,6 +780,12 @@ thx_Arrays.reducei = function(array,callback,initial) {
 var thx_Either = { __ename__ : true, __constructs__ : ["Left","Right"] };
 thx_Either.Left = function(value) { var $x = ["Left",0,value]; $x.__enum__ = thx_Either; $x.toString = $estr; return $x; };
 thx_Either.Right = function(value) { var $x = ["Right",1,value]; $x.__enum__ = thx_Either; $x.toString = $estr; return $x; };
+var thx_Error = function() { };
+thx_Error.__name__ = true;
+thx_Error.__super__ = Error;
+thx_Error.prototype = $extend(Error.prototype,{
+	__class__: thx_Error
+});
 var thx_Functions = function() { };
 thx_Functions.__name__ = true;
 thx_Functions.equality = function(a,b) {
@@ -769,6 +800,12 @@ thx_Iterators.map = function(it,f) {
 		acc.push(f(v));
 	}
 	return acc;
+};
+thx_Iterators.reduce = function(it,callback,initial) {
+	thx_Iterators.map(it,function(v) {
+		initial = callback(initial,v);
+	});
+	return initial;
 };
 var thx_Objects = function() { };
 thx_Objects.__name__ = true;
@@ -857,6 +894,56 @@ thx_StringOrderedMap.__super__ = thx_OrderedMapImpl;
 thx_StringOrderedMap.prototype = $extend(thx_OrderedMapImpl.prototype,{
 	__class__: thx_StringOrderedMap
 });
+var thx_promise_Future = function() { };
+thx_promise_Future.__name__ = true;
+thx_promise_Future.prototype = {
+	then: function(handler) {
+		this.handlers.push(handler);
+		this.update();
+		return this;
+	}
+	,update: function() {
+		{
+			var _g = this.state;
+			switch(_g[1]) {
+			case 1:
+				break;
+			case 0:
+				var result = _g[2];
+				var index = -1;
+				while(++index < this.handlers.length) this.handlers[index](result);
+				this.handlers = [];
+				break;
+			}
+		}
+	}
+	,__class__: thx_promise_Future
+};
+var thx_promise__$Promise_Promise_$Impl_$ = {};
+thx_promise__$Promise_Promise_$Impl_$.__name__ = true;
+thx_promise__$Promise_Promise_$Impl_$.always = function(this1,handler) {
+	return this1.then(function(_) {
+		handler();
+	});
+};
+thx_promise__$Promise_Promise_$Impl_$.either = function(this1,success,failure) {
+	return this1.then(function(r) {
+		switch(r[1]) {
+		case 1:
+			var value = r[2];
+			success(value);
+			break;
+		case 0:
+			var error = r[2];
+			failure(error);
+			break;
+		}
+	});
+};
+thx_promise__$Promise_Promise_$Impl_$.success = function(this1,success) {
+	return thx_promise__$Promise_Promise_$Impl_$.either(this1,success,function(_) {
+	});
+};
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {

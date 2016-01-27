@@ -9,6 +9,7 @@ typedef SelectionChooseFunction = js.html.InputElement -> String -> Void;
 typedef FancySearchClassNames = {
   ?input : String,
   ?inputEmpty : String,
+  ?inputLoading : String,
   ?clearButton : String,
   ?suggestionContainer : String,
   ?suggestionsOpen : String,
@@ -33,7 +34,8 @@ typedef FancySearchOptions = {
   ?keys : FancySearchKeyboardShortcuts,
   ?minLength : Int,
   ?onClearButtonClick : js.html.Event -> Void,
-  ?suggestionOptions : SuggestionOptions
+  ?suggestionOptions : SuggestionOptions,
+  ?populateSuggestions : String -> thx.promise.Promise<Array<String>>,
 };
 
 enum LiteralPosition {

@@ -64,6 +64,7 @@ class Search {
       input : 'fs-search-input',
       inputEmpty : 'fs-search-input-empty',
       clearButton : 'fs-clear-input-button',
+      inputLoading : 'fs-input-loading',
       suggestionContainer : 'fs-suggestion-container',
       suggestionsOpen : 'fs-suggestion-container-open',
       suggestionsClosed : 'fs-suggestion-container-closed',
@@ -134,8 +135,20 @@ class Search {
   }
 
   function onSearchInput(e : Event) {
+    // check for content in the input itself
     checkEmptyStatus();
+
+    // then, initially filter given what we already know
     filterUsingInputValue();
+
+    // and kick off a request for more suggestions, if a function was provided
+    if (opts.populateSuggestions != null) {
+      input.addClass(opts.classes.inputLoading);
+
+      opts.populateSuggestions(input.value)
+        .success(list.setSuggestions)
+        .always(function () input.removeClass(opts.classes.inputLoading));
+    }
   }
 
   function onSearchKeydown(e : KeyboardEvent) {
