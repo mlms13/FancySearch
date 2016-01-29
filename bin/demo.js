@@ -739,7 +739,7 @@ thx_Arrays.any = function(arr,predicate) {
 	return false;
 };
 thx_Arrays.contains = function(array,element,eq) {
-	if(null == eq) return HxOverrides.indexOf(array,element,0) >= 0; else {
+	if(null == eq) return thx__$ReadonlyArray_ReadonlyArray_$Impl_$.indexOf(array,element) >= 0; else {
 		var _g1 = 0;
 		var _g = array.length;
 		while(_g1 < _g) {
@@ -894,6 +894,18 @@ thx_StringOrderedMap.__super__ = thx_OrderedMapImpl;
 thx_StringOrderedMap.prototype = $extend(thx_OrderedMapImpl.prototype,{
 	__class__: thx_StringOrderedMap
 });
+var thx__$ReadonlyArray_ReadonlyArray_$Impl_$ = {};
+thx__$ReadonlyArray_ReadonlyArray_$Impl_$.__name__ = true;
+thx__$ReadonlyArray_ReadonlyArray_$Impl_$.indexOf = function(this1,el,eq) {
+	if(null == eq) eq = thx_Functions.equality;
+	var _g1 = 0;
+	var _g = this1.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		if(eq(el,this1[i])) return i;
+	}
+	return -1;
+};
 var thx_promise_Future = function() { };
 thx_promise_Future.__name__ = true;
 thx_promise_Future.prototype = {

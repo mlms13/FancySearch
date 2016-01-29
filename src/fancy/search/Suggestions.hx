@@ -251,6 +251,13 @@ class Suggestions {
     opts.onChooseSelection(opts.input, selected);
   }
 
+  /**
+    Allows overriding the `onChooseSelection` function at any time.
+  **/
+  public function setChooseSelection(fn : InputElement -> String -> Void) {
+    opts.onChooseSelection = fn;
+  }
+
 
   static function defaultChooseSelection(input : InputElement, selection : String) {
     input.value = selection;
