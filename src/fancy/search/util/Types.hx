@@ -2,9 +2,9 @@ package fancy.search.util;
 
 import js.html.InputElement;
 
-typedef FilterFunction = Array<String> -> String -> Array<String>;
+typedef FilterFunction<T> = Array<T> -> String -> Array<T>;
 typedef HighlightLetters = Array<String> -> String -> Array<Array<thx.Tuple.Tuple2<Int, Int>>>;
-typedef SelectionChooseFunction = js.html.InputElement -> String -> Void;
+typedef SelectionChooseFunction<T> = js.html.InputElement -> T -> Void;
 
 typedef FancySearchClassNames = {
   ?input : String,
@@ -27,15 +27,15 @@ typedef FancySearchKeyboardShortcuts = {
   ?selectionChoose : Array<Int>
 };
 
-typedef FancySearchOptions = {
+typedef FancySearchOptions<T> = {
   ?classes : FancySearchClassNames,
   ?clearBtn : Bool,
   ?container : js.html.Element,
   ?keys : FancySearchKeyboardShortcuts,
   ?minLength : Int,
   ?onClearButtonClick : js.html.Event -> Void,
-  ?suggestionOptions : SuggestionOptions,
-  ?populateSuggestions : String -> thx.promise.Promise<Array<String>>,
+  ?suggestionOptions : SuggestionOptions<T>,
+  ?populateSuggestions : String -> thx.promise.Promise<Array<T>>,
 };
 
 enum LiteralPosition {
@@ -43,16 +43,16 @@ enum LiteralPosition {
   Last;
 }
 
-typedef SuggestionOptions = {
-  ?filterFn : FilterFunction,
+typedef SuggestionOptions<T> = {
+  ?filterFn : FilterFunction<T>,
   ?highlightLettersFn : HighlightLetters,
   ?limit : Int,
-  ?onChooseSelection : SelectionChooseFunction,
+  ?onChooseSelection : SelectionChooseFunction<T>,
   ?input : js.html.InputElement,
   ?parent : js.html.Element,
   ?showSearchLiteralItem : Bool,
   ?searchLiteralPosition : LiteralPosition,
   ?searchLiteralValue : InputElement -> String,
   ?searchLiteralPrefix : String,
-  ?suggestions : Array<String>,
+  ?suggestions : Array<T>,
 };

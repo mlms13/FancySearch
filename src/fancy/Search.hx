@@ -10,6 +10,7 @@ import fancy.search.*;
 
 using thx.Objects;
 using thx.Arrays;
+using thx.Strings;
 using fancy.browser.Dom;
 
 /**
@@ -28,11 +29,11 @@ using fancy.browser.Dom;
   ```
 **/
 #if shallow-expose @:expose @:keep #end
-class Search {
-  public var list(default, null) : Suggestions;
+class Search<T> {
+  public var list(default, null) : Suggestions<T>;
   public var input(default, null) : InputElement;
   var clearBtn : Element;
-  var opts : FancySearchOptions;
+  var opts : FancySearchOptions<T>;
   var keys : FancySearchKeyboardShortcuts;
 
   /**
@@ -41,10 +42,10 @@ class Search {
     options are not required, but they allow you to modify the behavior of both
     the search input and the suggestion list.
   **/
-  public function new(el : InputElement, ?options : FancySearchOptions) {
+  public function new(el : InputElement, ?options : FancySearchOptions<T>) {
     // initialize all of the options
     input = el;
-    opts = Objects.merge({
+    opts = cast Objects.combine({
       classes : {},
       keys : {},
       minLength : 1,
@@ -162,7 +163,7 @@ class Search {
     } else if (keys.selectionDown.contains(code) && list.isOpen) {
       e.preventDefault();
       list.moveSelectionDown();
-    } else if (keys.selectionChoose.contains(code) && list.selected != "") {
+    } else if (keys.selectionChoose.contains(code) && !list.selected.isEmpty()) {
       list.chooseSelectedItem();
     }
   }
@@ -178,7 +179,7 @@ class Search {
     selector string. This is convenient if you have no other references to the
     input element in your code.
   **/
-  public static function createFromSelector(selector : String, options : FancySearchOptions) {
+  public static function createFromSelector<T>(selector : String, options : FancySearchOptions<T>) {
     return new Search(cast js.Browser.document.querySelector(selector), options);
   }
 
@@ -187,9 +188,8 @@ class Search {
     element surrounding the input that will be used for your FancySearch. This
     assumes that the container has exactly one `input` child.
   **/
-  public static function createFromContainer(container : Element, options : FancySearchOptions) {
-    return new Search(cast container.querySelector('input'), Objects.merge(options, {
-      container : container
-    }));
+  public static function createFromContainer<T>(container : Element, options : FancySearchOptions<T>) {
+    options.container = container;
+    return new Search(cast container.querySelector('input'), options);
   }
 }

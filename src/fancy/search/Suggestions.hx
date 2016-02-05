@@ -17,13 +17,13 @@ using thx.Tuple;
   Public methods exist to modify suggestions, show and hide the menu, move the
   selection and choose the selected option, filter on demand, and more.
 **/
-class Suggestions {
-  var opts : SuggestionOptions;
+class Suggestions<T> {
+  var opts : SuggestionOptions<T>;
   var classes : FancySearchClassNames;
-  public var filtered(default, null) : Array<String>;
   public var elements(default, null) : OrderedMap<String, Element>;
-  public var selected(default, null) : String; // selected item in `filtered`
+  public var selected(default, null) : String; // key of item in `filtered`
   public var isOpen(default, null) : Bool;
+  var filtered : OrderedMap<String, T>;
   var el : Element;
   var list : Element;
 
@@ -32,7 +32,7 @@ class Suggestions {
     that is an instance of `Suggestions`. In most cases, you will not need to
     create an instance of `Suggestions` directly.
   **/
-  public function new(options : SuggestionOptions, classes : FancySearchClassNames) {
+  public function new(options : SuggestionOptions<T>, classes : FancySearchClassNames) {
     // `Search` should really provide these things, but they aren't actually
     // required when `Search` is being given its options.
     if (options.parent == null || options.input == null) {
@@ -42,9 +42,9 @@ class Suggestions {
     // defaults
     this.classes = classes;
     initializeOptions(options);
-    filtered = [];
     selected = '';
     isOpen = false;
+    filtered = OrderedMap.createString();
 
     // create all elements and set initial suggestions
     list = Dom.create('ul.${classes.suggestionList}');
@@ -54,8 +54,8 @@ class Suggestions {
     setSuggestions(opts.suggestions);
   }
 
-  function initializeOptions(options : SuggestionOptions) {
-    this.opts = Objects.merge({
+  function initializeOptions(options : SuggestionOptions<T>) {
+    this.opts = cast Objects.combine({
       filterFn : defaultFilterer,
       highlightLettersFn : defaultHighlightLetters,
       limit : 5,
@@ -84,52 +84,65 @@ class Suggestions {
       });
   }
 
+  static function suggestionToString<T>(suggestion : T) : String {
+    return Std.string(suggestion);
+  }
+
+  static function suggestionsToStrings<T>(suggestions : Array<T>) : Array<String> {
+    return suggestions.map(suggestionToString);
+  }
+
   function getLiteralItemIndex() : Int {
     return opts.searchLiteralPosition == Last ? elements.length - 1 : 0;
   }
 
   // returns `true` or `false` depending on whether the item was created
-  function createLiteralItem(?replaceExisting = true) : Bool {
-    var literalValue = opts.searchLiteralValue(opts.input).trim(),
-        containsLiteral = opts.suggestions.map.fn(_.toLowerCase()).indexOf(literalValue.toLowerCase()) >= 0;
+  function shouldCreateLiteral(literal : String) : Bool {
+    return opts.showSearchLiteralItem && opts.suggestions
+      .map(suggestionToString)
+      .map.fn(_.toLowerCase())
+      .indexOf(literal.toLowerCase()) >= 0;
+  }
 
-    // if we're supposed to show the "Search for <literal>" option and the
-    // current search text doesn't exactly match a
-    if (opts.showSearchLiteralItem && !containsLiteral) {
-      var literalPosition = getLiteralItemIndex(),
-          el = createSuggestionItem(opts.searchLiteralPrefix + literalValue, literalValue);
+  function createLiteralItem(label : String, replaceExisting = true) {
 
-      if (replaceExisting) {
-        elements.removeAt(literalPosition);
-      }
+    // if we're not supposed to show the "Search for <literal>" option or the
+    // current search input exactly matches a suggestion, return
+    if (!shouldCreateLiteral(label)) return;
 
-      elements.insert(literalPosition, literalValue, el);
-      return true;
+    // otherwise, create a suggestion element with text like "Search for: foo"
+    var literalPosition = getLiteralItemIndex(),
+        el = createSuggestionItem(opts.searchLiteralPrefix + label, label);
+
+    if (replaceExisting) {
+      elements.removeAt(literalPosition);
     }
-    return false;
+
+    elements.insert(literalPosition, label, el);
   }
 
   /**
-    `list.setSuggestions` allows you to modify the String list of suggested
-    items on the fly.
+    `list.setSuggestions` allows you to modify the list of suggested items on
+    the fly.
   **/
-  public function setSuggestions(s : Array<String>) {
+  public function setSuggestions(s : Array<T>) {
     opts.suggestions = s.distinct();
 
     elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
-      acc.set(curr, createSuggestionItem(curr));
+      var stringified = suggestionToString(curr);
+      acc.set(stringified, createSuggestionItem(stringified));
       return acc;
     }, OrderedMap.createString());
 
-    createLiteralItem(false);
+    createLiteralItem(opts.searchLiteralValue(opts.input).trim(), false);
 
     if (isOpen)
       filter(opts.input.value);
   }
 
   /**
-    Filtering the list happens automatically when the search input is focues, as
-    well as when its value changes. Filtering happens using the provided filter
+    Filtering the list happens automatically when the search input is focused,
+    as well as when its value changes. Filtering uses the provided filter
     function, then the DOM is updated accordingly.
 
     In many cases, you will not need to manually call `filter`, but this
@@ -137,11 +150,23 @@ class Suggestions {
     FancySearch input.
   **/
   public function filter(search : String) {
+    // transform search string to our liking
+    // TODO: latinize? trim? expose all this to the user?
     search = search.toLowerCase();
-    filtered = opts.filterFn(opts.suggestions, search).slice(0, opts.limit);
-    var wordParts = opts.highlightLettersFn(filtered.copy(), search);
 
-    filtered.reducei(function (list : Element, str, index) {
+    // call the provided filter function, iterating over the whole list
+    // TODO: change filterFn signature to T -> String -> Bool
+    filtered = opts.filterFn(opts.suggestions, search)
+      .slice(0, opts.limit)
+      .reduce(function (acc : OrderedMap<String, T>, curr : T) {
+        acc.set(suggestionToString(curr), curr);
+        return acc;
+      }, OrderedMap.createString());
+
+    var filteredStrings = filtered.keys().toArray(),
+        wordParts = opts.highlightLettersFn(filteredStrings, search);
+
+    filteredStrings.reducei(function (list : Element, str : String, index) {
       var listItem = elements.get(str).empty();
 
       // each filtered word has an array of ranges to highlight
@@ -166,19 +191,21 @@ class Suggestions {
       return list;
     }, list.empty());
 
-    if (!filtered.contains(selected)) {
-      selected = "";
+    if (!filtered.exists(selected)) {
+      selected = null;
     }
 
     // replace the existing literal item, if the options request it
     // and add inject the literal search text as a key in `filtered`
-    if (search != '' && createLiteralItem()) {
-      var literalValue = opts.searchLiteralValue(opts.input).trim(),
-      literalElement = elements.get(literalValue);
+    var literalValue = opts.searchLiteralValue(opts.input).trim();
+    if (!search.isEmpty() && shouldCreateLiteral(literalValue)) {
+      createLiteralItem(literalValue);
+      var literalElement = elements.get(literalValue);
 
-      filtered.insert(getLiteralItemIndex(), literalValue);
+      // FIXME?
+      // filtered.insert(getLiteralItemIndex(), literalValue);
       list.insertAtIndex(literalElement, getLiteralItemIndex());
-      if (selected == "") selectItem(literalValue);
+      if (selected.isEmpty()) selectItem(literalValue);
     }
 
     if (filtered.length == 0) {
@@ -208,10 +235,9 @@ class Suggestions {
   }
 
   /**
-    Move the selection highlight class to a specific item (found using the
-    item's string key). If no key is provided, this method clears the selection.
+    Move the highlight class to a specific item. If no key is provided, this method clears the selection.
   **/
-  public function selectItem(?key : String = '') {
+  public function selectItem(?key : String) {
     // if a selection already existed, clear it
     elements.iterator().map.fn(_.removeClass(classes.suggestionItemSelected));
 
@@ -219,28 +245,34 @@ class Suggestions {
     selected = key;
 
     // and if there's a corresponding element for that key, select the element
-    if (key != '' && elements.get(selected) != null)
+    if (!selected.isEmpty() && elements.exists(selected))
       elements.get(selected).addClass(classes.suggestionItemSelected);
+  }
+
+  function selectItemAtIndex(index : Int) {
+    // TODO: implement OrderedMap.keyAt() in thx
+    selectItem(filtered.keys().toArray()[index]);
   }
 
   /**
     Move the selection highlight to the previous suggestion.
   **/
   public function moveSelectionUp() {
-    var currentIndex = filtered.indexOf(selected),
-      targetIndex = currentIndex > 0 ? currentIndex - 1 : filtered.length - 1;
+    var currentIndex = filtered.keys().toArray().indexOf(selected),
+        targetIndex = currentIndex > 0 ? currentIndex - 1 : filtered.length - 1;
 
-    selectItem(filtered[targetIndex]);
+    // TODO: add this to thx
+    selectItemAtIndex(targetIndex);
   }
 
   /**
     Move the selection highlight to the next suggestion.
   **/
   public function moveSelectionDown() {
-    var currentIndex = filtered.indexOf(selected),
-      targetIndex = (currentIndex + 1) == filtered.length ? 0 : currentIndex + 1;
+    var currentIndex = filtered.keys().toArray().indexOf(selected),
+        targetIndex = (currentIndex + 1) == filtered.length ? 0 : currentIndex + 1;
 
-    selectItem(filtered[targetIndex]);
+    selectItemAtIndex(targetIndex);
   }
 
   /**
@@ -248,25 +280,25 @@ class Suggestions {
     chosen (e.g. ENTER key or mouse click).
   **/
   public function chooseSelectedItem() {
-    opts.onChooseSelection(opts.input, selected);
+    opts.onChooseSelection(opts.input, filtered[selected]);
   }
 
   /**
     Allows overriding the `onChooseSelection` function at any time.
   **/
-  public function setChooseSelection(fn : InputElement -> String -> Void) {
+  public function setChooseSelection(fn : SelectionChooseFunction<T>) {
     opts.onChooseSelection = fn;
   }
 
 
-  static function defaultChooseSelection(input : InputElement, selection : String) {
-    input.value = selection;
+  static function defaultChooseSelection<T>(input : InputElement, selection : T) {
+    input.value = suggestionToString(selection);
     input.blur();
   }
 
-  static function defaultFilterer(suggestions : Array<String>, search : String) {
+  static function defaultFilterer<T>(suggestions : Array<T>, search : String) {
     search = search.toLowerCase();
-    return suggestions
+    return suggestionsToStrings(suggestions)
       .filter.fn(_.toLowerCase().indexOf(search) >= 0)
       .order(function (a, b) {
         var posA = a.toLowerCase().indexOf(search),
@@ -279,7 +311,7 @@ class Suggestions {
       });
   }
 
-  static function defaultHighlightLetters(filtered : Array<String>, search :String) {
+  static function defaultHighlightLetters(filtered : Array<String>, search : String) {
     return filtered.map.fn([new Tuple2(_.toLowerCase().indexOf(search), search.length)]);
   }
 }
