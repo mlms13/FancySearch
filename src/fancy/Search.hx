@@ -34,7 +34,6 @@ class Search<T> {
   public var input(default, null) : InputElement;
   var clearBtn : Element;
   var opts : FancySearchOptions<T>;
-  var keys : FancySearchKeyboardShortcuts;
 
   /**
     The constructor requires an input element which will be converted into a
@@ -45,15 +44,8 @@ class Search<T> {
   public function new(el : InputElement, ?options : FancySearchOptions<T>) {
     // initialize all of the options
     input = el;
-    opts = cast Objects.combine({
-      classes : {},
-      keys : {},
-      minLength : 1,
-      clearBtn : true,
-      container : input.parentElement,
-      onClearButtonClick : onClearButtonClick,
-      suggestionOptions : {}
-    }, options);
+    opts = createDefaultOptions(options);
+    opts.classes = createDefaultClasses(opts.classes);
 
     if (opts.suggestionOptions.input == null)
       opts.suggestionOptions.input = input;
@@ -61,21 +53,7 @@ class Search<T> {
     if (opts.suggestionOptions.parent == null)
       opts.suggestionOptions.parent = opts.container;
 
-    opts.classes = Objects.merge({
-      input : 'fs-search-input',
-      inputEmpty : 'fs-search-input-empty',
-      clearButton : 'fs-clear-input-button',
-      inputLoading : 'fs-input-loading',
-      suggestionContainer : 'fs-suggestion-container',
-      suggestionsOpen : 'fs-suggestion-container-open',
-      suggestionsClosed : 'fs-suggestion-container-closed',
-      suggestionsEmpty : 'fs-suggestion-container-empty',
-      suggestionList : 'fs-suggestion-list',
-      suggestionItem : 'fs-suggestion-item',
-      suggestionItemSelected : 'fs-suggestion-item-selected'
-    }, opts.classes);
-
-    keys = Objects.merge({
+    opts.keys = Objects.merge({
       closeMenu : [Keys.ESCAPE],
       selectionUp : [Keys.UP],
       selectionDown : [Keys.DOWN, Keys.TAB],
@@ -104,6 +82,34 @@ class Search<T> {
     input.on('blur', onSearchBlur);
     input.on('input', onSearchInput);
     input.on('keydown', cast onSearchKeydown);
+  }
+
+  function createDefaultOptions<T>(?options : FancySearchOptions<T>) : FancySearchOptions<T> {
+    return cast Objects.combine(({
+      classes : {},
+      keys : {},
+      minLength : 1,
+      clearBtn : true,
+      container : input.parentElement,
+      onClearButtonClick : onClearButtonClick,
+      suggestionOptions : {}
+    } : FancySearchOptions<T>), options == null ? ({} : FancySearchOptions<T>) : options);
+  }
+
+  function createDefaultClasses(classes : FancySearchClassNames) {
+    return Objects.merge({
+      input : 'fs-search-input',
+      inputEmpty : 'fs-search-input-empty',
+      clearButton : 'fs-clear-input-button',
+      inputLoading : 'fs-input-loading',
+      suggestionContainer : 'fs-suggestion-container',
+      suggestionsOpen : 'fs-suggestion-container-open',
+      suggestionsClosed : 'fs-suggestion-container-closed',
+      suggestionsEmpty : 'fs-suggestion-container-empty',
+      suggestionList : 'fs-suggestion-list',
+      suggestionItem : 'fs-suggestion-item',
+      suggestionItemSelected : 'fs-suggestion-item-selected'
+    }, opts.classes);
   }
 
   function onSearchFocus(e : Event) {
@@ -155,15 +161,15 @@ class Search<T> {
   function onSearchKeydown(e : KeyboardEvent) {
     var code = e.which != null ? e.which : e.keyCode;
 
-    if (keys.closeMenu.contains(code)) {
+    if (opts.keys.closeMenu.contains(code)) {
       list.close();
-    } else if (keys.selectionUp.contains(code) && list.isOpen) {
+    } else if (opts.keys.selectionUp.contains(code) && list.isOpen) {
       e.preventDefault();
       list.moveSelectionUp();
-    } else if (keys.selectionDown.contains(code) && list.isOpen) {
+    } else if (opts.keys.selectionDown.contains(code) && list.isOpen) {
       e.preventDefault();
       list.moveSelectionDown();
-    } else if (keys.selectionChoose.contains(code) && !list.selected.isEmpty()) {
+    } else if (opts.keys.selectionChoose.contains(code) && !list.selected.isEmpty()) {
       list.chooseSelectedItem();
     }
   }

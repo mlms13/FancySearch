@@ -124,11 +124,11 @@ StringTools.trim = function(s) {
 };
 var fancy_Search = function(el,options) {
 	this.input = el;
-	this.opts = thx_Objects.combine({ classes : { }, keys : { }, minLength : 1, clearBtn : true, container : this.input.parentElement, onClearButtonClick : $bind(this,this.onClearButtonClick), suggestionOptions : { }},options);
+	this.opts = this.createDefaultOptions(options);
+	this.opts.classes = this.createDefaultClasses(this.opts.classes);
 	if(this.opts.suggestionOptions.input == null) this.opts.suggestionOptions.input = this.input;
 	if(this.opts.suggestionOptions.parent == null) this.opts.suggestionOptions.parent = this.opts.container;
-	this.opts.classes = thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", inputLoading : "fs-input-loading", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},this.opts.classes);
-	this.keys = thx_Objects.combine({ closeMenu : [fancy_browser_Keys.ESCAPE], selectionUp : [fancy_browser_Keys.UP], selectionDown : [fancy_browser_Keys.DOWN,fancy_browser_Keys.TAB], selectionChoose : [fancy_browser_Keys.ENTER]},this.opts.keys);
+	this.opts.keys = thx_Objects.combine({ closeMenu : [fancy_browser_Keys.ESCAPE], selectionUp : [fancy_browser_Keys.UP], selectionDown : [fancy_browser_Keys.DOWN,fancy_browser_Keys.TAB], selectionChoose : [fancy_browser_Keys.ENTER]},this.opts.keys);
 	this.clearBtn = fancy_browser_Dom.create("button." + this.opts.classes.clearButton,null,null,"×");
 	fancy_browser_Dom.on(this.clearBtn,"mousedown",this.opts.onClearButtonClick);
 	if(this.opts.clearBtn) fancy_browser_Dom.append(this.opts.container,this.clearBtn);
@@ -145,7 +145,13 @@ fancy_Search.createFromSelector = function(selector,options) {
 	return new fancy_Search(window.document.querySelector(selector),options);
 };
 fancy_Search.prototype = {
-	onSearchFocus: function(e) {
+	createDefaultOptions: function(options) {
+		return thx_Objects.combine({ classes : { }, keys : { }, minLength : 1, clearBtn : true, container : this.input.parentElement, onClearButtonClick : $bind(this,this.onClearButtonClick), suggestionOptions : { }},options == null?{ }:options);
+	}
+	,createDefaultClasses: function(classes) {
+		return thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", inputLoading : "fs-input-loading", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},this.opts.classes);
+	}
+	,onSearchFocus: function(e) {
 		this.filterUsingInputValue();
 	}
 	,onSearchBlur: function(e) {
@@ -173,13 +179,13 @@ fancy_Search.prototype = {
 	,onSearchKeydown: function(e) {
 		var code;
 		if(e.which != null) code = e.which; else code = e.keyCode;
-		if(thx_Arrays.contains(this.keys.closeMenu,code)) this.list.close(); else if(thx_Arrays.contains(this.keys.selectionUp,code) && this.list.isOpen) {
+		if(thx_Arrays.contains(this.opts.keys.closeMenu,code)) this.list.close(); else if(thx_Arrays.contains(this.opts.keys.selectionUp,code) && this.list.isOpen) {
 			e.preventDefault();
 			this.list.moveSelectionUp();
-		} else if(thx_Arrays.contains(this.keys.selectionDown,code) && this.list.isOpen) {
+		} else if(thx_Arrays.contains(this.opts.keys.selectionDown,code) && this.list.isOpen) {
 			e.preventDefault();
 			this.list.moveSelectionDown();
-		} else if(thx_Arrays.contains(this.keys.selectionChoose,code) && !thx_Strings.isEmpty(this.list.selected)) this.list.chooseSelectedItem();
+		} else if(thx_Arrays.contains(this.opts.keys.selectionChoose,code) && !thx_Strings.isEmpty(this.list.selected)) this.list.chooseSelectedItem();
 	}
 	,onClearButtonClick: function(e) {
 		e.preventDefault();
