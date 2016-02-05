@@ -272,7 +272,7 @@ fancy_search_Suggestions.suggestionsToStrings = function(suggestions) {
 	return suggestions.map(fancy_search_Suggestions.suggestionToString);
 };
 fancy_search_Suggestions.defaultChooseSelection = function(input,selection) {
-	input.value = fancy_search_Suggestions.suggestionToString(selection);
+	if(selection != null) input.value = fancy_search_Suggestions.suggestionToString(selection);
 	input.blur();
 };
 fancy_search_Suggestions.defaultFilterer = function(suggestions,search) {
@@ -327,7 +327,7 @@ fancy_search_Suggestions.prototype = {
 			var x = literal.toLowerCase();
 			$r = HxOverrides.indexOf(_this,x,0);
 			return $r;
-		}(this)) >= 0;
+		}(this)) < 0;
 	}
 	,createLiteralItem: function(label,replaceExisting) {
 		if(replaceExisting == null) replaceExisting = true;
@@ -388,6 +388,7 @@ fancy_search_Suggestions.prototype = {
 		if(!thx_Strings.isEmpty(search) && this.shouldCreateLiteral(literalValue)) {
 			this.createLiteralItem(literalValue);
 			var literalElement = this.elements.get(literalValue);
+			this.filtered.insert(this.getLiteralItemIndex(),literalValue,null);
 			fancy_browser_Dom.insertAtIndex(this.list,literalElement,this.getLiteralItemIndex());
 			if(thx_Strings.isEmpty(this.selected)) this.selectItem(literalValue);
 		}

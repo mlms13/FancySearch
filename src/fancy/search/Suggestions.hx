@@ -101,7 +101,7 @@ class Suggestions<T> {
     return opts.showSearchLiteralItem && opts.suggestions
       .map(suggestionToString)
       .map.fn(_.toLowerCase())
-      .indexOf(literal.toLowerCase()) >= 0;
+      .indexOf(literal.toLowerCase()) < 0;
   }
 
   function createLiteralItem(label : String, replaceExisting = true) {
@@ -203,7 +203,7 @@ class Suggestions<T> {
       var literalElement = elements.get(literalValue);
 
       // FIXME?
-      // filtered.insert(getLiteralItemIndex(), literalValue);
+      filtered.insert(getLiteralItemIndex(), literalValue, null);
       list.insertAtIndex(literalElement, getLiteralItemIndex());
       if (selected.isEmpty()) selectItem(literalValue);
     }
@@ -292,7 +292,8 @@ class Suggestions<T> {
 
 
   static function defaultChooseSelection<T>(input : InputElement, selection : T) {
-    input.value = suggestionToString(selection);
+    if (selection != null)
+      input.value = suggestionToString(selection);
     input.blur();
   }
 
