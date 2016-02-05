@@ -56,7 +56,7 @@ class Suggestions<T> {
   }
 
   function initializeOptions(options : SuggestionOptions<T>) {
-    this.opts = cast Objects.combine({
+    this.opts = cast Objects.combine(({
       filterFn : defaultFilterer,
       highlightLettersFn : defaultHighlightLetters,
       limit : 5,
@@ -66,7 +66,8 @@ class Suggestions<T> {
       searchLiteralValue : function (inpt) return inpt.value,
       searchLiteralPrefix : "Search for: ",
       suggestions : [],
-    }, options);
+      suggestionToString : function (t) return Std.string(t),
+    } : SuggestionOptions<T>), options);
   }
 
   function createSuggestionItem(label : String, ?value : String) : Element {
@@ -85,12 +86,12 @@ class Suggestions<T> {
       });
   }
 
-  static function suggestionToString<T>(suggestion : T) : String {
-    return Std.string(suggestion);
+  static function suggestionToString<T>(toString : T -> String, suggestion : T) : String {
+    return toString(suggestion);
   }
 
-  static function suggestionsToStrings<T>(suggestions : Array<T>) : Array<String> {
-    return suggestions.map(suggestionToString);
+  static function suggestionsToStrings<T>(toString : T -> String, suggestions : Array<T>) : Array<String> {
+    return suggestions.map(suggestionToString.bind(toString));
   }
 
   function getLiteralItemIndex() : Int {
@@ -100,7 +101,7 @@ class Suggestions<T> {
   // returns `true` or `false` depending on whether the item was created
   function shouldCreateLiteral(literal : String) : Bool {
     return opts.showSearchLiteralItem && opts.suggestions
-      .map(suggestionToString)
+      .map(suggestionToString.bind(opts.suggestionToString))
       .map.fn(_.toLowerCase())
       .indexOf(literal.toLowerCase()) < 0;
   }
@@ -130,7 +131,7 @@ class Suggestions<T> {
     opts.suggestions = s.distinct();
 
     elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
-      var stringified = suggestionToString(curr);
+      var stringified = suggestionToString(opts.suggestionToString, curr);
       acc.set(stringified, createSuggestionItem(stringified));
       return acc;
     }, OrderedMap.createString());
@@ -157,10 +158,10 @@ class Suggestions<T> {
 
     // call the provided filter function, iterating over the whole list
     // TODO: change filterFn signature to T -> String -> Bool
-    filtered = opts.filterFn(opts.suggestions, search)
+    filtered = opts.filterFn(opts.suggestionToString, opts.suggestions, search)
       .slice(0, opts.limit)
       .reduce(function (acc : OrderedMap<String, T>, curr : T) {
-        acc.set(suggestionToString(curr), curr);
+        acc.set(suggestionToString(opts.suggestionToString, curr), curr);
         return acc;
       }, OrderedMap.createString());
 
@@ -280,7 +281,7 @@ class Suggestions<T> {
     chosen (e.g. ENTER key or mouse click).
   **/
   public function chooseSelectedItem() {
-    opts.onChooseSelection(opts.input, filtered.exists(selected) && filtered.get(selected) != null ?
+    opts.onChooseSelection(opts.suggestionToString, opts.input, filtered.exists(selected) && filtered.get(selected) != null ?
       Some(filtered.get(selected)) :
       None
     );
@@ -294,21 +295,23 @@ class Suggestions<T> {
   }
 
 
-  static function defaultChooseSelection<T>(input : InputElement, selection : Option<T>) {
+  static function defaultChooseSelection<T>(toString : T -> String, input : InputElement, selection : Option<T>) {
     switch selection {
-      case Some(value): input.value = suggestionToString(value);
+      case Some(value): input.value = suggestionToString(toString, value);
       case None: input.value = input.value;
     }
 
     input.blur();
   }
 
-  static function defaultFilterer<T>(suggestions : Array<T>, search : String) {
+  static function defaultFilterer<T>(toString : T -> String, suggestions : Array<T>, search : String) : Array<T> {
     search = search.toLowerCase();
-    return suggestionsToStrings(suggestions)
-      .filter.fn(_.toLowerCase().indexOf(search) >= 0)
-      .order(function (a, b) {
-        var posA = a.toLowerCase().indexOf(search),
+    return suggestions
+      .filter.fn(suggestionToString(toString, _).toLowerCase().indexOf(search) >= 0)
+      .order(function (aT, bT) {
+        var a = suggestionToString(toString, aT),
+            b = suggestionToString(toString, bT),
+            posA = a.toLowerCase().indexOf(search),
             posB = b.toLowerCase().indexOf(search);
 
         return if (posA == posB)
