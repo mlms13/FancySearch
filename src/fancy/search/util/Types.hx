@@ -1,10 +1,11 @@
 package fancy.search.util;
 
+import haxe.ds.Option;
 import js.html.InputElement;
 
 typedef FilterFunction<T> = Array<T> -> String -> Array<T>;
 typedef HighlightLetters = Array<String> -> String -> Array<Array<thx.Tuple.Tuple2<Int, Int>>>;
-typedef SelectionChooseFunction<T> = js.html.InputElement -> T -> Void;
+typedef SelectionChooseFunction<T> = js.html.InputElement -> Option<T> -> Void;
 
 typedef FancySearchClassNames = {
   ?input : String,

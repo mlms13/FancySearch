@@ -272,7 +272,15 @@ fancy_search_Suggestions.suggestionsToStrings = function(suggestions) {
 	return suggestions.map(fancy_search_Suggestions.suggestionToString);
 };
 fancy_search_Suggestions.defaultChooseSelection = function(input,selection) {
-	if(selection != null) input.value = fancy_search_Suggestions.suggestionToString(selection);
+	switch(selection[1]) {
+	case 0:
+		var value = selection[2];
+		input.value = fancy_search_Suggestions.suggestionToString(value);
+		break;
+	case 1:
+		input.value = input.value;
+		break;
+	}
 	input.blur();
 };
 fancy_search_Suggestions.defaultFilterer = function(suggestions,search) {
@@ -435,7 +443,7 @@ fancy_search_Suggestions.prototype = {
 		this.selectItemAtIndex(targetIndex);
 	}
 	,chooseSelectedItem: function() {
-		this.opts.onChooseSelection(this.opts.input,this.filtered.get(this.selected));
+		this.opts.onChooseSelection(this.opts.input,this.filtered.exists(this.selected) && this.filtered.get(this.selected) != null?haxe_ds_Option.Some(this.filtered.get(this.selected)):haxe_ds_Option.None);
 	}
 	,__class__: fancy_search_Suggestions
 };

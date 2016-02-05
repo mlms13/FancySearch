@@ -1,5 +1,6 @@
 package fancy.search;
 
+import haxe.ds.Option;
 import js.html.Element;
 import js.html.InputElement;
 using fancy.browser.Dom;
@@ -202,7 +203,6 @@ class Suggestions<T> {
       createLiteralItem(literalValue);
       var literalElement = elements.get(literalValue);
 
-      // FIXME?
       filtered.insert(getLiteralItemIndex(), literalValue, null);
       list.insertAtIndex(literalElement, getLiteralItemIndex());
       if (selected.isEmpty()) selectItem(literalValue);
@@ -280,7 +280,10 @@ class Suggestions<T> {
     chosen (e.g. ENTER key or mouse click).
   **/
   public function chooseSelectedItem() {
-    opts.onChooseSelection(opts.input, filtered[selected]);
+    opts.onChooseSelection(opts.input, filtered.exists(selected) && filtered.get(selected) != null ?
+      Some(filtered.get(selected)) :
+      None
+    );
   }
 
   /**
@@ -291,9 +294,12 @@ class Suggestions<T> {
   }
 
 
-  static function defaultChooseSelection<T>(input : InputElement, selection : T) {
-    if (selection != null)
-      input.value = suggestionToString(selection);
+  static function defaultChooseSelection<T>(input : InputElement, selection : Option<T>) {
+    switch selection {
+      case Some(value): input.value = suggestionToString(value);
+      case None: input.value = input.value;
+    }
+
     input.blur();
   }
 
