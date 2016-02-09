@@ -10,6 +10,11 @@
 -js demo/00.string-list/www/bundle.js
 
 --next
+-cp demo/01.search-objects/src
+-main Main
+-js demo/01.search-objects/www/bundle.js
+
+--next
 -D shallow-expose
 fancy.Search
 -js dist/fancysearch.js

@@ -322,6 +322,10 @@ class Suggestions<T> {
   }
 
   static function defaultHighlightLetters(filtered : Array<String>, search : String) {
-    return filtered.map.fn([new Tuple2(_.toLowerCase().indexOf(search), search.length)]);
+    return filtered.map(function (str) {
+      return str.indexOf(search) >= 0 ?
+        [new Tuple2(str.toLowerCase().indexOf(search.toLowerCase()), search.length)] :
+        [new Tuple2(0, 0)];
+    });
   }
 }

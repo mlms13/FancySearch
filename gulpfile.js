@@ -32,6 +32,7 @@ gulp.task('stylus', function () {
 gulp.task('html', function () {
   return getFolders(demoFolderPath).reduce(function (task, folder) {
     task.pipe(gulp.dest(path.join(demoFolderPath, folder, '/www/')));
+    return task;
   }, gulp.src('./demo/index.html'));
 })
 

@@ -69,8 +69,21 @@ HxOverrides.iter = function(a) {
 var Main = function() { };
 Main.__name__ = true;
 Main.main = function() {
-	var options = { minLength : 0, suggestionOptions : { suggestions : ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"], limit : 6, showSearchLiteralItem : true}};
-	var search = fancy_Search.createFromSelector(".fancy-container input",options);
+	var items = [{ value : "Apple", aliases : ["Fuji","Honeycrisp","Gala","Granny Smith"]},{ value : "Bean", aliases : ["Black","Pinto","Navy","Soy","Northern","Kidney"]},{ value : "Chickpea", aliases : ["Garbanzo Bean"]},{ value : "Corn", aliases : []},{ value : "Squash", aliases : ["Summer","Pumpkin","Zucchini","Acorn","Butternut"]},{ value : "Leaf Vegetable", aliases : ["Kale","Spinach","Romain","Iceberg","Lettuce"]}];
+	var options = { minLength : 0, suggestionOptions : { suggestions : items, limit : 4, suggestionToString : function(sugg) {
+		return sugg.value;
+	}, filterFn : function(toString,suggestions,search) {
+		search = search.toLowerCase();
+		console.log("Checking a list of " + suggestions.length + " suggestions");
+		return suggestions.filter(function(sugg1) {
+			return sugg1.aliases.reduce(function(match,alias) {
+				var valFirst = sugg1.value.toLowerCase() + " " + alias.toLowerCase();
+				var valLast = alias.toLowerCase() + " " + sugg1.value.toLowerCase();
+				return match || valFirst.indexOf(search) >= 0 || valLast.indexOf(search) >= 0;
+			},false);
+		});
+	}}};
+	var search1 = fancy_Search.createFromSelector(".fancy-container input",options);
 };
 Math.__name__ = true;
 var Reflect = function() { };
