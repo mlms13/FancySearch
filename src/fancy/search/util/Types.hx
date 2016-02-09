@@ -1,10 +1,12 @@
 package fancy.search.util;
 
+import haxe.ds.Option;
 import js.html.InputElement;
 
-typedef FilterFunction = Array<String> -> String -> Array<String>;
+typedef FilterFunction<T> = (T -> String) -> String -> T -> Bool;
+typedef SortSuggestions<T> = (T -> String) -> String -> T -> T -> Int;
 typedef HighlightLetters = Array<String> -> String -> Array<Array<thx.Tuple.Tuple2<Int, Int>>>;
-typedef SelectionChooseFunction = js.html.InputElement -> String -> Void;
+typedef SelectionChooseFunction<T> = (T -> String) -> js.html.InputElement -> Option<T> -> Void;
 
 typedef FancySearchClassNames = {
   ?input : String,
@@ -27,15 +29,15 @@ typedef FancySearchKeyboardShortcuts = {
   ?selectionChoose : Array<Int>
 };
 
-typedef FancySearchOptions = {
+typedef FancySearchOptions<T> = {
   ?classes : FancySearchClassNames,
   ?clearBtn : Bool,
   ?container : js.html.Element,
   ?keys : FancySearchKeyboardShortcuts,
   ?minLength : Int,
   ?onClearButtonClick : js.html.Event -> Void,
-  ?suggestionOptions : SuggestionOptions,
-  ?populateSuggestions : String -> thx.promise.Promise<Array<String>>,
+  ?suggestionOptions : SuggestionOptions<T>,
+  ?populateSuggestions : String -> thx.promise.Promise<Array<T>>,
 };
 
 enum LiteralPosition {
@@ -43,16 +45,18 @@ enum LiteralPosition {
   Last;
 }
 
-typedef SuggestionOptions = {
-  ?filterFn : FilterFunction,
+typedef SuggestionOptions<T> = {
+  ?filterFn : FilterFunction<T>,
+  ?sortSuggestionsFn : SortSuggestions<T>,
   ?highlightLettersFn : HighlightLetters,
   ?limit : Int,
-  ?onChooseSelection : SelectionChooseFunction,
+  ?onChooseSelection : SelectionChooseFunction<T>,
   ?input : js.html.InputElement,
   ?parent : js.html.Element,
   ?showSearchLiteralItem : Bool,
   ?searchLiteralPosition : LiteralPosition,
   ?searchLiteralValue : InputElement -> String,
   ?searchLiteralPrefix : String,
-  ?suggestions : Array<String>,
+  ?suggestions : Array<T>,
+  ?suggestionToString : T -> String,
 };
