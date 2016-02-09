@@ -19,7 +19,7 @@ using fancy.browser.Dom;
 
   A new FancySearch can be created using the constructor or one of the static
   factories below. In all cases, some means of accessing an input element must
-  be provided, but all options may be omitted.
+  be provided, but all other options may be omitted.
 
   Apart from the constructor and factories, no public methods exist on this
   class. It does provide public access to its suggestion list in the form of:

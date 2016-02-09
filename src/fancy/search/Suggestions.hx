@@ -125,11 +125,10 @@ class Suggestions<T> {
   }
 
   /**
-    `list.setSuggestions` allows you to modify the list of suggested items on
-    the fly.
+    Allows you to modify the list of suggested items on the fly.
   **/
-  public function setSuggestions(s : Array<T>) {
-    opts.suggestions = s.distinct();
+  public function setSuggestions(items: Array<T>) {
+    opts.suggestions = items.distinct();
 
     elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
       var stringified = suggestionToString(opts.suggestionToString, curr);
@@ -238,7 +237,8 @@ class Suggestions<T> {
   }
 
   /**
-    Move the highlight class to a specific item. If no key is provided, this method clears the selection.
+    Move the highlight class to a specific item. If no key is provided, this
+    method clears the selection.
   **/
   public function selectItem(?key : String) {
     // if a selection already existed, clear it

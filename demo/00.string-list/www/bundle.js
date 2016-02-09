@@ -354,9 +354,9 @@ fancy_search_Suggestions.prototype = {
 		if(replaceExisting) this.elements.removeAt(literalPosition);
 		this.elements.insert(literalPosition,label,el);
 	}
-	,setSuggestions: function(s) {
+	,setSuggestions: function(items) {
 		var _g = this;
-		this.opts.suggestions = thx_Arrays.distinct(s);
+		this.opts.suggestions = thx_Arrays.distinct(items);
 		this.elements = thx_Arrays.reduce(this.opts.suggestions,function(acc,curr) {
 			var stringified = fancy_search_Suggestions.suggestionToString(_g.opts.suggestionToString,curr);
 			acc.set(stringified,_g.createSuggestionItem(stringified));

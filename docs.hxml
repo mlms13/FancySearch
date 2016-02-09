@@ -1,7 +1,9 @@
 # build without output
 -cp src
 -cp docs
+-lib fancybrowser
 -lib thx.core
+-lib thx.promise
 -D doc-gen
 -D dox
 -dce no
