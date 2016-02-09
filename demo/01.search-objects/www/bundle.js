@@ -72,16 +72,12 @@ Main.main = function() {
 	var items = [{ value : "Apple", aliases : ["Fuji","Honeycrisp","Gala","Granny Smith"]},{ value : "Bean", aliases : ["Black","Pinto","Navy","Soy","Northern","Kidney"]},{ value : "Chickpea", aliases : ["Garbanzo Bean"]},{ value : "Corn", aliases : []},{ value : "Squash", aliases : ["Summer","Pumpkin","Zucchini","Acorn","Butternut"]},{ value : "Leaf Vegetable", aliases : ["Kale","Spinach","Romain","Iceberg","Lettuce"]}];
 	var options = { minLength : 0, suggestionOptions : { suggestions : items, limit : 4, suggestionToString : function(sugg) {
 		return sugg.value;
-	}, filterFn : function(toString,suggestions,search) {
-		search = search.toLowerCase();
-		console.log("Checking a list of " + suggestions.length + " suggestions");
-		return suggestions.filter(function(sugg1) {
-			return sugg1.aliases.reduce(function(match,alias) {
-				var valFirst = sugg1.value.toLowerCase() + " " + alias.toLowerCase();
-				var valLast = alias.toLowerCase() + " " + sugg1.value.toLowerCase();
-				return match || valFirst.indexOf(search) >= 0 || valLast.indexOf(search) >= 0;
-			},false);
-		});
+	}, filterFn : function(toString,search,sugg1) {
+		return sugg1.aliases.reduce(function(match,alias) {
+			var valFirst = sugg1.value.toLowerCase() + " " + alias.toLowerCase();
+			var valLast = alias.toLowerCase() + " " + sugg1.value.toLowerCase();
+			return match || valFirst.indexOf(search) >= 0 || valLast.indexOf(search) >= 0;
+		},false);
 	}}};
 	var search1 = fancy_Search.createFromSelector(".fancy-container input",options);
 };
@@ -299,19 +295,17 @@ fancy_search_Suggestions.defaultChooseSelection = function(toString,input,select
 	}
 	input.blur();
 };
-fancy_search_Suggestions.defaultFilterer = function(toString,suggestions,search) {
-	search = search.toLowerCase();
-	return thx_Arrays.order(suggestions.filter(function(_) {
-		return fancy_search_Suggestions.suggestionToString(toString,_).toLowerCase().indexOf(search) >= 0;
-	}),function(aT,bT) {
-		var a = fancy_search_Suggestions.suggestionToString(toString,aT);
-		var b = fancy_search_Suggestions.suggestionToString(toString,bT);
-		var posA = a.toLowerCase().indexOf(search);
-		var posB = b.toLowerCase().indexOf(search);
-		if(posA == posB) {
-			if(a < b) return -1; else if(a > b) return 1; else return 0;
-		} else return posA - posB;
-	});
+fancy_search_Suggestions.defaultFilterer = function(toString,search,sugg) {
+	return fancy_search_Suggestions.suggestionToString(toString,sugg).toLowerCase().indexOf(search) >= 0;
+};
+fancy_search_Suggestions.defaultSortSuggestions = function(toString,search,suggA,suggB) {
+	var a = fancy_search_Suggestions.suggestionToString(toString,suggA);
+	var b = fancy_search_Suggestions.suggestionToString(toString,suggB);
+	var posA = a.toLowerCase().indexOf(search);
+	var posB = b.toLowerCase().indexOf(search);
+	if(posA == posB) {
+		if(a < b) return -1; else if(a > b) return 1; else return 0;
+	} else return posA - posB;
 };
 fancy_search_Suggestions.defaultHighlightLetters = function(filtered,search) {
 	return filtered.map(function(str) {
@@ -325,7 +319,7 @@ fancy_search_Suggestions.defaultHighlightLetters = function(filtered,search) {
 };
 fancy_search_Suggestions.prototype = {
 	initializeOptions: function(options) {
-		this.opts = thx_Objects.combine({ filterFn : fancy_search_Suggestions.defaultFilterer, highlightLettersFn : fancy_search_Suggestions.defaultHighlightLetters, limit : 5, onChooseSelection : fancy_search_Suggestions.defaultChooseSelection, showSearchLiteralItem : false, searchLiteralPosition : fancy_search_util_LiteralPosition.First, searchLiteralValue : function(inpt) {
+		this.opts = thx_Objects.combine({ filterFn : fancy_search_Suggestions.defaultFilterer, sortSuggestionsFn : fancy_search_Suggestions.defaultSortSuggestions, highlightLettersFn : fancy_search_Suggestions.defaultHighlightLetters, limit : 5, onChooseSelection : fancy_search_Suggestions.defaultChooseSelection, showSearchLiteralItem : false, searchLiteralPosition : fancy_search_util_LiteralPosition.First, searchLiteralValue : function(inpt) {
 			return inpt.value;
 		}, searchLiteralPrefix : "Search for: ", suggestions : [], suggestionToString : function(t) {
 			return Std.string(t);
@@ -388,7 +382,15 @@ fancy_search_Suggestions.prototype = {
 	,filter: function(search) {
 		var _g = this;
 		search = search.toLowerCase();
-		this.filtered = thx_Arrays.reduce(this.opts.filterFn(this.opts.suggestionToString,this.opts.suggestions,search).slice(0,this.opts.limit),function(acc,curr) {
+		this.filtered = thx_Arrays.reduce(thx_Arrays.order(this.opts.suggestions.filter((function(f,a1,a2) {
+			return function(a3) {
+				return f(a1,a2,a3);
+			};
+		})(this.opts.filterFn,this.opts.suggestionToString,search)),(function(f1,a11,a21) {
+			return function(a31,a4) {
+				return f1(a11,a21,a31,a4);
+			};
+		})(this.opts.sortSuggestionsFn,this.opts.suggestionToString,search)).slice(0,this.opts.limit),function(acc,curr) {
 			acc.set(fancy_search_Suggestions.suggestionToString(_g.opts.suggestionToString,curr),curr);
 			return acc;
 		},(function($this) {

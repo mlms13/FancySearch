@@ -19,17 +19,13 @@ class Main {
         suggestions : items,
         limit : 4,
         suggestionToString : function (sugg) return sugg.value,
-        filterFn : function (toString, suggestions : Array<Food>, search : String) {
-          search = search.toLowerCase();
-          trace('Checking a list of ${suggestions.length} suggestions');
-          return suggestions.filter(function (sugg) {
-            return sugg.aliases.reduce(function (match, alias) {
-              var valFirst = sugg.value.toLowerCase() + " " + alias.toLowerCase(),
-                  valLast = alias.toLowerCase() + " " + sugg.value.toLowerCase();
+        filterFn : function (toString, search, sugg) {
+          return sugg.aliases.reduce(function (match, alias) {
+            var valFirst = sugg.value.toLowerCase() + " " + alias.toLowerCase(),
+                valLast = alias.toLowerCase() + " " + sugg.value.toLowerCase();
 
-              return match || valFirst.indexOf(search) >= 0 || valLast.indexOf(search) >= 0;
-            }, false);
-          });
+            return match || valFirst.indexOf(search) >= 0 || valLast.indexOf(search) >= 0;
+          }, false);
         }
       }
     };

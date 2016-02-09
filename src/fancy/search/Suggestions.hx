@@ -58,6 +58,7 @@ class Suggestions<T> {
   function initializeOptions(options : SuggestionOptions<T>) {
     this.opts = cast Objects.combine(({
       filterFn : defaultFilterer,
+      sortSuggestionsFn : defaultSortSuggestions,
       highlightLettersFn : defaultHighlightLetters,
       limit : 5,
       onChooseSelection : defaultChooseSelection,
@@ -157,8 +158,9 @@ class Suggestions<T> {
     search = search.toLowerCase();
 
     // call the provided filter function, iterating over the whole list
-    // TODO: change filterFn signature to T -> String -> Bool
-    filtered = opts.filterFn(opts.suggestionToString, opts.suggestions, search)
+    filtered = opts.suggestions
+      .filter(opts.filterFn.bind(opts.suggestionToString, search))
+      .order(opts.sortSuggestionsFn.bind(opts.suggestionToString, search))
       .slice(0, opts.limit)
       .reduce(function (acc : OrderedMap<String, T>, curr : T) {
         acc.set(suggestionToString(opts.suggestionToString, curr), curr);
@@ -304,21 +306,20 @@ class Suggestions<T> {
     input.blur();
   }
 
-  static function defaultFilterer<T>(toString : T -> String, suggestions : Array<T>, search : String) : Array<T> {
-    search = search.toLowerCase();
-    return suggestions
-      .filter.fn(suggestionToString(toString, _).toLowerCase().indexOf(search) >= 0)
-      .order(function (aT, bT) {
-        var a = suggestionToString(toString, aT),
-            b = suggestionToString(toString, bT),
-            posA = a.toLowerCase().indexOf(search),
-            posB = b.toLowerCase().indexOf(search);
+  static function defaultFilterer<T>(toString : T -> String, search : String, sugg : T) : Bool {
+    return suggestionToString(toString, sugg).toLowerCase().indexOf(search) >= 0;
+  }
 
-        return if (posA == posB)
-          if (a < b) -1 else if ( a > b ) 1 else 0;
-        else
-          posA - posB;
-      });
+  static function defaultSortSuggestions<T>(toString : T -> String, search : String, suggA : T, suggB : T) {
+    var a = suggestionToString(toString, suggA),
+        b = suggestionToString(toString, suggB),
+        posA = a.toLowerCase().indexOf(search),
+        posB = b.toLowerCase().indexOf(search);
+
+    return if (posA == posB)
+      if (a < b) -1 else if (a > b) 1 else 0;
+    else
+      posA - posB;
   }
 
   static function defaultHighlightLetters(filtered : Array<String>, search : String) {

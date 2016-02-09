@@ -3,7 +3,8 @@ package fancy.search.util;
 import haxe.ds.Option;
 import js.html.InputElement;
 
-typedef FilterFunction<T> = (T -> String) -> Array<T> -> String -> Array<T>;
+typedef FilterFunction<T> = (T -> String) -> String -> T -> Bool;
+typedef SortSuggestions<T> = (T -> String) -> String -> T -> T -> Int;
 typedef HighlightLetters = Array<String> -> String -> Array<Array<thx.Tuple.Tuple2<Int, Int>>>;
 typedef SelectionChooseFunction<T> = (T -> String) -> js.html.InputElement -> Option<T> -> Void;
 
@@ -46,6 +47,7 @@ enum LiteralPosition {
 
 typedef SuggestionOptions<T> = {
   ?filterFn : FilterFunction<T>,
+  ?sortSuggestionsFn : SortSuggestions<T>,
   ?highlightLettersFn : HighlightLetters,
   ?limit : Int,
   ?onChooseSelection : SelectionChooseFunction<T>,
