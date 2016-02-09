@@ -252,11 +252,6 @@ class Suggestions<T> {
       elements.get(selected).addClass(classes.suggestionItemSelected);
   }
 
-  function selectItemAtIndex(index : Int) {
-    // TODO: implement OrderedMap.keyAt() in thx
-    selectItem(filtered.keys().toArray()[index]);
-  }
-
   /**
     Move the selection highlight to the previous suggestion.
   **/
@@ -264,8 +259,7 @@ class Suggestions<T> {
     var currentIndex = filtered.keys().toArray().indexOf(selected),
         targetIndex = currentIndex > 0 ? currentIndex - 1 : filtered.length - 1;
 
-    // TODO: add this to thx
-    selectItemAtIndex(targetIndex);
+    selectItem(filtered.keyAt(targetIndex));
   }
 
   /**
@@ -275,7 +269,7 @@ class Suggestions<T> {
     var currentIndex = filtered.keys().toArray().indexOf(selected),
         targetIndex = (currentIndex + 1) == filtered.length ? 0 : currentIndex + 1;
 
-    selectItemAtIndex(targetIndex);
+    selectItem(filtered.keyAt(targetIndex));
   }
 
   /**

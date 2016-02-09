@@ -449,16 +449,13 @@ fancy_search_Suggestions.prototype = {
 		this.selected = key;
 		if(!thx_Strings.isEmpty(this.selected) && this.elements.exists(this.selected)) fancy_browser_Dom.addClass(this.elements.get(this.selected),this.classes.suggestionItemSelected);
 	}
-	,selectItemAtIndex: function(index) {
-		this.selectItem(thx_Iterators.toArray(this.filtered.keys())[index]);
-	}
 	,moveSelectionUp: function() {
 		var currentIndex;
 		var _this = thx_Iterators.toArray(this.filtered.keys());
 		currentIndex = HxOverrides.indexOf(_this,this.selected,0);
 		var targetIndex;
 		if(currentIndex > 0) targetIndex = currentIndex - 1; else targetIndex = this.filtered.length - 1;
-		this.selectItemAtIndex(targetIndex);
+		this.selectItem(this.filtered.keyAt(targetIndex));
 	}
 	,moveSelectionDown: function() {
 		var currentIndex;
@@ -466,7 +463,7 @@ fancy_search_Suggestions.prototype = {
 		currentIndex = HxOverrides.indexOf(_this,this.selected,0);
 		var targetIndex;
 		if(currentIndex + 1 == this.filtered.length) targetIndex = 0; else targetIndex = currentIndex + 1;
-		this.selectItemAtIndex(targetIndex);
+		this.selectItem(this.filtered.keyAt(targetIndex));
 	}
 	,chooseSelectedItem: function() {
 		this.opts.onChooseSelection(this.opts.suggestionToString,this.opts.input,this.filtered.exists(this.selected) && this.filtered.get(this.selected) != null?haxe_ds_Option.Some(this.filtered.get(this.selected)):haxe_ds_Option.None);
@@ -899,6 +896,9 @@ thx_OrderedMapImpl.__interfaces__ = [haxe_IMap];
 thx_OrderedMapImpl.prototype = {
 	get: function(k) {
 		return this.map.get(k);
+	}
+	,keyAt: function(index) {
+		return this.arr[index];
 	}
 	,set: function(k,v) {
 		if(!this.map.exists(k)) {
