@@ -15,14 +15,16 @@ using fancy.browser.Dom;
 
 /**
   The `Search` class is the main entry point. It wires up event handlers along
-  with the connection to the suggestion list.
+  with the connection to the suggestion list. Its generic type match the type of
+  the items passed as `SuggestionOptions.suggestions` to the
+  constructor.
 
   A new FancySearch can be created using the constructor or one of the static
   factories below. In all cases, some means of accessing an input element must
   be provided, but all other options may be omitted.
 
   Apart from the constructor and factories, no public methods exist on this
-  class. It does provide public access to its suggestion list in the form of:
+  class. It does provide public access to its `Suggestions` in the form of:
 
   ```haxe
   myFancySearch.list;
@@ -100,8 +102,8 @@ class Search<T> {
     return Objects.merge({
       input : 'fs-search-input',
       inputEmpty : 'fs-search-input-empty',
+      inputLoading : 'fs-search-input-loading',
       clearButton : 'fs-clear-input-button',
-      inputLoading : 'fs-input-loading',
       suggestionContainer : 'fs-suggestion-container',
       suggestionsOpen : 'fs-suggestion-container-open',
       suggestionsClosed : 'fs-suggestion-container-closed',

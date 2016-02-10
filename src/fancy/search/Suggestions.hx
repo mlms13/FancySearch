@@ -8,7 +8,7 @@ import fancy.search.util.Types;
 using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;
-using thx.Objects;
+import thx.Objects;
 using thx.OrderedMap;
 using thx.Strings;
 using thx.Tuple;
@@ -43,7 +43,6 @@ class Suggestions<T> {
     // defaults
     this.classes = classes;
     initializeOptions(options);
-    selected = '';
     isOpen = false;
     filtered = OrderedMap.createString();
 
@@ -166,32 +165,32 @@ class Suggestions<T> {
         return acc;
       }, OrderedMap.createString());
 
-    var filteredStrings = filtered.keys().toArray(),
-        wordParts = opts.highlightLettersFn(filteredStrings, search);
-
-    filteredStrings.reducei(function (list : Element, str : String, index) {
-      var listItem = elements.get(str).empty();
-
+    filtered.tuples().reducei(function (list : Element, pair, index) {
       // each filtered word has an array of ranges to highlight
-      // first we sort them be start index, then we iterate over them,
-      // splitting the suggestion into spans and strongs.
-      // NOTE: for now, we expect your ranges to not overlap each other.
-      wordParts[index].order.fn(_0.right - _1.right).map(function (range) {
-        // if the highlighted range isn't at the beginning, span it
-        if (range.left != 0)
-          listItem.append(Dom.create('span', str.substr(0, range.left)));
+      var key = pair.left,
+          val = pair.right;
 
-        // if the range to highlight has a non-zero length, strong it
-        if (range.right > 0)
-          listItem.append(Dom.create('strong', str.substr(range.left, range.right)));
+      var listItem = opts.highlightLettersFn(opts.suggestionToString, search, val)
+        .order.fn(_0.right - _1.right) // sort by start, assuming no overlap
 
-        // if the range didn't end at the end of the string, span the rest
-        if (range.left + range.right < str.length)
-          listItem.append(Dom.create('span', str.substr(range.right + range.left)));
-      });
+        // accumulate the suggestion parts as spans and strongs
+        .reduce(function (acc : Element, range) {
+          // if the highlighted range isn't at the beginning, span it
+          if (range.left != 0)
+            acc.append(Dom.create('span', key.substr(0, range.left)));
 
-      list.append(listItem);
-      return list;
+          // if the range to highlight has a non-zero length, strong it
+          if (range.right > 0)
+            acc.append(Dom.create('strong', key.substr(range.left, range.right)));
+
+          // if the range didn't end at the end of the string, span the rest
+          if (range.left + range.right < key.length)
+            acc.append(Dom.create('span', key.substr(range.right + range.left)));
+
+          return acc;
+        }, elements.get(key).empty());
+
+      return list.append(listItem);
     }, list.empty());
 
     if (!filtered.exists(selected)) {
@@ -316,11 +315,11 @@ class Suggestions<T> {
       posA - posB;
   }
 
-  static function defaultHighlightLetters(filtered : Array<String>, search : String) {
-    return filtered.map(function (str) {
-      return str.indexOf(search) >= 0 ?
-        [new Tuple2(str.toLowerCase().indexOf(search.toLowerCase()), search.length)] :
-        [new Tuple2(0, 0)];
-    });
+  static function defaultHighlightLetters<T>(toString : T -> String, search : String, item : T) {
+    var str = toString(item).toLowerCase();
+
+    return str.indexOf(search) >= 0 ?
+      [new Tuple2(str.indexOf(search), search.length)] :
+      [new Tuple2(0, 0)];
   }
 }

@@ -158,7 +158,7 @@ fancy_Search.prototype = {
 		return thx_Objects.combine({ classes : { }, keys : { }, minLength : 1, clearBtn : true, container : this.input.parentElement, onClearButtonClick : $bind(this,this.onClearButtonClick), suggestionOptions : { }},options == null?{ }:options);
 	}
 	,createDefaultClasses: function(classes) {
-		return thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", clearButton : "fs-clear-input-button", inputLoading : "fs-input-loading", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},this.opts.classes);
+		return thx_Objects.combine({ input : "fs-search-input", inputEmpty : "fs-search-input-empty", inputLoading : "fs-search-input-loading", clearButton : "fs-clear-input-button", suggestionContainer : "fs-suggestion-container", suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : "fs-suggestion-list", suggestionItem : "fs-suggestion-item", suggestionItemSelected : "fs-suggestion-item-selected"},this.opts.classes);
 	}
 	,onSearchFocus: function(e) {
 		this.filterUsingInputValue();
@@ -270,7 +270,6 @@ var fancy_search_Suggestions = function(options,classes) {
 	if(options.parent == null || options.input == null) throw new js__$Boot_HaxeError("Cannot create `Suggestions` without input or parent element");
 	this.classes = classes;
 	this.initializeOptions(options);
-	this.selected = "";
 	this.isOpen = false;
 	var inst = new thx_StringOrderedMap();
 	this.filtered = inst;
@@ -307,15 +306,14 @@ fancy_search_Suggestions.defaultSortSuggestions = function(toString,search,suggA
 		if(a < b) return -1; else if(a > b) return 1; else return 0;
 	} else return posA - posB;
 };
-fancy_search_Suggestions.defaultHighlightLetters = function(filtered,search) {
-	return filtered.map(function(str) {
-		if(str.indexOf(search) >= 0) return [(function($this) {
-			var $r;
-			var _0 = str.toLowerCase().indexOf(search.toLowerCase());
-			$r = { _0 : _0, _1 : search.length};
-			return $r;
-		}(this))]; else return [{ _0 : 0, _1 : 0}];
-	});
+fancy_search_Suggestions.defaultHighlightLetters = function(toString,search,item) {
+	var str = toString(item).toLowerCase();
+	if(str.indexOf(search) >= 0) return [(function($this) {
+		var $r;
+		var _0 = str.indexOf(search);
+		$r = { _0 : _0, _1 : search.length};
+		return $r;
+	}(this))]; else return [{ _0 : 0, _1 : 0}];
 };
 fancy_search_Suggestions.prototype = {
 	initializeOptions: function(options) {
@@ -399,23 +397,22 @@ fancy_search_Suggestions.prototype = {
 			$r = inst;
 			return $r;
 		}(this)));
-		var filteredStrings = thx_Iterators.toArray(this.filtered.keys());
-		var wordParts = this.opts.highlightLettersFn(filteredStrings,search);
-		thx_Arrays.reducei(filteredStrings,function(list,str,index) {
-			var listItem = fancy_browser_Dom.empty(_g.elements.get(str));
-			((function(_e) {
+		thx_Arrays.reducei(this.filtered.tuples(),function(list,pair,index) {
+			var key = pair._0;
+			var val = pair._1;
+			var listItem = thx_Arrays.reduce(((function(_e) {
 				return function(sort) {
 					return thx_Arrays.order(_e,sort);
 				};
-			})(wordParts[index]))(function(_0,_1) {
+			})(_g.opts.highlightLettersFn(_g.opts.suggestionToString,search,val)))(function(_0,_1) {
 				return _0._1 - _1._1;
-			}).map(function(range) {
-				if(range._0 != 0) fancy_browser_Dom.append(listItem,fancy_browser_Dom.create("span",null,null,HxOverrides.substr(str,0,range._0)));
-				if(range._1 > 0) fancy_browser_Dom.append(listItem,fancy_browser_Dom.create("strong",null,null,HxOverrides.substr(str,range._0,range._1)));
-				if(range._0 + range._1 < str.length) fancy_browser_Dom.append(listItem,fancy_browser_Dom.create("span",null,null,HxOverrides.substr(str,range._1 + range._0,null)));
-			});
-			fancy_browser_Dom.append(list,listItem);
-			return list;
+			}),function(acc1,range) {
+				if(range._0 != 0) fancy_browser_Dom.append(acc1,fancy_browser_Dom.create("span",null,null,HxOverrides.substr(key,0,range._0)));
+				if(range._1 > 0) fancy_browser_Dom.append(acc1,fancy_browser_Dom.create("strong",null,null,HxOverrides.substr(key,range._0,range._1)));
+				if(range._0 + range._1 < key.length) fancy_browser_Dom.append(acc1,fancy_browser_Dom.create("span",null,null,HxOverrides.substr(key,range._1 + range._0,null)));
+				return acc1;
+			},fancy_browser_Dom.empty(_g.elements.get(key)));
+			return fancy_browser_Dom.append(list,listItem);
 		},fancy_browser_Dom.empty(this.list));
 		if(!this.filtered.exists(this.selected)) this.selected = null;
 		var literalValue = StringTools.trim(this.opts.searchLiteralValue(this.opts.input));
@@ -937,6 +934,13 @@ thx_OrderedMapImpl.prototype = {
 	,iterator: function() {
 		var _this = this.toArray();
 		return HxOverrides.iter(_this);
+	}
+	,tuples: function() {
+		var _g = this;
+		return this.arr.map(function(key) {
+			var _1 = _g.map.get(key);
+			return { _0 : key, _1 : _1};
+		});
 	}
 	,toArray: function() {
 		var values = [];
