@@ -6,6 +6,6 @@
   "tags" : ["browser", "js", "search", "typeahead"],
   "description" : "A simple typeahead search implementation for Haxe and JavaScript",
   "releasenote" : "",
-  "version" : "1.0.0-beta.1",
+  "version" : "1.0.0-beta.2",
   "contributors" : ["mlms13"]
 }
