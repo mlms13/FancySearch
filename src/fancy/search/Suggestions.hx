@@ -8,6 +8,7 @@ import fancy.search.util.Types;
 using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;
+using thx.Nulls;
 import thx.Objects;
 using thx.OrderedMap;
 using thx.Strings;
@@ -42,7 +43,7 @@ class Suggestions<T> {
 
     // defaults
     this.classes = classes;
-    initializeOptions(options);
+    this.opts = initializeOptions(options);
     isOpen = false;
     filtered = OrderedMap.createString();
 
@@ -55,19 +56,22 @@ class Suggestions<T> {
   }
 
   function initializeOptions(options : SuggestionOptions<T>) {
-    this.opts = cast Objects.combine(({
-      filterFn : defaultFilterer,
-      sortSuggestionsFn : defaultSortSuggestions,
-      highlightLettersFn : defaultHighlightLetters,
-      limit : 5,
-      onChooseSelection : defaultChooseSelection,
-      showSearchLiteralItem : false,
-      searchLiteralPosition : LiteralPosition.First,
-      searchLiteralValue : function (inpt) return inpt.value,
-      searchLiteralPrefix : "Search for: ",
-      suggestions : [],
-      suggestionToString : function (t) return Std.string(t),
-    } : SuggestionOptions<T>), options);
+    var opts : SuggestionOptions<T> = {
+      parent : options.parent,
+      input : options.input
+    };
+    opts.filterFn = options.filterFn.or(defaultFilterer);
+    opts.sortSuggestionsFn = options.sortSuggestionsFn.or(defaultSortSuggestions);
+    opts.highlightLettersFn = options.highlightLettersFn.or(defaultHighlightLetters);
+    opts.limit = options.limit.or(5);
+    opts.onChooseSelection = options.onChooseSelection.or(defaultChooseSelection);
+    opts.showSearchLiteralItem = options.showSearchLiteralItem.or(false);
+    opts.searchLiteralPosition = options.searchLiteralPosition.or(LiteralPosition.First);
+    opts.searchLiteralValue = options.searchLiteralValue.or(function (inpt) return inpt.value);
+    opts.searchLiteralPrefix = options.searchLiteralPrefix.or("Search for: ");
+    opts.suggestions = options.suggestions.or([]);
+    opts.suggestionToString = options.suggestionToString.or(function (t) return Std.string(t));
+    return opts;
   }
 
   function createSuggestionItem(label : String, ?value : String) : Element {

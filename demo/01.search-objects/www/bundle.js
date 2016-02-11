@@ -269,7 +269,7 @@ fancy_browser_Keys.__name__ = true;
 var fancy_search_Suggestions = function(options,classes) {
 	if(options.parent == null || options.input == null) throw new js__$Boot_HaxeError("Cannot create `Suggestions` without input or parent element");
 	this.classes = classes;
-	this.initializeOptions(options);
+	this.opts = this.initializeOptions(options);
 	this.isOpen = false;
 	var inst = new thx_StringOrderedMap();
 	this.filtered = inst;
@@ -317,11 +317,67 @@ fancy_search_Suggestions.defaultHighlightLetters = function(toString,search,item
 };
 fancy_search_Suggestions.prototype = {
 	initializeOptions: function(options) {
-		this.opts = thx_Objects.combine({ filterFn : fancy_search_Suggestions.defaultFilterer, sortSuggestionsFn : fancy_search_Suggestions.defaultSortSuggestions, highlightLettersFn : fancy_search_Suggestions.defaultHighlightLetters, limit : 5, onChooseSelection : fancy_search_Suggestions.defaultChooseSelection, showSearchLiteralItem : false, searchLiteralPosition : fancy_search_util_LiteralPosition.First, searchLiteralValue : function(inpt) {
+		var opts = { parent : options.parent, input : options.input};
+		var t;
+		var _0 = options;
+		var _1;
+		if(null == _0) t = null; else if(null == (_1 = _0.filterFn)) t = null; else t = _1;
+		if(t != null) opts.filterFn = t; else opts.filterFn = fancy_search_Suggestions.defaultFilterer;
+		var t1;
+		var _01 = options;
+		var _11;
+		if(null == _01) t1 = null; else if(null == (_11 = _01.sortSuggestionsFn)) t1 = null; else t1 = _11;
+		if(t1 != null) opts.sortSuggestionsFn = t1; else opts.sortSuggestionsFn = fancy_search_Suggestions.defaultSortSuggestions;
+		var t2;
+		var _02 = options;
+		var _12;
+		if(null == _02) t2 = null; else if(null == (_12 = _02.highlightLettersFn)) t2 = null; else t2 = _12;
+		if(t2 != null) opts.highlightLettersFn = t2; else opts.highlightLettersFn = fancy_search_Suggestions.defaultHighlightLetters;
+		var t3;
+		var _03 = options;
+		var _13;
+		if(null == _03) t3 = null; else if(null == (_13 = _03.limit)) t3 = null; else t3 = _13;
+		if(t3 != null) opts.limit = t3; else opts.limit = 5;
+		var t4;
+		var _04 = options;
+		var _14;
+		if(null == _04) t4 = null; else if(null == (_14 = _04.onChooseSelection)) t4 = null; else t4 = _14;
+		if(t4 != null) opts.onChooseSelection = t4; else opts.onChooseSelection = fancy_search_Suggestions.defaultChooseSelection;
+		var t5;
+		var _05 = options;
+		var _15;
+		if(null == _05) t5 = null; else if(null == (_15 = _05.showSearchLiteralItem)) t5 = null; else t5 = _15;
+		if(t5 != null) opts.showSearchLiteralItem = t5; else opts.showSearchLiteralItem = false;
+		var t6;
+		var _06 = options;
+		var _16;
+		if(null == _06) t6 = null; else if(null == (_16 = _06.searchLiteralPosition)) t6 = null; else t6 = _16;
+		if(t6 != null) opts.searchLiteralPosition = t6; else opts.searchLiteralPosition = fancy_search_util_LiteralPosition.First;
+		var t7;
+		var _07 = options;
+		var _17;
+		if(null == _07) t7 = null; else if(null == (_17 = _07.searchLiteralValue)) t7 = null; else t7 = _17;
+		if(t7 != null) opts.searchLiteralValue = t7; else opts.searchLiteralValue = function(inpt) {
 			return inpt.value;
-		}, searchLiteralPrefix : "Search for: ", suggestions : [], suggestionToString : function(t) {
-			return Std.string(t);
-		}},options);
+		};
+		var t8;
+		var _08 = options;
+		var _18;
+		if(null == _08) t8 = null; else if(null == (_18 = _08.searchLiteralPrefix)) t8 = null; else t8 = _18;
+		if(t8 != null) opts.searchLiteralPrefix = t8; else opts.searchLiteralPrefix = "Search for: ";
+		var t9;
+		var _09 = options;
+		var _19;
+		if(null == _09) t9 = null; else if(null == (_19 = _09.suggestions)) t9 = null; else t9 = _19;
+		if(t9 != null) opts.suggestions = t9; else opts.suggestions = [];
+		var t10;
+		var _010 = options;
+		var _110;
+		if(null == _010) t10 = null; else if(null == (_110 = _010.suggestionToString)) t10 = null; else t10 = _110;
+		if(t10 != null) opts.suggestionToString = t10; else opts.suggestionToString = function(t11) {
+			return Std.string(t11);
+		};
+		return opts;
 	}
 	,createSuggestionItem: function(label,value) {
 		var _g = this;
