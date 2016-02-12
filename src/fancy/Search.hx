@@ -161,6 +161,8 @@ class Search<T> {
   }
 
   function onSearchKeydown(e : KeyboardEvent) {
+    e.stopPropagation();
+
     var code = e.which != null ? e.which : e.keyCode;
 
     if (opts.keys.closeMenu.contains(code)) {

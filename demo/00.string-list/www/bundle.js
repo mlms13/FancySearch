@@ -177,6 +177,7 @@ fancy_Search.prototype = {
 		}
 	}
 	,onSearchKeydown: function(e) {
+		e.stopPropagation();
 		var code;
 		if(e.which != null) code = e.which; else code = e.keyCode;
 		if(thx_Arrays.contains(this.opts.keys.closeMenu,code)) this.list.close(); else if(thx_Arrays.contains(this.opts.keys.selectionUp,code) && this.list.isOpen) {
