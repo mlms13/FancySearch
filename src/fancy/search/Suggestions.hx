@@ -64,6 +64,7 @@ class Suggestions<T> {
     opts.sortSuggestionsFn = options.sortSuggestionsFn.or(defaultSortSuggestions);
     opts.highlightLettersFn = options.highlightLettersFn.or(defaultHighlightLetters);
     opts.limit = options.limit.or(5);
+    opts.alwaysSelected = options.alwaysSelected.or(false);
     opts.onChooseSelection = options.onChooseSelection.or(defaultChooseSelection);
     opts.showSearchLiteralItem = options.showSearchLiteralItem.or(false);
     opts.searchLiteralPosition = options.searchLiteralPosition.or(LiteralPosition.First);
@@ -197,20 +198,30 @@ class Suggestions<T> {
       return list.append(listItem);
     }, list.empty());
 
-    if (!filtered.exists(selected)) {
-      selected = null;
-    }
-
     // replace the existing literal item, if the options request it
     // and add inject the literal search text as a key in `filtered`
-    var literalValue = opts.searchLiteralValue(opts.input).trim();
-    if (!search.isEmpty() && shouldCreateLiteral(literalValue)) {
+    var literalValue = opts.searchLiteralValue(opts.input).trim(),
+        createLiteral = shouldCreateLiteral(literalValue);
+
+    if (!search.isEmpty() && createLiteral) {
       createLiteralItem(literalValue);
       var literalElement = elements.get(literalValue);
 
       filtered.insert(getLiteralItemIndex(), literalValue, null);
       list.insertAtIndex(literalElement, getLiteralItemIndex());
-      if (selected.isEmpty()) selectItem(literalValue);
+    }
+
+    // if the previously selected item is no longer after filtering...
+    if (!filtered.exists(selected)) {
+      if (createLiteral)
+        // ...select the literal, if we created it
+        selectItem(literalValue);
+      else if (opts.alwaysSelected)
+        // ...or select the first item if we should always select _something_
+        selectItem(filtered.keyAt(0));
+      else
+        // ...or select nothing at all
+        selectItem();
     }
 
     if (filtered.length == 0) {

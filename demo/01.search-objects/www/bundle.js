@@ -70,7 +70,7 @@ var Main = function() { };
 Main.__name__ = true;
 Main.main = function() {
 	var items = [{ value : "Apple", aliases : ["Fuji","Honeycrisp","Gala","Granny Smith"]},{ value : "Bean", aliases : ["Black","Pinto","Navy","Soy","Northern","Kidney"]},{ value : "Chickpea", aliases : ["Garbanzo Bean"]},{ value : "Corn", aliases : []},{ value : "Squash", aliases : ["Summer","Pumpkin","Zucchini","Acorn","Butternut"]},{ value : "Leaf Vegetable", aliases : ["Kale","Spinach","Romain","Iceberg","Lettuce"]}];
-	var options = { minLength : 0, suggestionOptions : { suggestions : items, limit : 4, suggestionToString : function(sugg) {
+	var options = { minLength : 0, suggestionOptions : { suggestions : items, limit : 4, alwaysSelected : true, suggestionToString : function(sugg) {
 		return sugg.value;
 	}, filterFn : function(toString,search,sugg1) {
 		return sugg1.aliases.reduce(function(match,alias) {
@@ -342,41 +342,46 @@ fancy_search_Suggestions.prototype = {
 		var t4;
 		var _04 = options;
 		var _14;
-		if(null == _04) t4 = null; else if(null == (_14 = _04.onChooseSelection)) t4 = null; else t4 = _14;
-		if(t4 != null) opts.onChooseSelection = t4; else opts.onChooseSelection = fancy_search_Suggestions.defaultChooseSelection;
+		if(null == _04) t4 = null; else if(null == (_14 = _04.alwaysSelected)) t4 = null; else t4 = _14;
+		if(t4 != null) opts.alwaysSelected = t4; else opts.alwaysSelected = false;
 		var t5;
 		var _05 = options;
 		var _15;
-		if(null == _05) t5 = null; else if(null == (_15 = _05.showSearchLiteralItem)) t5 = null; else t5 = _15;
-		if(t5 != null) opts.showSearchLiteralItem = t5; else opts.showSearchLiteralItem = false;
+		if(null == _05) t5 = null; else if(null == (_15 = _05.onChooseSelection)) t5 = null; else t5 = _15;
+		if(t5 != null) opts.onChooseSelection = t5; else opts.onChooseSelection = fancy_search_Suggestions.defaultChooseSelection;
 		var t6;
 		var _06 = options;
 		var _16;
-		if(null == _06) t6 = null; else if(null == (_16 = _06.searchLiteralPosition)) t6 = null; else t6 = _16;
-		if(t6 != null) opts.searchLiteralPosition = t6; else opts.searchLiteralPosition = fancy_search_util_LiteralPosition.First;
+		if(null == _06) t6 = null; else if(null == (_16 = _06.showSearchLiteralItem)) t6 = null; else t6 = _16;
+		if(t6 != null) opts.showSearchLiteralItem = t6; else opts.showSearchLiteralItem = false;
 		var t7;
 		var _07 = options;
 		var _17;
-		if(null == _07) t7 = null; else if(null == (_17 = _07.searchLiteralValue)) t7 = null; else t7 = _17;
-		if(t7 != null) opts.searchLiteralValue = t7; else opts.searchLiteralValue = function(inpt) {
-			return inpt.value;
-		};
+		if(null == _07) t7 = null; else if(null == (_17 = _07.searchLiteralPosition)) t7 = null; else t7 = _17;
+		if(t7 != null) opts.searchLiteralPosition = t7; else opts.searchLiteralPosition = fancy_search_util_LiteralPosition.First;
 		var t8;
 		var _08 = options;
 		var _18;
-		if(null == _08) t8 = null; else if(null == (_18 = _08.searchLiteralPrefix)) t8 = null; else t8 = _18;
-		if(t8 != null) opts.searchLiteralPrefix = t8; else opts.searchLiteralPrefix = "Search for: ";
+		if(null == _08) t8 = null; else if(null == (_18 = _08.searchLiteralValue)) t8 = null; else t8 = _18;
+		if(t8 != null) opts.searchLiteralValue = t8; else opts.searchLiteralValue = function(inpt) {
+			return inpt.value;
+		};
 		var t9;
 		var _09 = options;
 		var _19;
-		if(null == _09) t9 = null; else if(null == (_19 = _09.suggestions)) t9 = null; else t9 = _19;
-		if(t9 != null) opts.suggestions = t9; else opts.suggestions = [];
+		if(null == _09) t9 = null; else if(null == (_19 = _09.searchLiteralPrefix)) t9 = null; else t9 = _19;
+		if(t9 != null) opts.searchLiteralPrefix = t9; else opts.searchLiteralPrefix = "Search for: ";
 		var t10;
 		var _010 = options;
 		var _110;
-		if(null == _010) t10 = null; else if(null == (_110 = _010.suggestionToString)) t10 = null; else t10 = _110;
-		if(t10 != null) opts.suggestionToString = t10; else opts.suggestionToString = function(t11) {
-			return Std.string(t11);
+		if(null == _010) t10 = null; else if(null == (_110 = _010.suggestions)) t10 = null; else t10 = _110;
+		if(t10 != null) opts.suggestions = t10; else opts.suggestions = [];
+		var t11;
+		var _011 = options;
+		var _111;
+		if(null == _011) t11 = null; else if(null == (_111 = _011.suggestionToString)) t11 = null; else t11 = _111;
+		if(t11 != null) opts.suggestionToString = t11; else opts.suggestionToString = function(t12) {
+			return Std.string(t12);
 		};
 		return opts;
 	}
@@ -471,14 +476,16 @@ fancy_search_Suggestions.prototype = {
 			},fancy_browser_Dom.empty(_g.elements.get(key)));
 			return fancy_browser_Dom.append(list,listItem);
 		},fancy_browser_Dom.empty(this.list));
-		if(!this.filtered.exists(this.selected)) this.selected = null;
 		var literalValue = StringTools.trim(this.opts.searchLiteralValue(this.opts.input));
-		if(!thx_Strings.isEmpty(search) && this.shouldCreateLiteral(literalValue)) {
+		var createLiteral = this.shouldCreateLiteral(literalValue);
+		if(!thx_Strings.isEmpty(search) && createLiteral) {
 			this.createLiteralItem(literalValue);
 			var literalElement = this.elements.get(literalValue);
 			this.filtered.insert(this.getLiteralItemIndex(),literalValue,null);
 			fancy_browser_Dom.insertAtIndex(this.list,literalElement,this.getLiteralItemIndex());
-			if(thx_Strings.isEmpty(this.selected)) this.selectItem(literalValue);
+		}
+		if(!this.filtered.exists(this.selected)) {
+			if(createLiteral) this.selectItem(literalValue); else if(this.opts.alwaysSelected) this.selectItem(this.filtered.keyAt(0)); else this.selectItem();
 		}
 		if(this.filtered.length == 0) fancy_browser_Dom.addClass(this.el,this.classes.suggestionsEmpty); else fancy_browser_Dom.removeClass(this.el,this.classes.suggestionsEmpty);
 	}

@@ -18,6 +18,7 @@ class Main {
       suggestionOptions : {
         suggestions : items,
         limit : 4,
+        alwaysSelected : true,
         suggestionToString : function (sugg) return sugg.value,
         filterFn : function (toString, search, sugg) {
           return sugg.aliases.reduce(function (match, alias) {

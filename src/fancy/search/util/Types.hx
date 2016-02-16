@@ -184,6 +184,9 @@ typedef SuggestionOptions<T> = {
   /** The maximum number of suggestions to be show. Default `5` **/
   @:optional var limit : Int;
 
+  /** Whether to start with the top suggestion selected. Default: false **/
+  @:optional var alwaysSelected : Bool;
+
   /** Optionally override the default `selectionChooseFunction` **/
   @:optional var onChooseSelection : SelectionChooseFunction<T>;
 
