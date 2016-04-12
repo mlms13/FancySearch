@@ -9,6 +9,8 @@
   "version" : "1.0.0-beta.2",
   "contributors" : ["mlms13"],
   "dependencies": {
-    "dots": ""
+    "dots": "",
+    "thx.core": "",
+    "thx.promise": ""
   }
 }
