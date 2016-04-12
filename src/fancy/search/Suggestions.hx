@@ -3,7 +3,7 @@ package fancy.search;
 import haxe.ds.Option;
 import js.html.Element;
 import js.html.InputElement;
-using fancy.browser.Dom;
+using dots.Dom;
 import fancy.search.util.Types;
 using thx.Arrays;
 using thx.Functions;
@@ -13,6 +13,7 @@ import thx.Objects;
 using thx.OrderedMap;
 using thx.Strings;
 using thx.Tuple;
+import dots.Html;
 
 /**
   The `Suggestions` class owns the suggestion list and controls its behavior.

@@ -4,14 +4,14 @@ import js.html.Element;
 import js.html.InputElement;
 import js.html.Event;
 import js.html.KeyboardEvent;
-import fancy.browser.Keys;
+import dots.Keys;
 import fancy.search.util.Types;
 import fancy.search.*;
 
 using thx.Objects;
 using thx.Arrays;
 using thx.Strings;
-using fancy.browser.Dom;
+using dots.Dom;
 
 /**
   The `Search` class is the main entry point. It wires up event handlers along
@@ -57,8 +57,8 @@ class Search<T> {
 
     opts.keys = Objects.merge({
       closeMenu : [Keys.ESCAPE],
-      selectionUp : [Keys.UP],
-      selectionDown : [Keys.DOWN, Keys.TAB],
+      selectionUp : [Keys.UP_ARROW],
+      selectionDown : [Keys.DOWN_ARROW, Keys.TAB],
       selectionChoose : [Keys.ENTER]
     }, opts.keys);
 
