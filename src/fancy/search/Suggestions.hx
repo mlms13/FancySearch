@@ -2,7 +2,9 @@ package fancy.search;
 
 import haxe.ds.Option;
 import js.html.Element;
+import js.html.Event;
 import js.html.InputElement;
+import js.html.Node;
 using dots.Dom;
 import fancy.search.util.Types;
 using thx.Arrays;
@@ -63,7 +65,6 @@ class Suggestions<T> {
     };
     opts.filterFn = options.filterFn.or(defaultFilterer);
     opts.sortSuggestionsFn = options.sortSuggestionsFn.or(defaultSortSuggestions);
-    opts.highlightLettersFn = options.highlightLettersFn.or(defaultHighlightLetters);
     opts.limit = options.limit.or(5);
     opts.alwaysSelected = options.alwaysSelected.or(false);
     opts.onChooseSelection = options.onChooseSelection.or(defaultChooseSelection);
@@ -72,25 +73,25 @@ class Suggestions<T> {
     opts.searchLiteralValue = options.searchLiteralValue.or(function (inpt) return inpt.value);
     opts.searchLiteralPrefix = options.searchLiteralPrefix.or("Search for: ");
     opts.suggestions = options.suggestions.or([]);
+    if(null == classes.suggestionHighlight)
+      classes.suggestionHighlight = "fs-suggestion-highlight";
+    if(null == classes.suggestionHighlighted)
+      classes.suggestionHighlighted = "fs-suggestion-highlighted";
     opts.suggestionToString = options.suggestionToString.or(function (t) return Std.string(t));
+    opts.suggestionToElement = options.suggestionToElement.or(function (t) return Dom.create('span.${classes.suggestionHighlight}', opts.suggestionToString(t)));
     return opts;
   }
 
-  function createSuggestionItem(label : String, ?value : String) : Element {
-    if (value == null) value = label;
-    var el = Dom.create('li.${classes.suggestionItem}', label);
-
-    return el
-      .on('mouseover', function (_) {
-        selectItem(value);
-      })
-      .on('mousedown', function (_) {
-        chooseSelectedItem();
-      })
-      .on('mouseout', function (_) {
-        selectItem(); // select none
-      });
+  function createSuggestionItem(label : Element, key : String) : Element {
+    var dom = Dom.create('li.${classes.suggestionItem}', [label]);
+    dom.addEventListener('mouseover', function(_ : Event) selectItem(key));
+    dom.addEventListener('mousedown', function(_ : Event) chooseSelectedItem());
+    dom.addEventListener('mouseout',  function(_ : Event) selectItem()); // select none
+    return dom;
   }
+
+  function createSuggestionItemString(label : String, key : String) : Element
+    return createSuggestionItem(Dom.create('span.${classes.suggestionHighlight}', label), key);
 
   static function suggestionToString<T>(toString : T -> String, suggestion : T) : String {
     return toString(suggestion);
@@ -113,21 +114,23 @@ class Suggestions<T> {
   }
 
   function createLiteralItem(label : String, replaceExisting = true) {
-
     // if we're not supposed to show the "Search for <literal>" option or the
     // current search input exactly matches a suggestion, return
-    if (!shouldCreateLiteral(label)) return;
+    if (!shouldCreateLiteral(genKeyForLiteral(label))) return;
 
     // otherwise, create a suggestion element with text like "Search for: foo"
     var literalPosition = getLiteralItemIndex(),
-        el = createSuggestionItem(opts.searchLiteralPrefix + label, label);
+        el = createSuggestionItemString(opts.searchLiteralPrefix + label, genKeyForLiteral(label));
 
     if (replaceExisting) {
       elements.removeAt(literalPosition);
     }
 
-    elements.insert(literalPosition, label, el);
+    elements.insert(literalPosition, genKeyForLiteral(label), el);
   }
+
+  function genKeyForLiteral(label : String)
+    return ':$label';
 
   /**
     Allows you to modify the list of suggested items on the fly.
@@ -136,8 +139,10 @@ class Suggestions<T> {
     opts.suggestions = items.distinct();
 
     elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
-      var stringified = suggestionToString(opts.suggestionToString, curr);
-      acc.set(stringified, createSuggestionItem(stringified));
+      var node = opts.suggestionToElement(curr),
+          key = genKey(curr),
+          dom = createSuggestionItem(node, key);
+      acc.set(key, dom);
       return acc;
     }, OrderedMap.createString());
 
@@ -156,6 +161,11 @@ class Suggestions<T> {
     method may be useful if your list can be filtered by means outside of the
     FancySearch input.
   **/
+
+  function genKey(v : T) : String {
+    return haxe.Json.stringify(v);
+  }
+
   public function filter(search : String) {
     // transform search string to our liking
     // TODO: latinize? trim? expose all this to the user?
@@ -167,36 +177,13 @@ class Suggestions<T> {
       .order(opts.sortSuggestionsFn.bind(opts.suggestionToString, search))
       .slice(0, opts.limit)
       .reduce(function (acc : OrderedMap<String, T>, curr : T) {
-        acc.set(suggestionToString(opts.suggestionToString, curr), curr);
+        acc.set(genKey(curr), curr);
         return acc;
       }, OrderedMap.createString());
 
-    filtered.tuples().reducei(function (list : Element, pair, index) {
-      // each filtered word has an array of ranges to highlight
-      var key = pair.left,
-          val = pair.right;
-
-      var listItem = opts.highlightLettersFn(opts.suggestionToString, search, val)
-        .order.fn(_0.right - _1.right) // sort by start, assuming no overlap
-
-        // accumulate the suggestion parts as spans and strongs
-        .reduce(function (acc : Element, range) {
-          // if the highlighted range isn't at the beginning, span it
-          if (range.left != 0)
-            acc.append(Dom.create('span', key.substr(0, range.left)));
-
-          // if the range to highlight has a non-zero length, strong it
-          if (range.right > 0)
-            acc.append(Dom.create('strong', key.substr(range.left, range.right)));
-
-          // if the range didn't end at the end of the string, span the rest
-          if (range.left + range.right < key.length)
-            acc.append(Dom.create('span', key.substr(range.right + range.left)));
-
-          return acc;
-        }, elements.get(key).empty());
-
-      return list.append(listItem);
+    filtered.keys().reducei(function (list : Element, key, index) {
+      var dom = highlight(dehighlight(elements.get(key)), search);
+      return list.append(dom);
     }, list.empty());
 
     // replace the existing literal item, if the options request it
@@ -206,7 +193,7 @@ class Suggestions<T> {
 
     if (!search.isEmpty() && createLiteral) {
       createLiteralItem(literalValue);
-      var literalElement = elements.get(literalValue);
+      var literalElement = elements.get(genKeyForLiteral(literalValue));
 
       filtered.insert(getLiteralItemIndex(), literalValue, null);
       list.insertAtIndex(literalElement, getLiteralItemIndex());
@@ -331,11 +318,57 @@ class Suggestions<T> {
       posA - posB;
   }
 
-  static function defaultHighlightLetters<T>(toString : T -> String, search : String, item : T) {
-    var str = toString(item).toLowerCase();
+  function highlight(dom : Element, search : String) : Element {
+    if(search.isEmpty())
+      return dom; // don't bother
+    var elements = dom.querySelectorAll('.${classes.suggestionHighlight}'),
+        parts = search
+                  .split(" ")
+                  .filter(function(v) { return v != ""; })
+                  .map(thx.ERegs.escape),
+        pattern = new EReg('(${parts.join("|")})', "i");
+    for(el in elements)
+      highlightElement(cast el, pattern);
+    return dom;
+  }
 
-    return str.indexOf(search) >= 0 ?
-      [new Tuple2(str.indexOf(search), search.length)] :
-      [new Tuple2(0, 0)];
+  function highlightElement(dom : Element, pattern : EReg) : Element {
+    Dom.traverseTextNodes(dom, function(node) {
+      var text = node.textContent;
+      var fragment = js.Browser.document.createDocumentFragment();
+      while(pattern.match(text)) {
+        var left = pattern.matchedLeft();
+        if(left != "" && left != null) {
+          fragment.appendChild(js.Browser.document.createTextNode(left));
+        }
+        fragment.appendChild(Dom.create('strong.${classes.suggestionHighlighted}', pattern.matched(1)));
+        text = pattern.matchedRight();
+      }
+      fragment.appendChild(js.Browser.document.createTextNode(text));
+      node.parentNode.replaceChild(fragment, node);
+    });
+    Dom.flattenTextNodes(dom);
+    return dom;
+  }
+
+  function dehighlight(dom : Element) : Element {
+    var els = dom.querySelectorAll('strong.${classes.suggestionHighlighted}');
+    for(el in els) {
+      if(el.childNodes.length == 0) {
+        // no content, just remove the container
+        el.parentNode.removeChild(el);
+      } else if(el.childNodes.length == 1) {
+        // simply replace node for node
+        el.parentNode.replaceChild(el.childNodes[0], el);
+      } else {
+        // create a document fragment and replace
+        var fragment = js.Browser.document.createDocumentFragment();
+        for(child in el.childNodes)
+          fragment.appendChild(child);
+        el.parentNode.replaceChild(fragment, el);
+      }
+    }
+    Dom.flattenTextNodes(dom);
+    return dom;
   }
 }

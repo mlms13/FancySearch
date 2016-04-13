@@ -21,8 +21,10 @@ class Main {
         limit : 6,
         showSearchLiteralItem : true,
         suggestionToElement : function(v : String) {
-          trace("SUGGESTION ", v);
-          return Dom.create('i.fa.fa-${v.toLowerCase()}');
+          return Dom.create('span', [
+            Dom.create('i.fa.fa-${v.toLowerCase()}[style=color:#000]'),
+            Dom.create('span.fs-suggestion-highlight[style=color:#999]', ' $v')
+          ]);
         }
       }
     };
