@@ -129,9 +129,6 @@ class Suggestions<T> {
     elements.insert(literalPosition, genKeyForLiteral(label), el);
   }
 
-  function genKeyForLiteral(label : String)
-    return ':$label';
-
   /**
     Allows you to modify the list of suggested items on the fly.
   **/
@@ -161,11 +158,6 @@ class Suggestions<T> {
     method may be useful if your list can be filtered by means outside of the
     FancySearch input.
   **/
-
-  function genKey(v : T) : String {
-    return haxe.Json.stringify(v);
-  }
-
   public function filter(search : String) {
     // transform search string to our liking
     // TODO: latinize? trim? expose all this to the user?
@@ -371,4 +363,10 @@ class Suggestions<T> {
     Dom.flattenTextNodes(dom);
     return dom;
   }
+
+  function genKey(v : T) : String
+    return haxe.Json.stringify(v);
+
+  function genKeyForLiteral(label : String) : String
+    return ':$label';
 }

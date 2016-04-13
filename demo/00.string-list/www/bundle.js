@@ -889,9 +889,6 @@ fancy_search_Suggestions.prototype = {
 		}
 		this.elements.insert(literalPosition,this.genKeyForLiteral(label),el);
 	}
-	,genKeyForLiteral: function(label) {
-		return ":" + label;
-	}
 	,setSuggestions: function(items) {
 		var _gthis = this;
 		this.opts.suggestions = thx_Arrays.distinct(items);
@@ -906,9 +903,6 @@ fancy_search_Suggestions.prototype = {
 		if(this.isOpen) {
 			this.filter(this.opts.input.value);
 		}
-	}
-	,genKey: function(v) {
-		return JSON.stringify(v);
 	}
 	,filter: function(search) {
 		var _gthis = this;
@@ -1055,6 +1049,12 @@ fancy_search_Suggestions.prototype = {
 		}
 		dots_Dom.flattenTextNodes(dom);
 		return dom;
+	}
+	,genKey: function(v) {
+		return JSON.stringify(v);
+	}
+	,genKeyForLiteral: function(label) {
+		return ":" + label;
 	}
 	,__class__: fancy_search_Suggestions
 };
