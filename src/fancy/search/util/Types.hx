@@ -2,6 +2,7 @@ package fancy.search.util;
 
 import haxe.ds.Option;
 import js.html.InputElement;
+import js.html.Element;
 
 /**
   The filter function is given a function to convert from suggestion item to
@@ -85,6 +86,12 @@ typedef FancySearchClassNames = {
 
   /** Default: `fs-suggestion-item-selected` **/
   @:optional var suggestionItemSelected : String;
+
+  /** Default: `fs-suggestion-highlight` **/
+  @:optional var suggestionHighlight : String;
+
+  /** Default: `fs-suggestion-highlighted` **/
+  @:optional var suggestionHighlighted : String;
 };
 
 /**
@@ -178,9 +185,6 @@ typedef SuggestionOptions<T> = {
   /** Optionally override the default `SortSuggestions` function **/
   @:optional var sortSuggestionsFn : SortSuggestions<T>;
 
-  /** Optionally override the default `HighlightLetters` function **/
-  @:optional var highlightLettersFn : HighlightLetters<T>;
-
   /** The maximum number of suggestions to be show. Default `5` **/
   @:optional var limit : Int;
 
@@ -227,4 +231,5 @@ typedef SuggestionOptions<T> = {
     the default is fine. For complex types, you'll want to override this.
   **/
   @:optional var suggestionToString : T -> String;
+  @:optional var suggestionToElement : T -> Element;
 };

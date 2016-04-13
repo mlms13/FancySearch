@@ -28,6 +28,74 @@ EReg.prototype = {
 			throw new js__$Boot_HaxeError("EReg::matched");
 		}
 	}
+	,matchedLeft: function() {
+		if(this.r.m == null) {
+			throw new js__$Boot_HaxeError("No string matched");
+		}
+		return HxOverrides.substr(this.r.s,0,this.r.m.index);
+	}
+	,matchedRight: function() {
+		if(this.r.m == null) {
+			throw new js__$Boot_HaxeError("No string matched");
+		}
+		var sz = this.r.m.index + this.r.m[0].length;
+		return HxOverrides.substr(this.r.s,sz,this.r.s.length - sz);
+	}
+	,matchedPos: function() {
+		if(this.r.m == null) {
+			throw new js__$Boot_HaxeError("No string matched");
+		}
+		return { pos : this.r.m.index, len : this.r.m[0].length};
+	}
+	,matchSub: function(s,pos,len) {
+		if(len == null) {
+			len = -1;
+		}
+		if(this.r.global) {
+			this.r.lastIndex = pos;
+			this.r.m = this.r.exec(len < 0?s:HxOverrides.substr(s,0,pos + len));
+			var b = this.r.m != null;
+			if(b) {
+				this.r.s = s;
+			}
+			return b;
+		} else {
+			var b1 = this.match(len < 0?HxOverrides.substr(s,pos,null):HxOverrides.substr(s,pos,len));
+			if(b1) {
+				this.r.s = s;
+				this.r.m.index += pos;
+			}
+			return b1;
+		}
+	}
+	,map: function(s,f) {
+		var offset = 0;
+		var buf_b = "";
+		while(true) {
+			if(offset >= s.length) {
+				break;
+			} else if(!this.matchSub(s,offset)) {
+				buf_b += Std.string(HxOverrides.substr(s,offset,null));
+				break;
+			}
+			var p = this.matchedPos();
+			buf_b += Std.string(HxOverrides.substr(s,offset,p.pos - offset));
+			buf_b += Std.string(f(this));
+			if(p.len == 0) {
+				buf_b += Std.string(HxOverrides.substr(s,p.pos,1));
+				offset = p.pos + 1;
+			} else {
+				offset = p.pos + p.len;
+			}
+			if(!this.r.global) {
+				break;
+			}
+		}
+		if(!this.r.global && offset > 0 && offset < s.length) {
+			buf_b += Std.string(HxOverrides.substr(s,offset,null));
+		}
+		return buf_b;
+	}
 	,__class__: EReg
 };
 var HxOverrides = function() { };
@@ -70,8 +138,7 @@ var Main = function() { };
 Main.__name__ = true;
 Main.main = function() {
 	fancy_Search.createFromSelector(".fancy-container input",{ minLength : 0, suggestionOptions : { suggestions : ["Amazon","Angellist","Apple","Facebook","Foursquare","Github","Google","Linkedin","Twitter","Vimeo"], limit : 6, showSearchLiteralItem : true, suggestionToElement : function(v) {
-		haxe_Log.trace("SUGGESTION ",{ fileName : "Main.hx", lineNumber : 24, className : "Main", methodName : "main", customParams : [v]});
-		return dots_Dom.create("i.fa.fa-" + v.toLowerCase());
+		return dots_Dom.create("span",null,[dots_Dom.create("i.fa.fa-" + v.toLowerCase() + "[style=color:#000]"),dots_Dom.create("span.fs-suggestion-highlight[style=color:#999]",null,null," " + v)]);
 	}}});
 };
 Math.__name__ = true;
@@ -200,28 +267,6 @@ dots_Attributes.setStringAttribute = function(el,name,value) {
 };
 var dots_Dom = function() { };
 dots_Dom.__name__ = true;
-dots_Dom.toString = function(node) {
-	if(node.nodeType == 1) {
-		return node.outerHTML;
-	} else if(node.nodeType == 8) {
-		return "<!--" + node.textContent + "-->";
-	} else if(node.nodeType == 3) {
-		return node.textContent;
-	} else {
-		throw new thx_Error("invalid nodeType " + node.nodeType,null,{ fileName : "Dom.hx", lineNumber : 58, className : "dots.Dom", methodName : "toString"});
-	}
-};
-dots_Dom.nodeText = function(node) {
-	if(node.nodeType == 1) {
-		return node.innerHTML;
-	} else if(node.nodeType == 8) {
-		return node.textContent;
-	} else if(node.nodeType == 3) {
-		return node.textContent;
-	} else {
-		throw new thx_Error("invalid nodeType " + node.nodeType,null,{ fileName : "Dom.hx", lineNumber : 69, className : "dots.Dom", methodName : "nodeText"});
-	}
-};
 dots_Dom.create = function(name,attrs,children,textContent,doc) {
 	var node = dots_SelectorParser.parseSelector(name,attrs);
 	if(null == doc) {
@@ -267,6 +312,50 @@ dots_Dom.append = function(el,child,children) {
 dots_Dom.empty = function(el) {
 	while(el.firstChild != null) el.removeChild(el.firstChild);
 	return el;
+};
+dots_Dom.flattenSiblingsAndChildren = function(node) {
+	while(node != null) {
+		if(node.nodeType == 1) {
+			dots_Dom.flattenSiblingsAndChildren(node.childNodes[0]);
+		} else if(node.nodeType == 3) {
+			while(null != node.nextSibling && node.nextSibling.nodeType == 3) {
+				var a = node.textContent;
+				var b = node.nextSibling.textContent;
+				node.parentNode.removeChild(node.nextSibling);
+				var t = window.document.createTextNode(a + b);
+				node.parentNode.replaceChild(t,node);
+				node = t;
+			}
+		}
+		node = node.nextSibling;
+	}
+};
+dots_Dom.flattenTextNodes = function(dom) {
+	dots_Dom.flattenSiblingsAndChildren(dom.childNodes[0]);
+};
+dots_Dom.traverseTextNodes = function(dom,f) {
+	var collect = [];
+	var perform = null;
+	perform = function(dom1) {
+		if(dom1.nodeType == 3) {
+			collect.push(dom1);
+		} else if(dom1.nodeType == 1) {
+			var _g = 0;
+			var _g1 = dom1.childNodes;
+			while(_g < _g1.length) {
+				var child = _g1[_g];
+				++_g;
+				perform(child);
+			}
+		}
+	};
+	perform(dom);
+	var _g2 = 0;
+	while(_g2 < collect.length) {
+		var n = collect[_g2];
+		++_g2;
+		f(n);
+	}
 };
 var dots_SelectorParser = function(selector) {
 	this.selector = selector;
@@ -578,16 +667,9 @@ fancy_search_Suggestions.defaultSortSuggestions = function(toString,search,suggA
 		return posA - posB;
 	}
 };
-fancy_search_Suggestions.defaultHighlightLetters = function(toString,search,item) {
-	var str = toString(item).toLowerCase();
-	if(str.indexOf(search) >= 0) {
-		return [{ _0 : str.indexOf(search), _1 : search.length}];
-	} else {
-		return [{ _0 : 0, _1 : 0}];
-	}
-};
 fancy_search_Suggestions.prototype = {
 	initializeOptions: function(options) {
+		var _gthis = this;
 		var opts = { parent : options.parent, input : options.input};
 		var _1;
 		var t;
@@ -620,183 +702,161 @@ fancy_search_Suggestions.prototype = {
 		if(null == options) {
 			t2 = null;
 		} else {
-			_12 = options.highlightLettersFn;
+			_12 = options.limit;
 			if(null == _12) {
 				t2 = null;
 			} else {
 				t2 = _12;
 			}
 		}
-		opts.highlightLettersFn = t2 != null?t2:fancy_search_Suggestions.defaultHighlightLetters;
+		opts.limit = t2 != null?t2:5;
 		var _13;
 		var t3;
 		if(null == options) {
 			t3 = null;
 		} else {
-			_13 = options.limit;
+			_13 = options.alwaysSelected;
 			if(null == _13) {
 				t3 = null;
 			} else {
 				t3 = _13;
 			}
 		}
-		opts.limit = t3 != null?t3:5;
+		opts.alwaysSelected = t3 != null && t3;
 		var _14;
 		var t4;
 		if(null == options) {
 			t4 = null;
 		} else {
-			_14 = options.alwaysSelected;
+			_14 = options.onChooseSelection;
 			if(null == _14) {
 				t4 = null;
 			} else {
 				t4 = _14;
 			}
 		}
-		opts.alwaysSelected = t4 != null && t4;
+		opts.onChooseSelection = t4 != null?t4:fancy_search_Suggestions.defaultChooseSelection;
 		var _15;
 		var t5;
 		if(null == options) {
 			t5 = null;
 		} else {
-			_15 = options.onChooseSelection;
+			_15 = options.showSearchLiteralItem;
 			if(null == _15) {
 				t5 = null;
 			} else {
 				t5 = _15;
 			}
 		}
-		opts.onChooseSelection = t5 != null?t5:fancy_search_Suggestions.defaultChooseSelection;
+		opts.showSearchLiteralItem = t5 != null && t5;
 		var _16;
 		var t6;
 		if(null == options) {
 			t6 = null;
 		} else {
-			_16 = options.showSearchLiteralItem;
+			_16 = options.searchLiteralPosition;
 			if(null == _16) {
 				t6 = null;
 			} else {
 				t6 = _16;
 			}
 		}
-		opts.showSearchLiteralItem = t6 != null && t6;
+		opts.searchLiteralPosition = t6 != null?t6:fancy_search_util_LiteralPosition.First;
 		var _17;
 		var t7;
 		if(null == options) {
 			t7 = null;
 		} else {
-			_17 = options.searchLiteralPosition;
+			_17 = options.searchLiteralValue;
 			if(null == _17) {
 				t7 = null;
 			} else {
 				t7 = _17;
 			}
 		}
-		opts.searchLiteralPosition = t7 != null?t7:fancy_search_util_LiteralPosition.First;
+		opts.searchLiteralValue = t7 != null?t7:function(inpt) {
+			return inpt.value;
+		};
 		var _18;
 		var t8;
 		if(null == options) {
 			t8 = null;
 		} else {
-			_18 = options.searchLiteralValue;
+			_18 = options.searchLiteralPrefix;
 			if(null == _18) {
 				t8 = null;
 			} else {
 				t8 = _18;
 			}
 		}
-		opts.searchLiteralValue = t8 != null?t8:function(inpt) {
-			return inpt.value;
-		};
+		opts.searchLiteralPrefix = t8 != null?t8:"Search for: ";
 		var _19;
 		var t9;
 		if(null == options) {
 			t9 = null;
 		} else {
-			_19 = options.searchLiteralPrefix;
+			_19 = options.suggestions;
 			if(null == _19) {
 				t9 = null;
 			} else {
 				t9 = _19;
 			}
 		}
-		opts.searchLiteralPrefix = t9 != null?t9:"Search for: ";
+		opts.suggestions = t9 != null?t9:[];
+		if(null == this.classes.suggestionHighlight) {
+			this.classes.suggestionHighlight = "fs-suggestion-highlight";
+		}
+		if(null == this.classes.suggestionHighlighted) {
+			this.classes.suggestionHighlighted = "fs-suggestion-highlighted";
+		}
 		var _110;
 		var t10;
 		if(null == options) {
 			t10 = null;
 		} else {
-			_110 = options.suggestions;
+			_110 = options.suggestionToString;
 			if(null == _110) {
 				t10 = null;
 			} else {
 				t10 = _110;
 			}
 		}
-		opts.suggestions = t10 != null?t10:[];
-		var _111;
-		var t11;
-		if(null == options) {
-			t11 = null;
-		} else {
-			_111 = options.suggestionToString;
-			if(null == _111) {
-				t11 = null;
-			} else {
-				t11 = _111;
-			}
-		}
-		opts.suggestionToString = t11 != null?t11:function(t12) {
-			return Std.string(t12);
+		opts.suggestionToString = t10 != null?t10:function(t11) {
+			return Std.string(t11);
 		};
-		var _112;
-		var t13;
+		var _111;
+		var t12;
 		if(null == options) {
-			t13 = null;
+			t12 = null;
 		} else {
-			_112 = options.suggestionToElement;
-			if(null == _112) {
-				t13 = null;
+			_111 = options.suggestionToElement;
+			if(null == _111) {
+				t12 = null;
 			} else {
-				t13 = _112;
+				t12 = _111;
 			}
 		}
-		opts.suggestionToElement = t13 != null?t13:function(t14) {
-			return dots_Dom.create("span",null,null,Std.string(t14));
+		opts.suggestionToElement = t12 != null?t12:function(t13) {
+			return dots_Dom.create("span." + _gthis.classes.suggestionHighlight,null,null,opts.suggestionToString(t13));
 		};
 		return opts;
 	}
-	,createSuggestionItem: function(label,value) {
+	,createSuggestionItem: function(label,key) {
 		var _gthis = this;
-		if(value == null) {
-			value = dots_Dom.nodeText(label);
-		}
-		var el = dots_Dom.create("li." + this.classes.suggestionItem,null,[label]);
-		var f = function() {
-			_gthis.selectItem(value);
-		};
-		el.addEventListener("mouseover",function(e) {
-			e.preventDefault();
-			f();
+		var dom = dots_Dom.create("li." + this.classes.suggestionItem,null,[label]);
+		dom.addEventListener("mouseover",function(_) {
+			_gthis.selectItem(key);
 		});
-		var f1 = function() {
+		dom.addEventListener("mousedown",function(_1) {
 			_gthis.chooseSelectedItem();
-		};
-		el.addEventListener("mousedown",function(e1) {
-			e1.preventDefault();
-			f1();
 		});
-		var f2 = function() {
+		dom.addEventListener("mouseout",function(_2) {
 			_gthis.selectItem();
-		};
-		el.addEventListener("mouseout",function(e2) {
-			e2.preventDefault();
-			f2();
 		});
-		return el;
+		return dom;
 	}
-	,createSuggestionItemString: function(label,value) {
-		return this.createSuggestionItem(dots_Dom.create("span",null,null,label),value);
+	,createSuggestionItemString: function(label,key) {
+		return this.createSuggestionItem(dots_Dom.create("span." + this.classes.suggestionHighlight,null,null,label),key);
 	}
 	,getLiteralItemIndex: function() {
 		if(this.opts.searchLiteralPosition == fancy_search_util_LiteralPosition.Last) {
@@ -821,15 +881,15 @@ fancy_search_Suggestions.prototype = {
 		if(replaceExisting == null) {
 			replaceExisting = true;
 		}
-		if(!this.shouldCreateLiteral(label)) {
+		if(!this.shouldCreateLiteral(this.genKeyForLiteral(label))) {
 			return;
 		}
 		var literalPosition = this.getLiteralItemIndex();
-		var el = this.createSuggestionItemString(this.opts.searchLiteralPrefix + label,label);
+		var el = this.createSuggestionItemString(this.opts.searchLiteralPrefix + label,this.genKeyForLiteral(label));
 		if(replaceExisting) {
 			this.elements.removeAt(literalPosition);
 		}
-		this.elements.insert(literalPosition,label,el);
+		this.elements.insert(literalPosition,this.genKeyForLiteral(label),el);
 	}
 	,setSuggestions: function(items) {
 		var _gthis = this;
@@ -837,9 +897,8 @@ fancy_search_Suggestions.prototype = {
 		var inst = new thx_StringOrderedMap();
 		this.elements = this.opts.suggestions.reduce(function(acc,curr) {
 			var node = _gthis.opts.suggestionToElement(curr);
-			var stringified = fancy_search_Suggestions.suggestionToString(_gthis.opts.suggestionToString,curr);
-			haxe_Log.trace(dots_Dom.toString(node),{ fileName : "Suggestions.hx", lineNumber : 137, className : "fancy.search.Suggestions", methodName : "setSuggestions"});
-			acc.set(stringified,_gthis.createSuggestionItem(node));
+			var key = _gthis.genKey(curr);
+			acc.set(key,_gthis.createSuggestionItem(node,key));
 			return acc;
 		},inst);
 		this.createLiteralItem(StringTools.trim(this.opts.searchLiteralValue(this.opts.input)),false);
@@ -864,38 +923,19 @@ fancy_search_Suggestions.prototype = {
 		}).slice(0,this.opts.limit);
 		var inst = new thx_StringOrderedMap();
 		this.filtered = array.reduce(function(acc,curr) {
-			acc.set(fancy_search_Suggestions.suggestionToString(_gthis.opts.suggestionToString,curr),curr);
+			acc.set(_gthis.genKey(curr),curr);
 			return acc;
 		},inst);
-		var array1 = this.filtered.tuples();
-		var initial = dots_Dom.empty(this.list);
-		array1.reduce(function(list,pair,index) {
-			var key = pair._0;
-			var _e = _gthis.opts.highlightLettersFn(_gthis.opts.suggestionToString,search,pair._1);
-			var array2 = (function(sort) {
-				return thx_Arrays.order(_e,sort);
-			})(function(_0,_1) {
-				return _0._1 - _1._1;
-			});
-			var initial1 = dots_Dom.empty(_gthis.elements.get(key));
-			return dots_Dom.append(list,array2.reduce(function(acc1,range) {
-				if(range._0 != 0) {
-					dots_Dom.append(acc1,dots_Dom.create("span",null,null,HxOverrides.substr(key,0,range._0)));
-				}
-				if(range._1 > 0) {
-					dots_Dom.append(acc1,dots_Dom.create("strong",null,null,HxOverrides.substr(key,range._0,range._1)));
-				}
-				if(range._0 + range._1 < key.length) {
-					dots_Dom.append(acc1,dots_Dom.create("span",null,null,HxOverrides.substr(key,range._1 + range._0,null)));
-				}
-				return acc1;
-			},initial1));
-		},initial);
+		var tmp1 = this.filtered.keys();
+		var tmp2 = dots_Dom.empty(this.list);
+		thx_Iterators.reducei(tmp1,function(list,key,index) {
+			return dots_Dom.append(list,_gthis.highlight(_gthis.dehighlight(_gthis.elements.get(key)),search));
+		},tmp2);
 		var literalValue = StringTools.trim(this.opts.searchLiteralValue(this.opts.input));
 		var createLiteral = this.shouldCreateLiteral(literalValue);
 		if(!thx_Strings.isEmpty(search) && createLiteral) {
 			this.createLiteralItem(literalValue);
-			var literalElement = this.elements.get(literalValue);
+			var literalElement = this.elements.get(this.genKeyForLiteral(literalValue));
 			this.filtered.insert(this.getLiteralItemIndex(),literalValue,null);
 			dots_Dom.insertAtIndex(this.list,literalElement,this.getLiteralItemIndex());
 		}
@@ -951,6 +991,72 @@ fancy_search_Suggestions.prototype = {
 	}
 	,chooseSelectedItem: function() {
 		this.opts.onChooseSelection(this.opts.suggestionToString,this.opts.input,this.filtered.exists(this.selected) && this.filtered.get(this.selected) != null?haxe_ds_Option.Some(this.filtered.get(this.selected)):haxe_ds_Option.None);
+	}
+	,highlight: function(dom,search) {
+		if(thx_Strings.isEmpty(search)) {
+			return dom;
+		}
+		var elements = dom.querySelectorAll("." + this.classes.suggestionHighlight);
+		var pattern = new EReg("(" + search.split(" ").filter(function(v) {
+			return v != "";
+		}).map(thx_ERegs.escape).join("|") + ")","i");
+		var _g = 0;
+		while(_g < elements.length) {
+			var el = elements[_g];
+			++_g;
+			this.highlightElement(el,pattern);
+		}
+		return dom;
+	}
+	,highlightElement: function(dom,pattern) {
+		var _gthis = this;
+		dots_Dom.traverseTextNodes(dom,function(node) {
+			var text = node.textContent;
+			var fragment = window.document.createDocumentFragment();
+			while(pattern.match(text)) {
+				var left = pattern.matchedLeft();
+				if(left != "" && left != null) {
+					fragment.appendChild(window.document.createTextNode(left));
+				}
+				fragment.appendChild(dots_Dom.create("strong." + _gthis.classes.suggestionHighlighted,null,null,pattern.matched(1)));
+				text = pattern.matchedRight();
+			}
+			fragment.appendChild(window.document.createTextNode(text));
+			node.parentNode.replaceChild(fragment,node);
+		});
+		dots_Dom.flattenTextNodes(dom);
+		return dom;
+	}
+	,dehighlight: function(dom) {
+		var els = dom.querySelectorAll("strong." + this.classes.suggestionHighlighted);
+		var _g = 0;
+		while(_g < els.length) {
+			var el = els[_g];
+			++_g;
+			if(el.childNodes.length == 0) {
+				el.parentNode.removeChild(el);
+			} else if(el.childNodes.length == 1) {
+				el.parentNode.replaceChild(el.childNodes[0],el);
+			} else {
+				var fragment = window.document.createDocumentFragment();
+				var _g1 = 0;
+				var _g2 = el.childNodes;
+				while(_g1 < _g2.length) {
+					var child = _g2[_g1];
+					++_g1;
+					fragment.appendChild(child);
+				}
+				el.parentNode.replaceChild(fragment,el);
+			}
+		}
+		dots_Dom.flattenTextNodes(dom);
+		return dom;
+	}
+	,genKey: function(v) {
+		return JSON.stringify(v);
+	}
+	,genKeyForLiteral: function(label) {
+		return ":" + label;
 	}
 	,__class__: fancy_search_Suggestions
 };
@@ -1101,11 +1207,6 @@ haxe_IMap.__name__ = true;
 haxe_IMap.prototype = {
 	__class__: haxe_IMap
 };
-var haxe_Log = function() { };
-haxe_Log.__name__ = true;
-haxe_Log.trace = function(v,infos) {
-	js_Boot.__trace(v,infos);
-};
 var haxe_ds_Option = { __ename__ : true, __constructs__ : ["Some","None"] };
 haxe_ds_Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe_ds_Option; $x.toString = $estr; return $x; };
 haxe_ds_Option.None = ["None",1];
@@ -1214,35 +1315,6 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = true;
-js_Boot.__unhtml = function(s) {
-	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-};
-js_Boot.__trace = function(v,i) {
-	var msg = i != null?i.fileName + ":" + i.lineNumber + ": ":"";
-	msg += js_Boot.__string_rec(v,"");
-	if(i != null && i.customParams != null) {
-		var _g = 0;
-		var _g1 = i.customParams;
-		while(_g < _g1.length) {
-			var v1 = _g1[_g];
-			++_g;
-			msg += "," + js_Boot.__string_rec(v1,"");
-		}
-	}
-	var d;
-	var tmp;
-	if(typeof(document) != "undefined") {
-		d = document.getElementById("haxe:trace");
-		tmp = d != null;
-	} else {
-		tmp = false;
-	}
-	if(tmp) {
-		d.innerHTML += js_Boot.__unhtml(msg) + "<br/>";
-	} else if(typeof console != "undefined" && console.log != null) {
-		console.log(msg);
-	}
-};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) {
 		return Array;
@@ -1506,6 +1578,13 @@ thx_Bools.parse = function(v) {
 		}
 	}
 };
+var thx_ERegs = function() { };
+thx_ERegs.__name__ = true;
+thx_ERegs.escape = function(text) {
+	return thx_ERegs.ESCAPE_PATTERN.map(text,function(ereg) {
+		return "\\" + ereg.matched(1);
+	});
+};
 var thx_Either = { __ename__ : true, __constructs__ : ["Left","Right"] };
 thx_Either.Left = function(value) { var $x = ["Left",0,value]; $x.__enum__ = thx_Either; $x.toString = $estr; return $x; };
 thx_Either.Right = function(value) { var $x = ["Right",1,value]; $x.__enum__ = thx_Either; $x.toString = $estr; return $x; };
@@ -1563,10 +1642,22 @@ thx_Iterators.map = function(it,f) {
 	while(it.hasNext()) acc.push(f(it.next()));
 	return acc;
 };
+thx_Iterators.mapi = function(it,f) {
+	var acc = [];
+	var i = 0;
+	while(it.hasNext()) acc.push(f(it.next(),i++));
+	return acc;
+};
 thx_Iterators.reduce = function(it,callback,initial) {
 	var result = initial;
 	while(it.hasNext()) result = callback(result,it.next());
 	return result;
+};
+thx_Iterators.reducei = function(it,callback,initial) {
+	thx_Iterators.mapi(it,function(v,i) {
+		initial = callback(initial,v,i);
+	});
+	return initial;
 };
 thx_Iterators.toArray = function(it) {
 	var elements = [];
@@ -1647,12 +1738,6 @@ thx_OrderedMapImpl.prototype = {
 	}
 	,iterator: function() {
 		return HxOverrides.iter(this.toArray());
-	}
-	,tuples: function() {
-		var _gthis = this;
-		return this.arr.map(function(key) {
-			return { _0 : key, _1 : _gthis.map.get(key)};
-		});
 	}
 	,toArray: function() {
 		var values = [];
@@ -2067,5 +2152,6 @@ dots_Attributes.properties = (function($this) {
 	return $r;
 }(this));
 js_Boot.__toStr = { }.toString;
+thx_ERegs.ESCAPE_PATTERN = new EReg("([-\\[\\]{}()*+?\\.,\\\\^$|# \t\r\n])","g");
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
