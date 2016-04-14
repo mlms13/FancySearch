@@ -20,7 +20,7 @@ class Main {
         limit : 4,
         alwaysSelected : true,
         suggestionToString : function (sugg) return sugg.value,
-        filterFn : function (toString, search, sugg) {
+        filterFn : function (search, sugg) {
           return sugg.aliases.reduce(function (match, alias) {
             var valFirst = sugg.value.toLowerCase() + " " + alias.toLowerCase(),
                 valLast = alias.toLowerCase() + " " + sugg.value.toLowerCase();

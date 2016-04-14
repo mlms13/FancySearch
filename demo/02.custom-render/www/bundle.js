@@ -654,13 +654,10 @@ var fancy_search_Suggestions = function(options,classes) {
 	this.setSuggestions(this.opts.suggestions);
 };
 fancy_search_Suggestions.__name__ = true;
-fancy_search_Suggestions.suggestionToString = function(toString,suggestion) {
-	return toString(suggestion);
-};
 fancy_search_Suggestions.defaultChooseSelection = function(toString,input,selection) {
 	switch(selection[1]) {
 	case 0:
-		input.value = fancy_search_Suggestions.suggestionToString(toString,selection[2]);
+		input.value = toString(selection[2]);
 		break;
 	case 1:
 		input.value = input.value;
@@ -669,195 +666,162 @@ fancy_search_Suggestions.defaultChooseSelection = function(toString,input,select
 	input.blur();
 };
 fancy_search_Suggestions.defaultFilterer = function(toString,search,sugg) {
-	return fancy_search_Suggestions.suggestionToString(toString,sugg).toLowerCase().indexOf(search) >= 0;
-};
-fancy_search_Suggestions.defaultSortSuggestions = function(toString,search,suggA,suggB) {
-	var a = fancy_search_Suggestions.suggestionToString(toString,suggA);
-	var b = fancy_search_Suggestions.suggestionToString(toString,suggB);
-	var posA = a.toLowerCase().indexOf(search);
-	var posB = b.toLowerCase().indexOf(search);
-	if(posA == posB) {
-		if(a < b) {
-			return -1;
-		} else if(a > b) {
-			return 1;
-		} else {
-			return 0;
-		}
-	} else {
-		return posA - posB;
-	}
+	return toString(sugg).toLowerCase().indexOf(search) >= 0;
 };
 fancy_search_Suggestions.prototype = {
 	initializeOptions: function(options) {
 		var _gthis = this;
 		var opts = { parent : options.parent, input : options.input};
+		opts.sortSuggestionsFn = options.sortSuggestionsFn;
 		var _1;
 		var t;
 		if(null == options) {
 			t = null;
 		} else {
-			_1 = options.filterFn;
+			_1 = options.limit;
 			if(null == _1) {
 				t = null;
 			} else {
 				t = _1;
 			}
 		}
-		opts.filterFn = t != null?t:fancy_search_Suggestions.defaultFilterer;
+		opts.limit = t != null?t:5;
 		var _11;
 		var t1;
 		if(null == options) {
 			t1 = null;
 		} else {
-			_11 = options.sortSuggestionsFn;
+			_11 = options.alwaysSelected;
 			if(null == _11) {
 				t1 = null;
 			} else {
 				t1 = _11;
 			}
 		}
-		opts.sortSuggestionsFn = t1 != null?t1:fancy_search_Suggestions.defaultSortSuggestions;
+		opts.alwaysSelected = t1 != null && t1;
 		var _12;
 		var t2;
 		if(null == options) {
 			t2 = null;
 		} else {
-			_12 = options.limit;
+			_12 = options.showSearchLiteralItem;
 			if(null == _12) {
 				t2 = null;
 			} else {
 				t2 = _12;
 			}
 		}
-		opts.limit = t2 != null?t2:5;
+		opts.showSearchLiteralItem = t2 != null && t2;
 		var _13;
 		var t3;
 		if(null == options) {
 			t3 = null;
 		} else {
-			_13 = options.alwaysSelected;
+			_13 = options.searchLiteralPosition;
 			if(null == _13) {
 				t3 = null;
 			} else {
 				t3 = _13;
 			}
 		}
-		opts.alwaysSelected = t3 != null && t3;
+		opts.searchLiteralPosition = t3 != null?t3:fancy_search_util_LiteralPosition.First;
 		var _14;
 		var t4;
 		if(null == options) {
 			t4 = null;
 		} else {
-			_14 = options.onChooseSelection;
+			_14 = options.searchLiteralValue;
 			if(null == _14) {
 				t4 = null;
 			} else {
 				t4 = _14;
 			}
 		}
-		opts.onChooseSelection = t4 != null?t4:fancy_search_Suggestions.defaultChooseSelection;
+		opts.searchLiteralValue = t4 != null?t4:function(inpt) {
+			return inpt.value;
+		};
 		var _15;
 		var t5;
 		if(null == options) {
 			t5 = null;
 		} else {
-			_15 = options.showSearchLiteralItem;
+			_15 = options.searchLiteralPrefix;
 			if(null == _15) {
 				t5 = null;
 			} else {
 				t5 = _15;
 			}
 		}
-		opts.showSearchLiteralItem = t5 != null && t5;
+		opts.searchLiteralPrefix = t5 != null?t5:"Search for: ";
 		var _16;
 		var t6;
 		if(null == options) {
 			t6 = null;
 		} else {
-			_16 = options.searchLiteralPosition;
+			_16 = options.suggestions;
 			if(null == _16) {
 				t6 = null;
 			} else {
 				t6 = _16;
 			}
 		}
-		opts.searchLiteralPosition = t6 != null?t6:fancy_search_util_LiteralPosition.First;
-		var _17;
-		var t7;
-		if(null == options) {
-			t7 = null;
-		} else {
-			_17 = options.searchLiteralValue;
-			if(null == _17) {
-				t7 = null;
-			} else {
-				t7 = _17;
-			}
-		}
-		opts.searchLiteralValue = t7 != null?t7:function(inpt) {
-			return inpt.value;
-		};
-		var _18;
-		var t8;
-		if(null == options) {
-			t8 = null;
-		} else {
-			_18 = options.searchLiteralPrefix;
-			if(null == _18) {
-				t8 = null;
-			} else {
-				t8 = _18;
-			}
-		}
-		opts.searchLiteralPrefix = t8 != null?t8:"Search for: ";
-		var _19;
-		var t9;
-		if(null == options) {
-			t9 = null;
-		} else {
-			_19 = options.suggestions;
-			if(null == _19) {
-				t9 = null;
-			} else {
-				t9 = _19;
-			}
-		}
-		opts.suggestions = t9 != null?t9:[];
+		opts.suggestions = t6 != null?t6:[];
 		if(null == this.classes.suggestionHighlight) {
 			this.classes.suggestionHighlight = "fs-suggestion-highlight";
 		}
 		if(null == this.classes.suggestionHighlighted) {
 			this.classes.suggestionHighlighted = "fs-suggestion-highlighted";
 		}
-		var _110;
+		var _17;
+		var t7;
+		if(null == options) {
+			t7 = null;
+		} else {
+			_17 = options.suggestionToString;
+			if(null == _17) {
+				t7 = null;
+			} else {
+				t7 = _17;
+			}
+		}
+		opts.suggestionToString = t7 != null?t7:function(t8) {
+			return Std.string(t8);
+		};
+		var _18;
+		var t9;
+		if(null == options) {
+			t9 = null;
+		} else {
+			_18 = options.onChooseSelection;
+			if(null == _18) {
+				t9 = null;
+			} else {
+				t9 = _18;
+			}
+		}
+		var tmp;
+		if(t9 != null) {
+			tmp = t9;
+		} else {
+			var a1 = opts.suggestionToString;
+			tmp = function(a2,a3) {
+				fancy_search_Suggestions.defaultChooseSelection(a1,a2,a3);
+			};
+		}
+		opts.onChooseSelection = tmp;
+		var _19;
 		var t10;
 		if(null == options) {
 			t10 = null;
 		} else {
-			_110 = options.suggestionToString;
-			if(null == _110) {
+			_19 = options.suggestionToElement;
+			if(null == _19) {
 				t10 = null;
 			} else {
-				t10 = _110;
+				t10 = _19;
 			}
 		}
-		opts.suggestionToString = t10 != null?t10:function(t11) {
-			return Std.string(t11);
-		};
-		var _111;
-		var t12;
-		if(null == options) {
-			t12 = null;
-		} else {
-			_111 = options.suggestionToElement;
-			if(null == _111) {
-				t12 = null;
-			} else {
-				t12 = _111;
-			}
-		}
-		opts.suggestionToElement = t12 != null?t12:function(t13) {
+		opts.suggestionToElement = t10 != null?t10:function(t11) {
 			var _g = new haxe_ds_StringMap();
 			var value = _gthis.classes.suggestionHighlight;
 			if(__map_reserved["class"] != null) {
@@ -865,8 +829,30 @@ fancy_search_Suggestions.prototype = {
 			} else {
 				_g.h["class"] = value;
 			}
-			return dots_Dom.create("span",_g,null,opts.suggestionToString(t13));
+			return dots_Dom.create("span",_g,null,opts.suggestionToString(t11));
 		};
+		var _110;
+		var t12;
+		if(null == options) {
+			t12 = null;
+		} else {
+			_110 = options.filterFn;
+			if(null == _110) {
+				t12 = null;
+			} else {
+				t12 = _110;
+			}
+		}
+		var tmp1;
+		if(t12 != null) {
+			tmp1 = t12;
+		} else {
+			var a11 = opts.suggestionToString;
+			tmp1 = function(a21,a31) {
+				return fancy_search_Suggestions.defaultFilterer(a11,a21,a31);
+			};
+		}
+		opts.filterFn = tmp1;
 		return opts;
 	}
 	,createSuggestionItem: function(label,key) {
@@ -909,10 +895,7 @@ fancy_search_Suggestions.prototype = {
 	}
 	,shouldCreateLiteral: function(literal) {
 		if(this.opts.showSearchLiteralItem) {
-			var a1 = this.opts.suggestionToString;
-			return this.opts.suggestions.map(function(a2) {
-				return fancy_search_Suggestions.suggestionToString(a1,a2);
-			}).map(function(_) {
+			return this.opts.suggestions.map(this.opts.suggestionToString).map(function(_) {
 				return _.toLowerCase();
 			}).indexOf(literal.toLowerCase()) < 0;
 		} else {
@@ -951,28 +934,35 @@ fancy_search_Suggestions.prototype = {
 	,filter: function(search) {
 		var _gthis = this;
 		search = search.toLowerCase();
+		console.log(this.opts.suggestions.slice(this.opts.limit).map(function(v) {
+			return Reflect.field(v,"name");
+		}).toString());
 		var f = this.opts.filterFn;
-		var a1 = this.opts.suggestionToString;
-		var a2 = search;
-		var tmp = this.opts.suggestions.filter(function(a3) {
-			return f(a1,a2,a3);
+		var a1 = search;
+		var temp = this.opts.suggestions.filter(function(a2) {
+			return f(a1,a2);
 		});
-		var f1 = this.opts.sortSuggestionsFn;
-		var a11 = this.opts.suggestionToString;
-		var a21 = search;
-		var array = thx_Arrays.order(tmp,function(a31,a4) {
-			return f1(a11,a21,a31,a4);
-		}).slice(0,this.opts.limit);
+		if(null != this.opts.sortSuggestionsFn) {
+			var f1 = this.opts.sortSuggestionsFn;
+			var a11 = search;
+			temp = thx_Arrays.order(temp,function(a21,a3) {
+				return f1(a11,a21,a3);
+			});
+		}
+		var array = temp.slice(0,this.opts.limit);
 		var inst = new thx_StringOrderedMap();
 		this.filtered = array.reduce(function(acc,curr) {
 			acc.set(_gthis.genKey(curr),curr);
 			return acc;
 		},inst);
-		var tmp1 = this.filtered.keys();
-		var tmp2 = dots_Dom.empty(this.list);
-		thx_Iterators.reducei(tmp1,function(list,key,index) {
+		console.log(this.filtered.toArray().slice(0,this.opts.limit).map(function(v1) {
+			return Reflect.field(v1,"name");
+		}).toString());
+		var tmp = this.filtered.keys();
+		var tmp1 = dots_Dom.empty(this.list);
+		thx_Iterators.reducei(tmp,function(list,key,index) {
 			return dots_Dom.append(list,_gthis.highlight(_gthis.dehighlight(_gthis.elements.get(key)),search));
-		},tmp2);
+		},tmp1);
 		var literalValue = StringTools.trim(this.opts.searchLiteralValue(this.opts.input));
 		var createLiteral = this.shouldCreateLiteral(literalValue);
 		if(!thx_Strings.isEmpty(search) && createLiteral) {
@@ -1032,7 +1022,8 @@ fancy_search_Suggestions.prototype = {
 		this.selectItem(this.filtered.keyAt(currentIndex + 1 == this.filtered.length?0:currentIndex + 1));
 	}
 	,chooseSelectedItem: function() {
-		this.opts.onChooseSelection(this.opts.suggestionToString,this.opts.input,this.filtered.exists(this.selected) && this.filtered.get(this.selected) != null?haxe_ds_Option.Some(this.filtered.get(this.selected)):haxe_ds_Option.None);
+		var value = this.filtered.get(this.selected);
+		this.opts.onChooseSelection(this.opts.input,null == value?haxe_ds_Option.None:haxe_ds_Option.Some(value));
 	}
 	,highlight: function(dom,search) {
 		if(thx_Strings.isEmpty(search)) {
