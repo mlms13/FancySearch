@@ -12,6 +12,7 @@ using thx.Functions;
 using thx.Iterators;
 using thx.Nulls;
 import thx.Objects;
+using thx.Options;
 using thx.OrderedMap;
 using thx.Strings;
 using thx.Tuple;
@@ -63,11 +64,10 @@ class Suggestions<T> {
       parent : options.parent,
       input : options.input
     };
-    opts.filterFn = options.filterFn.or(defaultFilterer);
-    opts.sortSuggestionsFn = options.sortSuggestionsFn.or(defaultSortSuggestions);
+
+    opts.sortSuggestionsFn = options.sortSuggestionsFn;
     opts.limit = options.limit.or(5);
     opts.alwaysSelected = options.alwaysSelected.or(false);
-    opts.onChooseSelection = options.onChooseSelection.or(defaultChooseSelection);
     opts.showSearchLiteralItem = options.showSearchLiteralItem.or(false);
     opts.searchLiteralPosition = options.searchLiteralPosition.or(LiteralPosition.First);
     opts.searchLiteralValue = options.searchLiteralValue.or(function (inpt) return inpt.value);
@@ -78,7 +78,10 @@ class Suggestions<T> {
     if(null == classes.suggestionHighlighted)
       classes.suggestionHighlighted = "fs-suggestion-highlighted";
     opts.suggestionToString = options.suggestionToString.or(function (t) return Std.string(t));
+    opts.onChooseSelection = options.onChooseSelection.or(defaultChooseSelection.bind(opts.suggestionToString));
     opts.suggestionToElement = options.suggestionToElement.or(function (t) return Dom.create('span', ["class" => classes.suggestionHighlight], opts.suggestionToString(t)));
+
+    opts.filterFn = options.filterFn.or(defaultFilterer.bind(opts.suggestionToString));
     return opts;
   }
 
@@ -93,12 +96,8 @@ class Suggestions<T> {
   function createSuggestionItemString(label : String, key : String) : Element
     return createSuggestionItem(Dom.create('span', ["class" => classes.suggestionHighlight], label), key);
 
-  static function suggestionToString<T>(toString : T -> String, suggestion : T) : String {
-    return toString(suggestion);
-  }
-
   static function suggestionsToStrings<T>(toString : T -> String, suggestions : Array<T>) : Array<String> {
-    return suggestions.map(suggestionToString.bind(toString));
+    return suggestions.map(toString);
   }
 
   function getLiteralItemIndex() : Int {
@@ -108,7 +107,7 @@ class Suggestions<T> {
   // returns `true` or `false` depending on whether the item was created
   function shouldCreateLiteral(literal : String) : Bool {
     return opts.showSearchLiteralItem && opts.suggestions
-      .map(suggestionToString.bind(opts.suggestionToString))
+      .map(opts.suggestionToString)
       .map.fn(_.toLowerCase())
       .indexOf(literal.toLowerCase()) < 0;
   }
@@ -164,9 +163,11 @@ class Suggestions<T> {
     search = search.toLowerCase();
 
     // call the provided filter function, iterating over the whole list
-    filtered = opts.suggestions
-      .filter(opts.filterFn.bind(opts.suggestionToString, search))
-      .order(opts.sortSuggestionsFn.bind(opts.suggestionToString, search))
+    var temp = opts.suggestions.filter(opts.filterFn.bind(search));
+    if(null != opts.sortSuggestionsFn)
+      temp = temp.order(opts.sortSuggestionsFn.bind(search));
+
+    filtered = temp
       .slice(0, opts.limit)
       .reduce(function (acc : OrderedMap<String, T>, curr : T) {
         acc.set(genKey(curr), curr);
@@ -271,10 +272,7 @@ class Suggestions<T> {
     chosen (e.g. ENTER key or mouse click).
   **/
   public function chooseSelectedItem() {
-    opts.onChooseSelection(opts.suggestionToString, opts.input, filtered.exists(selected) && filtered.get(selected) != null ?
-      Some(filtered.get(selected)) :
-      None
-    );
+    opts.onChooseSelection(opts.input, Options.ofValue(filtered.get(selected)));
   }
 
   /**
@@ -287,7 +285,7 @@ class Suggestions<T> {
 
   static function defaultChooseSelection<T>(toString : T -> String, input : InputElement, selection : Option<T>) {
     switch selection {
-      case Some(value): input.value = suggestionToString(toString, value);
+      case Some(value): input.value = toString(value);
       case None: input.value = input.value;
     }
 
@@ -295,12 +293,12 @@ class Suggestions<T> {
   }
 
   static function defaultFilterer<T>(toString : T -> String, search : String, sugg : T) : Bool {
-    return suggestionToString(toString, sugg).toLowerCase().indexOf(search) >= 0;
+    return toString(sugg).toLowerCase().indexOf(search) >= 0;
   }
 
-  static function defaultSortSuggestions<T>(toString : T -> String, search : String, suggA : T, suggB : T) {
-    var a = suggestionToString(toString, suggA),
-        b = suggestionToString(toString, suggB),
+  public static function defaultSortSuggestions<T>(toString : T -> String, search : String, suggA : T, suggB : T) {
+    var a = toString(suggA),
+        b = toString(suggB),
         posA = a.toLowerCase().indexOf(search),
         posB = b.toLowerCase().indexOf(search);
 

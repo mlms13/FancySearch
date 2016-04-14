@@ -5,48 +5,35 @@ import js.html.InputElement;
 import js.html.Element;
 
 /**
-  The filter function is given a function to convert from suggestion item to
-  string (see `SuggestionOptions.suggestionToString`), the search string (value
-  from the input), and a suggestion item to compare. It should return true if
-  this item will be in the filtered list, and false to filter it out.
+  The filter function is given the search string (value from the input), and
+  a suggestion item to compare. It should return true if this item will be in
+  the filtered list, and false to filter it out.
 
   The default filterer converts the suggestion to a lowercase string and checks
   for the full search string inside the suggestion string.
 **/
-typedef FilterFunction<T> = (T -> String) -> String -> T -> Bool;
+typedef FilterFunction<T> = String -> T -> Bool;
 
 /**
-  The sort function is given a function from suggestion item to string, as well
-  as the original search string. It is also given two suggestion items, and it
-  should return `-1`, `0`, or `1`, similar to most array order-by functions.
+  The sort function is given a the original search string. It is also given two
+  suggestion items, and it should return `-1`, `0`, or `1`, similar to most
+  array order-by functions.
 
   The default sort function prefers suggestion strings with earlier occurences
   of the search string. If the occurence of the search string is equal, the
   suggestions are sorted alphabetically.
 **/
-typedef SortSuggestions<T> = (T -> String) -> String -> T -> T -> Int;
-
-/**
-  Given a function from suggestion item to string and a search string, the
-  highlight letters function should return an array of Tuple2s. Each tuple marks
-  the start index and length of a range that should be bold in the suggestion
-  string that is printed (using the same toString method) in the list.
-
-  The default version of this function returns exactly one range to highlight,
-  which starts at `indexOf` the search string in the stringified suggestion item
-  and has a length equal to the length of the search string.
-**/
-typedef HighlightLetters<T> = (T -> String) -> String -> T -> Array<thx.Tuple.Tuple2<Int, Int>>;
+typedef SortSuggestions<T> = String -> T -> T -> Int;
 
 /**
   This function will be called when a suggestion item is chosen (either by mouse
-  click, or the enter key, etc). It is given the toString conversion function,
-  the actual input element, and an Option of Some suggestion item or None.
+  click, or the enter key, etc). It is given the actual input element and
+  an Option of Some suggestion item or None.
 
   The default version of this function simply sets the input's value to the
   stringified suggestion item, then it blurs the input.
 **/
-typedef SelectionChooseFunction<T> = (T -> String) -> js.html.InputElement -> Option<T> -> Void;
+typedef SelectionChooseFunction<T> = js.html.InputElement -> Option<T> -> Void;
 
 /**
   The following keys all expect string values, which will be added directly to
