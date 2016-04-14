@@ -51,8 +51,8 @@ class Suggestions<T> {
     filtered = OrderedMap.createString();
 
     // create all elements and set initial suggestions
-    list = Dom.create('ul.${classes.suggestionList}');
-    el = Dom.create('div.${classes.suggestionContainer}.${classes.suggestionsClosed}', [list]);
+    list = Dom.create('ul', ["class" => classes.suggestionList]);
+    el = Dom.create('div', ["class" => '${classes.suggestionContainer} ${classes.suggestionsClosed}'], [list]);
     opts.parent.append(el);
 
     setSuggestions(opts.suggestions);
@@ -78,12 +78,12 @@ class Suggestions<T> {
     if(null == classes.suggestionHighlighted)
       classes.suggestionHighlighted = "fs-suggestion-highlighted";
     opts.suggestionToString = options.suggestionToString.or(function (t) return Std.string(t));
-    opts.suggestionToElement = options.suggestionToElement.or(function (t) return Dom.create('span.${classes.suggestionHighlight}', opts.suggestionToString(t)));
+    opts.suggestionToElement = options.suggestionToElement.or(function (t) return Dom.create('span', ["class" => classes.suggestionHighlight], opts.suggestionToString(t)));
     return opts;
   }
 
   function createSuggestionItem(label : Element, key : String) : Element {
-    var dom = Dom.create('li.${classes.suggestionItem}', [label]);
+    var dom = Dom.create('li', ["class" => classes.suggestionItem], [label]);
     dom.addEventListener('mouseover', function(_ : Event) selectItem(key));
     dom.addEventListener('mousedown', function(_ : Event) chooseSelectedItem());
     dom.addEventListener('mouseout',  function(_ : Event) selectItem()); // select none
@@ -91,7 +91,7 @@ class Suggestions<T> {
   }
 
   function createSuggestionItemString(label : String, key : String) : Element
-    return createSuggestionItem(Dom.create('span.${classes.suggestionHighlight}', label), key);
+    return createSuggestionItem(Dom.create('span', ["class" => classes.suggestionHighlight], label), key);
 
   static function suggestionToString<T>(toString : T -> String, suggestion : T) : String {
     return toString(suggestion);
@@ -313,7 +313,7 @@ class Suggestions<T> {
   function highlight(dom : Element, search : String) : Element {
     if(search.isEmpty())
       return dom; // don't bother
-    var elements = dom.querySelectorAll('.${classes.suggestionHighlight}'),
+    var elements = dom.querySelectorAll('.${classes.suggestionHighlight.split(" ").join(".")}'),
         parts = search
                   .split(" ")
                   .filter(function(v) { return v != ""; })
@@ -333,7 +333,7 @@ class Suggestions<T> {
         if(left != "" && left != null) {
           fragment.appendChild(js.Browser.document.createTextNode(left));
         }
-        fragment.appendChild(Dom.create('strong.${classes.suggestionHighlighted}', pattern.matched(1)));
+        fragment.appendChild(Dom.create('strong', ["class" => classes.suggestionHighlighted], pattern.matched(1)));
         text = pattern.matchedRight();
       }
       fragment.appendChild(js.Browser.document.createTextNode(text));
@@ -344,7 +344,7 @@ class Suggestions<T> {
   }
 
   function dehighlight(dom : Element) : Element {
-    var els = dom.querySelectorAll('strong.${classes.suggestionHighlighted}');
+    var els = dom.querySelectorAll('strong.${classes.suggestionHighlighted.split(" ").join(".")}');
     for(el in els) {
       if(el.childNodes.length == 0) {
         // no content, just remove the container
