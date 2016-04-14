@@ -63,7 +63,7 @@ class Search<T> {
     }, opts.keys);
 
     // create sibling elements
-    clearBtn = Dom.create('button.${opts.classes.clearButton}', '\u00D7');
+    clearBtn = Dom.create('button', ["class" => opts.classes.clearButton], '\u00D7');
     clearBtn.on('mousedown', opts.onClearButtonClick);
 
     if (opts.clearBtn) {
