@@ -932,9 +932,6 @@ fancy_search_Suggestions.prototype = {
 	,filter: function(search) {
 		var _gthis = this;
 		search = search.toLowerCase();
-		console.log(this.opts.suggestions.slice(this.opts.limit).map(function(v) {
-			return Reflect.field(v,"name");
-		}).toString());
 		var f = this.opts.filterFn;
 		var a1 = search;
 		var temp = this.opts.suggestions.filter(function(a2) {
@@ -953,9 +950,6 @@ fancy_search_Suggestions.prototype = {
 			acc.set(_gthis.genKey(curr),curr);
 			return acc;
 		},inst);
-		console.log(this.filtered.toArray().slice(0,this.opts.limit).map(function(v1) {
-			return Reflect.field(v1,"name");
-		}).toString());
 		var tmp = this.filtered.keys();
 		var tmp1 = dots_Dom.empty(this.list);
 		thx_Iterators.reducei(tmp,function(list,key,index) {

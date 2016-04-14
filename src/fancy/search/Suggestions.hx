@@ -163,9 +163,7 @@ class Suggestions<T> {
     search = search.toLowerCase();
 
     // call the provided filter function, iterating over the whole list
-    trace(opts.suggestions.slice(opts.limit).map(function(v) return Reflect.field(v, "name")));
-    var temp = opts.suggestions
-      .filter(opts.filterFn.bind(search));
+    var temp = opts.suggestions.filter(opts.filterFn.bind(search));
     if(null != opts.sortSuggestionsFn)
       temp = temp.order(opts.sortSuggestionsFn.bind(search));
 
@@ -175,7 +173,6 @@ class Suggestions<T> {
         acc.set(genKey(curr), curr);
         return acc;
       }, OrderedMap.createString());
-    trace(filtered.toArray().slice(0, opts.limit).map(function(v) return Reflect.field(v, "name")));
 
     filtered.keys().reducei(function (list : Element, key, index) {
       var dom = highlight(dehighlight(elements.get(key)), search);
