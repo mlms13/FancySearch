@@ -154,11 +154,23 @@ class Search<T> {
     if (opts.populateSuggestions != null) {
       input.addClass(opts.classes.inputLoading);
 
-      opts.populateSuggestions(input.value)
-        .success(list.setSuggestions)
+      polulateSuggestion(input.value)
+        .success(function(o) {
+          if(o.query != input.value) return; // request has changed during loading
+          list.setSuggestions(o.list);
+        })
         .always(function () input.removeClass(opts.classes.inputLoading));
     }
   }
+
+  function polulateSuggestion(value : String)
+    return opts.populateSuggestions(value)
+      .map(function(result) {
+        return {
+          list : result,
+          query : value
+        };
+      });
 
   function onSearchKeydown(e : KeyboardEvent) {
     e.stopPropagation();
