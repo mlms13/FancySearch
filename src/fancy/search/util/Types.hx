@@ -132,7 +132,7 @@ typedef FancySearchOptions<T> = {
   @:optional var minLength : Int;
 
   /**
-    Action to be performed when the clear button is provided. Only relevant if
+    Action to be performed when the clear button is clicked. Only relevant if
     `clearBtn` is `true`. By default, this clears the input's value and filters
     the suggestion list, given no input. This function is called on `mousedown`,
     and the provided argument is the mouse event.

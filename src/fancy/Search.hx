@@ -1,17 +1,16 @@
 package fancy;
 
+using dots.Dom;
+import dots.Keys;
 import js.html.Element;
 import js.html.InputElement;
 import js.html.Event;
 import js.html.KeyboardEvent;
-import dots.Keys;
 import fancy.search.util.Types;
 import fancy.search.*;
-
-using thx.Objects;
 using thx.Arrays;
+using thx.Objects;
 using thx.Strings;
-using dots.Dom;
 
 /**
   The `Search` class is the main entry point. It wires up event handlers along
