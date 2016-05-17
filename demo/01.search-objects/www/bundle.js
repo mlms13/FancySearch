@@ -787,7 +787,7 @@ fancy_search_Suggestions.prototype = {
 			$r = inst;
 			return $r;
 		}(this)));
-		thx_Iterators.reducei(this.filtered.keys(),function(list,key,index) {
+		thx_Iterators.reduce(this.filtered.keys(),function(list,key) {
 			var dom = _g.highlight(_g.dehighlight(_g.elements.get(key)),search);
 			return dots_Dom.append(list,dom);
 		},dots_Dom.empty(this.list));
@@ -1640,25 +1640,10 @@ thx_Iterators.map = function(it,f) {
 	}
 	return acc;
 };
-thx_Iterators.mapi = function(it,f) {
-	var acc = [];
-	var i = 0;
-	while( it.hasNext() ) {
-		var v = it.next();
-		acc.push(f(v,i++));
-	}
-	return acc;
-};
 thx_Iterators.reduce = function(it,callback,initial) {
 	var result = initial;
 	while(it.hasNext()) result = callback(result,it.next());
 	return result;
-};
-thx_Iterators.reducei = function(it,callback,initial) {
-	thx_Iterators.mapi(it,function(v,i) {
-		initial = callback(initial,v,i);
-	});
-	return initial;
 };
 thx_Iterators.toArray = function(it) {
 	var elements = [];

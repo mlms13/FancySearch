@@ -4,7 +4,6 @@ import haxe.ds.Option;
 import js.html.Element;
 import js.html.Event;
 import js.html.InputElement;
-import js.html.Node;
 using dots.Dom;
 import fancy.search.util.Types;
 using thx.Arrays;
@@ -16,7 +15,6 @@ using thx.Options;
 using thx.OrderedMap;
 using thx.Strings;
 using thx.Tuple;
-import dots.Html;
 
 /**
   The `Suggestions` class owns the suggestion list and controls its behavior.
@@ -87,9 +85,9 @@ class Suggestions<T> {
 
   function createSuggestionItem(label : Element, key : String) : Element {
     var dom = Dom.create('li', ["class" => classes.suggestionItem], [label]);
-    dom.addEventListener('mouseover', function(_ : Event) selectItem(key));
-    dom.addEventListener('mousedown', function(_ : Event) chooseSelectedItem());
-    dom.addEventListener('mouseout',  function(_ : Event) selectItem()); // select none
+    dom.addEventListener('mouseover', function(_) selectItem(key));
+    dom.addEventListener('mousedown', function(_) chooseSelectedItem());
+    dom.addEventListener('mouseout',  function(_) selectItem()); // select none
     return dom;
   }
 
@@ -174,7 +172,7 @@ class Suggestions<T> {
         return acc;
       }, OrderedMap.createString());
 
-    filtered.keys().reducei(function (list : Element, key, index) {
+    filtered.keys().reduce(function (list : Element, key) {
       var dom = highlight(dehighlight(elements.get(key)), search);
       return list.append(dom);
     }, list.empty());
