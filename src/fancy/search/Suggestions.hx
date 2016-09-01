@@ -2,21 +2,17 @@ package fancy.search;
 
 import haxe.ds.Option;
 import js.html.Element;
-import js.html.Event;
 import js.html.InputElement;
-import js.html.Node;
 using dots.Dom;
+import fancy.search.FancySearchSettings;
 import fancy.search.util.Types;
 using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;
-using thx.Nulls;
-import thx.Objects;
+using thx.Nulls; // TODO remove after making a new class for settings
 using thx.Options;
 using thx.OrderedMap;
 using thx.Strings;
-using thx.Tuple;
-import dots.Html;
 
 /**
   The `Suggestions` class owns the suggestion list and controls its behavior.
@@ -25,45 +21,38 @@ import dots.Html;
 **/
 class Suggestions<T> {
   var opts : SuggestionOptions<T>;
-  var classes : FancySearchClassNames;
+  var classes: FancySearchClasses;
   public var elements(default, null) : OrderedMap<String, Element>;
   public var selected(default, null) : String; // key of item in `filtered`
   public var isOpen(default, null) : Bool;
   var filtered : OrderedMap<String, T>;
   var el : Element;
   var list : Element;
+  var searchInput: InputElement;
 
   /**
     When you create an instance of `Search`, it comes with a public `list` field
     that is an instance of `Suggestions`. In most cases, you will not need to
     create an instance of `Suggestions` directly.
   **/
-  public function new(options : SuggestionOptions<T>, classes : FancySearchClassNames) {
-    // `Search` should really provide these things, but they aren't actually
-    // required when `Search` is being given its options.
-    if (options.parent == null || options.input == null) {
-      throw "Cannot create `Suggestions` without input or parent element";
-    }
-
-    // defaults
+  public function new(parent: Element, input: InputElement, classes, options: SuggestionOptions<T>) {
     this.classes = classes;
+    this.searchInput = input;
+    // defaults
     this.opts = initializeOptions(options);
     isOpen = false;
     filtered = OrderedMap.createString();
 
     // create all elements and set initial suggestions
     list = Dom.create('ul', ["class" => classes.suggestionList]);
-    el = Dom.create('div', ["class" => '${classes.suggestionContainer} ${classes.suggestionsClosed}'], [list]);
-    opts.parent.append(el);
+    el = Dom.create('div', ["class" => [classes.suggestionContainer, classes.suggestionsClosed].join(" ")], [list]);
+    parent.append(el);
 
     setSuggestions(opts.suggestions);
   }
 
   function initializeOptions(options : SuggestionOptions<T>) {
-    var opts : SuggestionOptions<T> = {
-      parent : options.parent,
-      input : options.input
-    };
+    var opts: SuggestionOptions<T> = {};
 
     opts.sortSuggestionsFn = options.sortSuggestionsFn;
     opts.limit = options.limit.or(5);
@@ -73,10 +62,6 @@ class Suggestions<T> {
     opts.searchLiteralValue = options.searchLiteralValue.or(function (inpt) return inpt.value);
     opts.searchLiteralPrefix = options.searchLiteralPrefix.or("Search for: ");
     opts.suggestions = options.suggestions.or([]);
-    if(null == classes.suggestionHighlight)
-      classes.suggestionHighlight = "fs-suggestion-highlight";
-    if(null == classes.suggestionHighlighted)
-      classes.suggestionHighlighted = "fs-suggestion-highlighted";
     opts.suggestionToString = options.suggestionToString.or(function (t) return Std.string(t));
     opts.onChooseSelection = options.onChooseSelection.or(defaultChooseSelection.bind(opts.suggestionToString));
     opts.suggestionToElement = options.suggestionToElement.or(function (t) return Dom.create('span', ["class" => classes.suggestionHighlight], opts.suggestionToString(t)));
@@ -87,9 +72,9 @@ class Suggestions<T> {
 
   function createSuggestionItem(label : Element, key : String) : Element {
     var dom = Dom.create('li', ["class" => classes.suggestionItem], [label]);
-    dom.addEventListener('mouseover', function(_ : Event) selectItem(key));
-    dom.addEventListener('mousedown', function(_ : Event) chooseSelectedItem());
-    dom.addEventListener('mouseout',  function(_ : Event) selectItem()); // select none
+    dom.on('mouseover', function(_) selectItem(key));
+    dom.on('mousedown', function(_) chooseSelectedItem());
+    dom.on('mouseout',  function(_) selectItem()); // select none
     return dom;
   }
 
@@ -142,10 +127,10 @@ class Suggestions<T> {
       return acc;
     }, OrderedMap.createString());
 
-    createLiteralItem(opts.searchLiteralValue(opts.input).trim(), false);
+    createLiteralItem(opts.searchLiteralValue(searchInput).trim(), false);
 
     if (isOpen)
-      filter(opts.input.value);
+      filter(searchInput.value);
   }
 
   /**
@@ -181,7 +166,7 @@ class Suggestions<T> {
 
     // replace the existing literal item, if the options request it
     // and add inject the literal search text as a key in `filtered`
-    var literalValue = opts.searchLiteralValue(opts.input).trim(),
+    var literalValue = opts.searchLiteralValue(searchInput).trim(),
         createLiteral = shouldCreateLiteral(literalValue);
 
     if (!search.isEmpty() && createLiteral) {
@@ -272,7 +257,7 @@ class Suggestions<T> {
     chosen (e.g. ENTER key or mouse click).
   **/
   public function chooseSelectedItem() {
-    opts.onChooseSelection(opts.input, Options.ofValue(filtered.get(selected)));
+    opts.onChooseSelection(searchInput, Options.ofValue(filtered.get(selected)));
   }
 
   /**

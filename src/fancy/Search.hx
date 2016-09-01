@@ -1,7 +1,6 @@
 package fancy;
 
 using dots.Dom;
-import dots.Keys;
 import js.html.Element;
 import js.html.InputElement;
 import js.html.Event;
@@ -11,6 +10,7 @@ import fancy.search.*;
 using thx.Arrays;
 using thx.Objects;
 using thx.Strings;
+using thx.Options;
 
 /**
   The `Search` class is the main entry point. It wires up event handlers along
@@ -31,10 +31,10 @@ using thx.Strings;
 **/
 #if shallow-expose @:expose @:keep #end
 class Search<T> {
-  public var list(default, null) : Suggestions<T>;
-  public var input(default, null) : InputElement;
-  var clearBtn : Element;
-  var opts : FancySearchOptions<T>;
+  public var list(default, null): Suggestions<T>;
+  public var input(default, null): InputElement;
+  var clearBtn: Element;
+  var settings: FancySearchSettings<T>;
 
   /**
     The constructor requires an input element which will be converted into a
@@ -42,40 +42,28 @@ class Search<T> {
     options are not required, but they allow you to modify the behavior of both
     the search input and the suggestion list.
   **/
-  public function new(el : InputElement, ?options : FancySearchOptions<T>) {
+  public function new(el: InputElement, ?options: FancySearchOptions<T>) {
+    if (options == null) options = {};
+
     // initialize all of the options
     input = el;
-    opts = createDefaultOptions(options);
-    opts.classes = createDefaultClasses(opts.classes);
-
-    if (opts.suggestionOptions.input == null)
-      opts.suggestionOptions.input = input;
-
-    if (opts.suggestionOptions.parent == null)
-      opts.suggestionOptions.parent = opts.container;
-
-    opts.keys = Objects.merge({
-      closeMenu : [Keys.ESCAPE],
-      selectionUp : [Keys.UP_ARROW],
-      selectionDown : [Keys.DOWN_ARROW, Keys.TAB],
-      selectionChoose : [Keys.ENTER]
-    }, opts.keys);
+    settings = FancySearchSettings.createFromOptions(el, onClearButtonClick, options);
 
     // create sibling elements
-    clearBtn = Dom.create('button', ["class" => opts.classes.clearButton], '\u00D7');
-    clearBtn.on('mousedown', opts.onClearButtonClick);
+    clearBtn = Dom.create('button', ["class" => settings.classes.clearButton], '\u00D7');
+    clearBtn.on('mousedown', settings.onClearButtonClick);
 
-    if (opts.clearBtn) {
-      opts.container.append(clearBtn);
+    if (settings.clearBtn) {
+      settings.container.append(clearBtn);
     }
 
-    list = new Suggestions(opts.suggestionOptions, opts.classes);
+    list = new Suggestions(settings.container, el, settings.classes, options.suggestionOptions);
 
     // apply classes
-    input.addClass(opts.classes.input);
+    input.addClass(settings.classes.input);
 
     if (input.value.length < 1) {
-      input.addClass(opts.classes.inputEmpty);
+      input.addClass(settings.classes.inputEmpty);
     }
 
     // apply event listeners
@@ -83,34 +71,6 @@ class Search<T> {
     input.on('blur', onSearchBlur);
     input.on('input', onSearchInput);
     input.on('keydown', cast onSearchKeydown);
-  }
-
-  function createDefaultOptions<T>(?options : FancySearchOptions<T>) : FancySearchOptions<T> {
-    return cast Objects.combine(({
-      classes : {},
-      keys : {},
-      minLength : 1,
-      clearBtn : true,
-      container : input.parentElement,
-      onClearButtonClick : onClearButtonClick,
-      suggestionOptions : {}
-    } : FancySearchOptions<T>), options == null ? ({} : FancySearchOptions<T>) : options);
-  }
-
-  function createDefaultClasses(classes : FancySearchClassNames) {
-    return Objects.merge({
-      input : 'fs-search-input',
-      inputEmpty : 'fs-search-input-empty',
-      inputLoading : 'fs-search-input-loading',
-      clearButton : 'fs-clear-input-button',
-      suggestionContainer : 'fs-suggestion-container',
-      suggestionsOpen : 'fs-suggestion-container-open',
-      suggestionsClosed : 'fs-suggestion-container-closed',
-      suggestionsEmpty : 'fs-suggestion-container-empty',
-      suggestionList : 'fs-suggestion-list',
-      suggestionItem : 'fs-suggestion-item',
-      suggestionItemSelected : 'fs-suggestion-item-selected'
-    }, opts.classes);
   }
 
   function onSearchFocus(e : Event) {
@@ -127,7 +87,7 @@ class Search<T> {
 
   function filterUsingInputValue() {
     list.filter(input.value);
-    if (input.value.length >= opts.minLength) {
+    if (input.value.length >= settings.minLength) {
       list.open();
     } else {
       list.close();
@@ -136,9 +96,9 @@ class Search<T> {
 
   function checkEmptyStatus() {
     if (input.value.length > 0) {
-      input.removeClass(opts.classes.inputEmpty);
+      input.removeClass(settings.classes.inputEmpty);
     } else {
-      input.addClass(opts.classes.inputEmpty);
+      input.addClass(settings.classes.inputEmpty);
     }
   }
 
@@ -150,41 +110,33 @@ class Search<T> {
     filterUsingInputValue();
 
     // and kick off a request for more suggestions, if a function was provided
-    if (opts.populateSuggestions != null) {
-      input.addClass(opts.classes.inputLoading);
+    settings.populateSuggestions.map(function (fn) {
+      input.addClass(settings.classes.inputLoading);
+      var value = input.value; // cache the value when we make the request
 
-      polulateSuggestion(input.value)
-        .success(function(o) {
-          if(o.query != input.value) return; // request has changed during loading
-          list.setSuggestions(o.list);
+      return fn(value)
+        .success(function(result) {
+          // only update the suggestion list if input value hasn't changed
+          if (value == input.value) list.setSuggestions(result);
         })
-        .always(function () input.removeClass(opts.classes.inputLoading));
-    }
+        .always(function () input.removeClass(settings.classes.inputLoading));
+    });
   }
-
-  function polulateSuggestion(value : String)
-    return opts.populateSuggestions(value)
-      .map(function(result) {
-        return {
-          list : result,
-          query : value
-        };
-      });
 
   function onSearchKeydown(e : KeyboardEvent) {
     e.stopPropagation();
 
     var code = e.which != null ? e.which : e.keyCode;
 
-    if (opts.keys.closeMenu.contains(code)) {
+    if (settings.keys.closeMenu.contains(code)) {
       list.close();
-    } else if (opts.keys.selectionUp.contains(code) && list.isOpen) {
+    } else if (settings.keys.selectionUp.contains(code) && list.isOpen) {
       e.preventDefault();
       list.moveSelectionUp();
-    } else if (opts.keys.selectionDown.contains(code) && list.isOpen) {
+    } else if (settings.keys.selectionDown.contains(code) && list.isOpen) {
       e.preventDefault();
       list.moveSelectionDown();
-    } else if (opts.keys.selectionChoose.contains(code) && !list.selected.isEmpty()) {
+    } else if (settings.keys.selectionChoose.contains(code) && !list.selected.isEmpty()) {
       list.chooseSelectedItem();
     }
   }
