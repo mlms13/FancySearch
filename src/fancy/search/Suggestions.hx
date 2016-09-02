@@ -20,14 +20,14 @@ using thx.Strings;
   selection and choose the selected option, filter on demand, and more.
 **/
 class Suggestions<T> {
-  var opts : SuggestionOptions<T>;
+  var settings: FancySuggestionSettings<T>;
   var classes: FancySearchClasses;
   public var elements(default, null) : OrderedMap<String, Element>;
   public var selected(default, null) : String; // key of item in `filtered`
-  public var isOpen(default, null) : Bool;
-  var filtered : OrderedMap<String, T>;
-  var el : Element;
-  var list : Element;
+  public var isOpen(default, null): Bool;
+  var filtered: OrderedMap<String, T>;
+  var el: Element;
+  var list: Element;
   var searchInput: InputElement;
 
   /**
@@ -35,11 +35,10 @@ class Suggestions<T> {
     that is an instance of `Suggestions`. In most cases, you will not need to
     create an instance of `Suggestions` directly.
   **/
-  public function new(parent: Element, input: InputElement, classes, options: SuggestionOptions<T>) {
-    this.classes = classes;
+  public function new(parent: Element, input, classes, ?options: SuggestionOptions<T>) {
     this.searchInput = input;
-    // defaults
-    this.opts = initializeOptions(options);
+    this.classes = classes;
+    this.settings = FancySuggestionSettings.createFromOptions(defaultFilterer, defaultChooseSelection, classes, options);
     isOpen = false;
     filtered = OrderedMap.createString();
 
@@ -48,26 +47,7 @@ class Suggestions<T> {
     el = Dom.create('div', ["class" => [classes.suggestionContainer, classes.suggestionsClosed].join(" ")], [list]);
     parent.append(el);
 
-    setSuggestions(opts.suggestions);
-  }
-
-  function initializeOptions(options : SuggestionOptions<T>) {
-    var opts: SuggestionOptions<T> = {};
-
-    opts.sortSuggestionsFn = options.sortSuggestionsFn;
-    opts.limit = options.limit.or(5);
-    opts.alwaysSelected = options.alwaysSelected.or(false);
-    opts.showSearchLiteralItem = options.showSearchLiteralItem.or(false);
-    opts.searchLiteralPosition = options.searchLiteralPosition.or(LiteralPosition.First);
-    opts.searchLiteralValue = options.searchLiteralValue.or(function (inpt) return inpt.value);
-    opts.searchLiteralPrefix = options.searchLiteralPrefix.or("Search for: ");
-    opts.suggestions = options.suggestions.or([]);
-    opts.suggestionToString = options.suggestionToString.or(function (t) return Std.string(t));
-    opts.onChooseSelection = options.onChooseSelection.or(defaultChooseSelection.bind(opts.suggestionToString));
-    opts.suggestionToElement = options.suggestionToElement.or(function (t) return Dom.create('span', ["class" => classes.suggestionHighlight], opts.suggestionToString(t)));
-
-    opts.filterFn = options.filterFn.or(defaultFilterer.bind(opts.suggestionToString));
-    return opts;
+    setSuggestions(settings.suggestions);
   }
 
   function createSuggestionItem(label : Element, key : String) : Element {
@@ -85,14 +65,17 @@ class Suggestions<T> {
     return suggestions.map(toString);
   }
 
-  function getLiteralItemIndex() : Int {
-    return opts.searchLiteralPosition == Last ? elements.length - 1 : 0;
+  function getLiteralItemIndex(): Int {
+    return switch settings.searchLiteralPosition {
+      case First: 0;
+      case Last: elements.length - 1;
+    };
   }
 
   // returns `true` or `false` depending on whether the item was created
-  function shouldCreateLiteral(literal : String) : Bool {
-    return opts.showSearchLiteralItem && opts.suggestions
-      .map(opts.suggestionToString)
+  function shouldCreateLiteral(literal: String): Bool {
+    return settings.showSearchLiteralItem && settings.suggestions
+      .map(settings.suggestionToString)
       .map.fn(_.toLowerCase())
       .indexOf(literal.toLowerCase()) < 0;
   }
@@ -104,7 +87,7 @@ class Suggestions<T> {
 
     // otherwise, create a suggestion element with text like "Search for: foo"
     var literalPosition = getLiteralItemIndex(),
-        el = createSuggestionItemString(opts.searchLiteralPrefix + label, genKeyForLiteral(label));
+        el = createSuggestionItemString(settings.searchLiteralPrefix + label, genKeyForLiteral(label));
 
     if (replaceExisting) {
       elements.removeAt(literalPosition);
@@ -117,17 +100,17 @@ class Suggestions<T> {
     Allows you to modify the list of suggested items on the fly.
   **/
   public function setSuggestions(items: Array<T>) {
-    opts.suggestions = items.distinct();
+    settings.suggestions = items.distinct();
 
-    elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
-      var node = opts.suggestionToElement(curr),
+    elements = settings.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
+      var node = settings.suggestionToElement(curr),
           key = genKey(curr),
           dom = createSuggestionItem(node, key);
       acc.set(key, dom);
       return acc;
     }, OrderedMap.createString());
 
-    createLiteralItem(opts.searchLiteralValue(searchInput).trim(), false);
+    createLiteralItem(settings.searchLiteralValue(searchInput).trim(), false);
 
     if (isOpen)
       filter(searchInput.value);
@@ -148,12 +131,13 @@ class Suggestions<T> {
     search = search.toLowerCase();
 
     // call the provided filter function, iterating over the whole list
-    var temp = opts.suggestions.filter(opts.filterFn.bind(search));
-    if(null != opts.sortSuggestionsFn)
-      temp = temp.order(opts.sortSuggestionsFn.bind(search));
+    var temp = settings.suggestions.filter(settings.filterFn.bind(search));
 
-    filtered = temp
-      .slice(0, opts.limit)
+    filtered = settings.sortSuggestionsFn.cata(temp, function (fn) {
+        // optionally sort the filtered list first
+        return temp.order(fn.bind(search));
+      })
+      .slice(0, settings.limit)
       .reduce(function (acc : OrderedMap<String, T>, curr : T) {
         acc.set(genKey(curr), curr);
         return acc;
@@ -166,7 +150,7 @@ class Suggestions<T> {
 
     // replace the existing literal item, if the options request it
     // and add inject the literal search text as a key in `filtered`
-    var literalValue = opts.searchLiteralValue(searchInput).trim(),
+    var literalValue = settings.searchLiteralValue(searchInput).trim(),
         createLiteral = shouldCreateLiteral(literalValue);
 
     if (!search.isEmpty() && createLiteral) {
@@ -182,7 +166,7 @@ class Suggestions<T> {
       if (createLiteral)
         // ...select the literal, if we created it
         selectItem(literalValue);
-      else if (opts.alwaysSelected)
+      else if (settings.alwaysSelected)
         // ...or select the first item if we should always select _something_
         selectItem(filtered.keyAt(0));
       else
@@ -257,14 +241,14 @@ class Suggestions<T> {
     chosen (e.g. ENTER key or mouse click).
   **/
   public function chooseSelectedItem() {
-    opts.onChooseSelection(searchInput, Options.ofValue(filtered.get(selected)));
+    settings.onChooseSelection(searchInput, Options.ofValue(filtered.get(selected)));
   }
 
   /**
     Allows overriding the `onChooseSelection` function at any time.
   **/
   public function setChooseSelection(fn : SelectionChooseFunction<T>) {
-    opts.onChooseSelection = fn;
+    settings.onChooseSelection = fn;
   }
 
 

@@ -434,10 +434,106 @@ fancy_search_FancySearchSettings.createFromOptions = function(input,clrBtnClick,
 fancy_search_FancySearchSettings.prototype = {
 	__class__: fancy_search_FancySearchSettings
 };
+var fancy_search_FancySuggestionSettings = function(alwaysSelected,limit,filterFn,onChoose,suggestions,literalPosition,literalPrefix,literalValue,showLiteral,sorter,suggToElement,suggToString) {
+	this.alwaysSelected = alwaysSelected;
+	this.limit = limit;
+	this.filterFn = filterFn;
+	this.onChooseSelection = onChoose;
+	this.suggestions = suggestions;
+	this.searchLiteralPosition = literalPosition;
+	this.searchLiteralPrefix = literalPrefix;
+	this.searchLiteralValue = literalValue;
+	this.showSearchLiteralItem = showLiteral;
+	this.sortSuggestionsFn = sorter;
+	this.suggestionToElement = suggToElement;
+	this.suggestionToString = suggToString;
+};
+fancy_search_FancySuggestionSettings.__name__ = true;
+fancy_search_FancySuggestionSettings.createFromOptions = function(filterFn,chooseFn,classes,opts) {
+	var toString = opts.suggestionToString != null?opts.suggestionToString:function(t) {
+		return Std.string(t);
+	};
+	var tmp = opts.alwaysSelected != null && opts.alwaysSelected;
+	var tmp1 = opts.limit != null?opts.limit:5;
+	var tmp2;
+	if(opts.filterFn != null) {
+		tmp2 = opts.filterFn;
+	} else {
+		var f = filterFn;
+		var a1 = toString;
+		tmp2 = function(a2,a3) {
+			return f(a1,a2,a3);
+		};
+	}
+	var tmp3;
+	if(opts.onChooseSelection != null) {
+		tmp3 = opts.onChooseSelection;
+	} else {
+		var f1 = chooseFn;
+		var a11 = toString;
+		tmp3 = function(a21,a31) {
+			f1(a11,a21,a31);
+		};
+	}
+	var tmp4 = opts.suggestions != null?opts.suggestions:[];
+	var tmp5 = opts.searchLiteralPosition != null?opts.searchLiteralPosition:fancy_search_util_LiteralPosition.First;
+	var tmp6 = opts.searchLiteralPrefix != null?opts.searchLiteralPrefix:"Search for: ";
+	var tmp7 = opts.searchLiteralValue != null?opts.searchLiteralValue:function(inpt) {
+		return inpt.value;
+	};
+	var tmp8 = opts.showSearchLiteralItem != null && opts.showSearchLiteralItem;
+	var value = opts.sortSuggestionsFn;
+	return new fancy_search_FancySuggestionSettings(tmp,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7,tmp8,null == value?haxe_ds_Option.None:haxe_ds_Option.Some(value),opts.suggestionToElement != null?opts.suggestionToElement:function(t1) {
+		var doc = null;
+		if(null == doc) {
+			doc = window.document;
+		}
+		var el = doc.createElement("span");
+		var _g1 = 0;
+		var _g2 = [];
+		while(_g1 < _g2.length) {
+			var o = _g2[_g1];
+			++_g1;
+			el.setAttribute(o.name,o.value);
+		}
+		var _g11 = new haxe_ds_StringMap();
+		var value1 = classes.suggestionHighlight;
+		if(__map_reserved["class"] != null) {
+			_g11.setReserved("class",value1);
+		} else {
+			_g11.h["class"] = value1;
+		}
+		var attrs = _g11;
+		if(null != attrs) {
+			var tmp9 = attrs.keys();
+			while(tmp9.hasNext()) {
+				var attr = tmp9.next();
+				el.setAttribute(attr,__map_reserved[attr] != null?attrs.getReserved(attr):attrs.h[attr]);
+			}
+		}
+		var children = null;
+		if(null != children) {
+			var _g21 = 0;
+			while(_g21 < children.length) {
+				var child = children[_g21];
+				++_g21;
+				el.appendChild(child);
+			}
+		}
+		var textContent = opts.suggestionToString(t1);
+		if(null != textContent) {
+			el.appendChild(doc.createTextNode(textContent));
+		}
+		return el;
+	},toString);
+};
+fancy_search_FancySuggestionSettings.prototype = {
+	__class__: fancy_search_FancySuggestionSettings
+};
 var fancy_search_Suggestions = function(parent,input,classes,options) {
-	this.classes = classes;
 	this.searchInput = input;
-	this.opts = this.initializeOptions(options);
+	this.classes = classes;
+	this.settings = fancy_search_FancySuggestionSettings.createFromOptions(fancy_search_Suggestions.defaultFilterer,fancy_search_Suggestions.defaultChooseSelection,classes,options);
 	this.isOpen = false;
 	this.filtered = new thx_StringOrderedMap();
 	var doc = null;
@@ -523,7 +619,7 @@ var fancy_search_Suggestions = function(parent,input,classes,options) {
 	}
 	this.el = el1;
 	dots_Dom.append(parent,this.el);
-	this.setSuggestions(this.opts.suggestions);
+	this.setSuggestions(this.settings.suggestions);
 };
 fancy_search_Suggestions.__name__ = true;
 fancy_search_Suggestions.defaultChooseSelection = function(toString,input,selection) {
@@ -541,220 +637,7 @@ fancy_search_Suggestions.defaultFilterer = function(toString,search,sugg) {
 	return toString(sugg).toLowerCase().indexOf(search) >= 0;
 };
 fancy_search_Suggestions.prototype = {
-	initializeOptions: function(options) {
-		var _gthis = this;
-		var opts = { };
-		opts.sortSuggestionsFn = options.sortSuggestionsFn;
-		var _0 = options;
-		var t;
-		if(null == _0) {
-			t = null;
-		} else {
-			var _1 = _0.limit;
-			if(null == _1) {
-				t = null;
-			} else {
-				t = _1;
-			}
-		}
-		opts.limit = t != null?t:5;
-		var _01 = options;
-		var t1;
-		if(null == _01) {
-			t1 = null;
-		} else {
-			var _11 = _01.alwaysSelected;
-			if(null == _11) {
-				t1 = null;
-			} else {
-				t1 = _11;
-			}
-		}
-		opts.alwaysSelected = t1 != null && t1;
-		var _02 = options;
-		var t2;
-		if(null == _02) {
-			t2 = null;
-		} else {
-			var _12 = _02.showSearchLiteralItem;
-			if(null == _12) {
-				t2 = null;
-			} else {
-				t2 = _12;
-			}
-		}
-		opts.showSearchLiteralItem = t2 != null && t2;
-		var _03 = options;
-		var t3;
-		if(null == _03) {
-			t3 = null;
-		} else {
-			var _13 = _03.searchLiteralPosition;
-			if(null == _13) {
-				t3 = null;
-			} else {
-				t3 = _13;
-			}
-		}
-		opts.searchLiteralPosition = t3 != null?t3:fancy_search_util_LiteralPosition.First;
-		var _04 = options;
-		var t4;
-		if(null == _04) {
-			t4 = null;
-		} else {
-			var _14 = _04.searchLiteralValue;
-			if(null == _14) {
-				t4 = null;
-			} else {
-				t4 = _14;
-			}
-		}
-		opts.searchLiteralValue = t4 != null?t4:function(inpt) {
-			return inpt.value;
-		};
-		var _05 = options;
-		var t5;
-		if(null == _05) {
-			t5 = null;
-		} else {
-			var _15 = _05.searchLiteralPrefix;
-			if(null == _15) {
-				t5 = null;
-			} else {
-				t5 = _15;
-			}
-		}
-		opts.searchLiteralPrefix = t5 != null?t5:"Search for: ";
-		var _06 = options;
-		var t6;
-		if(null == _06) {
-			t6 = null;
-		} else {
-			var _16 = _06.suggestions;
-			if(null == _16) {
-				t6 = null;
-			} else {
-				t6 = _16;
-			}
-		}
-		opts.suggestions = t6 != null?t6:[];
-		var _07 = options;
-		var t7;
-		if(null == _07) {
-			t7 = null;
-		} else {
-			var _17 = _07.suggestionToString;
-			if(null == _17) {
-				t7 = null;
-			} else {
-				t7 = _17;
-			}
-		}
-		opts.suggestionToString = t7 != null?t7:function(t8) {
-			return Std.string(t8);
-		};
-		var _08 = options;
-		var t9;
-		if(null == _08) {
-			t9 = null;
-		} else {
-			var _18 = _08.onChooseSelection;
-			if(null == _18) {
-				t9 = null;
-			} else {
-				t9 = _18;
-			}
-		}
-		var tmp;
-		if(t9 != null) {
-			tmp = t9;
-		} else {
-			var a1 = opts.suggestionToString;
-			tmp = function(a2,a3) {
-				fancy_search_Suggestions.defaultChooseSelection(a1,a2,a3);
-			};
-		}
-		opts.onChooseSelection = tmp;
-		var _09 = options;
-		var t10;
-		if(null == _09) {
-			t10 = null;
-		} else {
-			var _19 = _09.suggestionToElement;
-			if(null == _19) {
-				t10 = null;
-			} else {
-				t10 = _19;
-			}
-		}
-		opts.suggestionToElement = t10 != null?t10:function(t11) {
-			var doc = null;
-			if(null == doc) {
-				doc = window.document;
-			}
-			var el = doc.createElement("span");
-			var _g1 = 0;
-			var _g2 = [];
-			while(_g1 < _g2.length) {
-				var o = _g2[_g1];
-				++_g1;
-				el.setAttribute(o.name,o.value);
-			}
-			var _g11 = new haxe_ds_StringMap();
-			var value = _gthis.classes.suggestionHighlight;
-			if(__map_reserved["class"] != null) {
-				_g11.setReserved("class",value);
-			} else {
-				_g11.h["class"] = value;
-			}
-			var attrs = _g11;
-			if(null != attrs) {
-				var tmp1 = attrs.keys();
-				while(tmp1.hasNext()) {
-					var attr = tmp1.next();
-					el.setAttribute(attr,__map_reserved[attr] != null?attrs.getReserved(attr):attrs.h[attr]);
-				}
-			}
-			var children = null;
-			if(null != children) {
-				var _g21 = 0;
-				while(_g21 < children.length) {
-					var child = children[_g21];
-					++_g21;
-					el.appendChild(child);
-				}
-			}
-			var textContent = opts.suggestionToString(t11);
-			if(null != textContent) {
-				el.appendChild(doc.createTextNode(textContent));
-			}
-			return el;
-		};
-		var _010 = options;
-		var t12;
-		if(null == _010) {
-			t12 = null;
-		} else {
-			var _110 = _010.filterFn;
-			if(null == _110) {
-				t12 = null;
-			} else {
-				t12 = _110;
-			}
-		}
-		var tmp2;
-		if(t12 != null) {
-			tmp2 = t12;
-		} else {
-			var a11 = opts.suggestionToString;
-			tmp2 = function(a21,a31) {
-				return fancy_search_Suggestions.defaultFilterer(a11,a21,a31);
-			};
-		}
-		opts.filterFn = tmp2;
-		return opts;
-	}
-	,createSuggestionItem: function(label,key) {
+	createSuggestionItem: function(label,key) {
 		var _gthis = this;
 		var doc = null;
 		if(null == doc) {
@@ -852,15 +735,16 @@ fancy_search_Suggestions.prototype = {
 		return this.createSuggestionItem(el,key);
 	}
 	,getLiteralItemIndex: function() {
-		if(this.opts.searchLiteralPosition == fancy_search_util_LiteralPosition.Last) {
-			return this.elements.length - 1;
-		} else {
+		switch(this.settings.searchLiteralPosition[1]) {
+		case 0:
 			return 0;
+		case 1:
+			return this.elements.length - 1;
 		}
 	}
 	,shouldCreateLiteral: function(literal) {
-		if(this.opts.showSearchLiteralItem) {
-			return this.opts.suggestions.map(this.opts.suggestionToString).map(function(_) {
+		if(this.settings.showSearchLiteralItem) {
+			return this.settings.suggestions.map(this.settings.suggestionToString).map(function(_) {
 				return _.toLowerCase();
 			}).indexOf(literal.toLowerCase()) < 0;
 		} else {
@@ -875,7 +759,7 @@ fancy_search_Suggestions.prototype = {
 			return;
 		}
 		var literalPosition = this.getLiteralItemIndex();
-		var el = this.createSuggestionItemString(this.opts.searchLiteralPrefix + label,this.genKeyForLiteral(label));
+		var el = this.createSuggestionItemString(this.settings.searchLiteralPrefix + label,this.genKeyForLiteral(label));
 		if(replaceExisting) {
 			this.elements.removeAt(literalPosition);
 		}
@@ -883,15 +767,15 @@ fancy_search_Suggestions.prototype = {
 	}
 	,setSuggestions: function(items) {
 		var _gthis = this;
-		this.opts.suggestions = thx_Arrays.distinct(items);
+		this.settings.suggestions = thx_Arrays.distinct(items);
 		var inst = new thx_StringOrderedMap();
-		this.elements = thx_Arrays.reduce(this.opts.suggestions,function(acc,curr) {
-			var node = _gthis.opts.suggestionToElement(curr);
+		this.elements = thx_Arrays.reduce(this.settings.suggestions,function(acc,curr) {
+			var node = _gthis.settings.suggestionToElement(curr);
 			var key = _gthis.genKey(curr);
 			acc.set(key,_gthis.createSuggestionItem(node,key));
 			return acc;
 		},inst);
-		this.createLiteralItem(StringTools.trim(this.opts.searchLiteralValue(this.searchInput)),false);
+		this.createLiteralItem(StringTools.trim(this.settings.searchLiteralValue(this.searchInput)),false);
 		if(this.isOpen) {
 			this.filter(this.searchInput.value);
 		}
@@ -899,19 +783,18 @@ fancy_search_Suggestions.prototype = {
 	,filter: function(search) {
 		var _gthis = this;
 		search = search.toLowerCase();
-		var f = this.opts.filterFn;
+		var f = this.settings.filterFn;
 		var a1 = search;
-		var temp = this.opts.suggestions.filter(function(a2) {
+		var temp = this.settings.suggestions.filter(function(a2) {
 			return f(a1,a2);
 		});
-		if(null != this.opts.sortSuggestionsFn) {
-			var f1 = this.opts.sortSuggestionsFn;
+		var tmp = thx_Options.cata(this.settings.sortSuggestionsFn,temp,function(fn) {
+			var f1 = fn;
 			var a11 = search;
-			temp = thx_Arrays.order(temp,function(a21,a3) {
+			return thx_Arrays.order(temp,function(a21,a3) {
 				return f1(a11,a21,a3);
 			});
-		}
-		var tmp = temp.slice(0,this.opts.limit);
+		}).slice(0,this.settings.limit);
 		var inst = new thx_StringOrderedMap();
 		this.filtered = thx_Arrays.reduce(tmp,function(acc,curr) {
 			acc.set(_gthis.genKey(curr),curr);
@@ -922,7 +805,7 @@ fancy_search_Suggestions.prototype = {
 		thx_Iterators.reducei(tmp1,function(list,key,index) {
 			return dots_Dom.append(list,_gthis.highlight(_gthis.dehighlight(_gthis.elements.get(key)),search));
 		},tmp2);
-		var literalValue = StringTools.trim(this.opts.searchLiteralValue(this.searchInput));
+		var literalValue = StringTools.trim(this.settings.searchLiteralValue(this.searchInput));
 		var createLiteral = this.shouldCreateLiteral(literalValue);
 		if(!thx_Strings.isEmpty(search) && createLiteral) {
 			this.createLiteralItem(literalValue);
@@ -933,7 +816,7 @@ fancy_search_Suggestions.prototype = {
 		if(!this.filtered.exists(this.selected)) {
 			if(createLiteral) {
 				this.selectItem(literalValue);
-			} else if(this.opts.alwaysSelected) {
+			} else if(this.settings.alwaysSelected) {
 				this.selectItem(this.filtered.keyAt(0));
 			} else {
 				this.selectItem();
@@ -982,7 +865,7 @@ fancy_search_Suggestions.prototype = {
 	}
 	,chooseSelectedItem: function() {
 		var value = this.filtered.get(this.selected);
-		this.opts.onChooseSelection(this.searchInput,null == value?haxe_ds_Option.None:haxe_ds_Option.Some(value));
+		this.settings.onChooseSelection(this.searchInput,null == value?haxe_ds_Option.None:haxe_ds_Option.Some(value));
 	}
 	,highlight: function(dom,search) {
 		if(thx_Strings.isEmpty(search)) {
@@ -1675,6 +1558,14 @@ thx_Options.map = function(option,callback) {
 		return haxe_ds_Option.Some(callback(option[2]));
 	case 1:
 		return haxe_ds_Option.None;
+	}
+};
+thx_Options.cata = function(option,ifNone,f) {
+	switch(option[1]) {
+	case 0:
+		return f(option[2]);
+	case 1:
+		return ifNone;
 	}
 };
 thx_Options.getOrThrow = function(option,posInfo) {

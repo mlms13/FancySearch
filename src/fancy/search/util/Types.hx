@@ -168,17 +168,17 @@ enum LiteralPosition {
   dropdown suggestion list.
 **/
 typedef SuggestionOptions<T> = {
+  /** Whether to start with the top suggestion selected. Default: false **/
+  @:optional var alwaysSelected: Bool;
+
+  /** The maximum number of suggestions to be show. Default `5` **/
+  @:optional var limit: Int;
+
   /** Optionally override the default `FilterFunction` **/
   @:optional var filterFn : FilterFunction<T>;
 
   /** Optionally override the default `SortSuggestions` function **/
   @:optional var sortSuggestionsFn : SortSuggestions<T>;
-
-  /** The maximum number of suggestions to be show. Default `5` **/
-  @:optional var limit : Int;
-
-  /** Whether to start with the top suggestion selected. Default: false **/
-  @:optional var alwaysSelected : Bool;
 
   /** Optionally override the default `selectionChooseFunction` **/
   @:optional var onChooseSelection : SelectionChooseFunction<T>;
