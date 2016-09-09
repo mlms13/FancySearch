@@ -55,7 +55,7 @@ class FancySuggestionSettings<T> {
       opts.showSearchLiteralItem != null ? opts.showSearchLiteralItem : false,
       Options.ofValue(opts.sortSuggestionsFn),
       opts.suggestionToElement != null ? opts.suggestionToElement :
-        function (t) return Dom.create('span', ["class" => classes.suggestionHighlight], opts.suggestionToString(t)),
+        function (t) return Dom.create('span', ["class" => classes.suggestionHighlight], toString(t)),
       toString
     );
   }

@@ -814,7 +814,7 @@ fancy_search_FancySuggestionSettings.createFromOptions = function(filterFn,choos
 				el.appendChild(child);
 			}
 		}
-		var textContent = opts.suggestionToString(t1);
+		var textContent = toString(t1);
 		if(null != textContent) {
 			el.appendChild(doc.createTextNode(textContent));
 		}
