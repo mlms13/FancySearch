@@ -278,7 +278,7 @@ class Suggestions<T> {
   }
 
   function highlight(dom : Element, search : String) : Element {
-    if(search.isEmpty())
+    if(search.trim().isEmpty())
       return dom; // don't bother
     var elements = dom.querySelectorAll('.${classes.suggestionHighlight.split(" ").join(".")}'),
         parts = search

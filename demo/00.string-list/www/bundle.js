@@ -269,7 +269,7 @@ var fancy_Search = function(el,options) {
 		options = { };
 	}
 	this.input = el;
-	this.settings = fancy_search_FancySearchSettings.createFromOptions(el,$bind(this,this.onClearButtonClick),options);
+	this.settings = fancy_search_FancySearchSettings.createFromOptions(this.input,$bind(this,this.onClearButtonClick),options);
 	var doc = null;
 	if(null == doc) {
 		doc = window.document;
@@ -315,7 +315,7 @@ var fancy_Search = function(el,options) {
 	if(this.settings.clearBtn) {
 		dots_Dom.append(this.settings.container,this.clearBtn);
 	}
-	this.list = new fancy_search_Suggestions(this.settings.container,el,this.settings.classes,options.suggestionOptions);
+	this.list = new fancy_search_Suggestions(this.settings.container,this.input,this.settings.classes,options.suggestionOptions);
 	this.input.classList.add(this.settings.classes.input);
 	if(this.input.value.length < 1) {
 		this.input.classList.add(this.settings.classes.inputEmpty);
@@ -868,7 +868,7 @@ fancy_search_Suggestions.prototype = {
 		this.settings.onChooseSelection(this.searchInput,null == value?haxe_ds_Option.None:haxe_ds_Option.Some(value));
 	}
 	,highlight: function(dom,search) {
-		if(thx_Strings.isEmpty(search)) {
+		if(thx_Strings.isEmpty(StringTools.trim(search))) {
 			return dom;
 		}
 		var elements = dom.querySelectorAll("." + this.classes.suggestionHighlight.split(" ").join("."));

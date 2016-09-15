@@ -47,7 +47,7 @@ class Search<T> {
 
     // initialize all of the options
     input = el;
-    settings = FancySearchSettings.createFromOptions(el, onClearButtonClick, options);
+    settings = FancySearchSettings.createFromOptions(input, onClearButtonClick, options);
 
     // create sibling elements
     clearBtn = Dom.create('button', ["class" => settings.classes.clearButton], '\u00D7');
@@ -57,7 +57,7 @@ class Search<T> {
       settings.container.append(clearBtn);
     }
 
-    list = new Suggestions(settings.container, el, settings.classes, options.suggestionOptions);
+    list = new Suggestions(settings.container, input, settings.classes, options.suggestionOptions);
 
     // apply classes
     input.addClass(settings.classes.input);
