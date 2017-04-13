@@ -2214,18 +2214,59 @@ fancy_search_Reducer.reduce = function(state,action) {
 	switch(_g[1]) {
 	case 0:
 		switch(action[1]) {
+		case 0:
+			tmp1 = state.menu;
+			break;
 		case 1:
 			tmp1 = fancy_search_Reducer.openMenu(state.config,thx_Options.getOrElse(state.input,""));
+			break;
+		case 2:
+			tmp1 = fancy_search_MenuState.Closed;
+			break;
+		case 3:
+			tmp1 = state.menu;
 			break;
 		case 4:
 			tmp1 = state.menu;
 			break;
-		default:
+		case 5:
 			tmp1 = state.menu;
+			break;
+		}
+		break;
+	case 1:
+		switch(action[1]) {
+		case 0:
+			tmp1 = state.menu;
+			break;
+		case 1:
+			tmp1 = state.menu;
+			break;
+		case 2:
+			tmp1 = fancy_search_MenuState.Closed;
+			break;
+		case 3:
+			tmp1 = state.menu;
+			break;
+		case 4:
+			tmp1 = state.menu;
+			break;
+		case 5:
+			tmp1 = state.menu;
+			break;
 		}
 		break;
 	case 2:
 		switch(action[1]) {
+		case 0:
+			tmp1 = state.menu;
+			break;
+		case 1:
+			tmp1 = state.menu;
+			break;
+		case 2:
+			tmp1 = fancy_search_MenuState.Closed;
+			break;
 		case 3:
 			switch(action[2][1]) {
 			case 0:
@@ -2242,16 +2283,18 @@ fancy_search_Reducer.reduce = function(state,action) {
 			case 0:case 1:
 				tmp1 = state.menu;
 				break;
-			default:
+			case 2:
+				var highlighted = _g[2][3];
+				var list = _g[2][2];
 				tmp1 = state.menu;
+				break;
 			}
 			break;
-		default:
+		case 5:
 			tmp1 = state.menu;
+			break;
 		}
 		break;
-	default:
-		tmp1 = state.menu;
 	}
 	return { config : state1, input : tmp, menu : tmp1};
 };
@@ -2572,15 +2615,15 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 fancy_search_renderer_Dom.fromInput = function(input,container,search) {
 	var menu = search.store.stream().map(fancy_search_renderer_Dom.renderMenu);
 	input.addEventListener("focus",function(_) {
-		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "Dom.hx", lineNumber : 34, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "Dom.hx", lineNumber : 36, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
 	input.addEventListener("blur",function(_1) {
-		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "Dom.hx", lineNumber : 35, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "Dom.hx", lineNumber : 37, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
 	input.addEventListener("input",function(_2) {
-		search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 36, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 38, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
-	search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 39, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+	search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 41, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	return menu;
 };
 var fancy_search_util_SuggestionItem = $hxClasses["fancy.search.util.SuggestionItem"] = { __ename__ : ["fancy","search","util","SuggestionItem"], __constructs__ : ["Suggestion","Label"] };

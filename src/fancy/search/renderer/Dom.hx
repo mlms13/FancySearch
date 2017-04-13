@@ -8,6 +8,8 @@ import dots.Dom.create;
 import fancy.search.util.Configuration;
 
 class Dom {
+
+  // TODO: take a highlight T here and do something with it
   static function renderMenuItem<T>(render: T -> Element, sugg: SuggestionItem<T>): Element {
     return create("li", [switch sugg {
       case Suggestion(sugg): render(sugg);

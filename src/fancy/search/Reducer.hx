@@ -23,21 +23,41 @@ class Reducer {
         // if the menu is closed and we're told to open it, try
         case [Closed, OpenMenu]: openMenu(state.config, state.input.getOrElse(""));
 
+        // if the menu is already open or unopenable, ignore requests to open
+        case [Open(_), OpenMenu] | [InputTooShort, OpenMenu]: state.menu;
+
         // if the menu is open and results have loaded, show them
         case [Open(_), PopulateSuggestions(None)]: Open(NoResults);
         case [Open(_), PopulateSuggestions(Some(suggestions))]: showSuggestions(state.config, suggestions);
 
+        // if we're told to close the menu, just do it
+        case [_, CloseMenu]: Closed;
+
+        // TODO: handle moving the highlight
+        case [Open(Results(list, highlighted)), ChangeHighlight(_)]: state.menu;
+
         // if the menu is closed, loading, or has no results,
         // and we receive an instruction to change hightlight... ignore it
         case [Closed, ChangeHighlight(_)] |
-            [Open(Loading), ChangeHighlight(_)] |
-            [Open(NoResults), ChangeHighlight(_)]: state.menu;
+             [InputTooShort, ChangeHighlight(_)] |
+             [Open(Loading), ChangeHighlight(_)] |
+             [Open(NoResults), ChangeHighlight(_)]: state.menu;
 
-        case _: state.menu; // TODO: remove
+        // ignore requests to populate suggestions if the menu isn't open
+        case [Closed, PopulateSuggestions(_)] |
+             [InputTooShort, PopulateSuggestions(_)]: state.menu;
+
+        // we don't care about changing values here... middleware re-filters
+        // and the `input` part of state cares, but the menu doesn't
+        case [_, ChangeValue(_)]: state.menu;
+
+        // TODO: do we care about choosing a suggestion, or is that all middleware?
+        case [_, Choose(_)]: state.menu;
       }
     };
   }
 
+  // show the correct menu state, given a request to open it
   static function openMenu<T>(config: Configuration<T>, inputValue: String): MenuState<T> {
     return inputValue.length < config.minLength ? InputTooShort : Open(Loading);
   }
