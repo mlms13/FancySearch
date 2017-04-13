@@ -1,25 +1,20 @@
 -cp src
+-lib dots
 -lib thx.core
 -lib thx.promise
--lib dots
--dce full
+-lib thx.stream
 
 --each
 -cp demo/00.string-list/src
 -main Main
 -js demo/00.string-list/www/bundle.js
 
---next
--cp demo/01.search-objects/src
--main Main
--js demo/01.search-objects/www/bundle.js
+# --next
+# -cp demo/01.search-objects/src
+# -main Main
+# -js demo/01.search-objects/www/bundle.js
 
---next
--cp demo/02.custom-render/src
--main Main
--js demo/02.custom-render/www/bundle.js
-
---next
--D shallow-expose
-fancy.Search
--js dist/fancysearch.js
+# --next
+# -cp demo/02.custom-render/src
+# -main Main
+# -js demo/02.custom-render/www/bundle.js

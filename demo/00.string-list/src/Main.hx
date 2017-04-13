@@ -1,18 +1,38 @@
-import fancy.Search;
+
+import js.html.Element;
+import fancy.search.util.StringDefaults;
+import fancy.search.util.Configuration;
 
 class Main {
   static function main() {
-    var options = {
-      minLength : 0,
-      suggestionOptions : {
-        suggestions : ["Apple", "Banana", "Barley", "Black Bean", "Carrot", "Corn",
+    var config: Configuration<String> = {
+      filterer: StringDefaults.filterStringsSync([
+        "Apple", "Banana", "Barley", "Black Bean", "Carrot", "Corn",
           "Cucumber", "Dates", "Eggplant", "Fava Beans", "Kale", "Lettuce", "Lime",
           "Lima Bean", "Mango", "Melon", "Orange", "Peach", "Pear", "Pepper",
-          "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"],
-        limit : 6,
-        showSearchLiteralItem : true
-      }
+          "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
+      ]),
+      renderView: StringDefaults.renderStringElement,
+      renderString: thx.Functions.identity,
+      clearButton: None,
+      minLength: 0,
+      alwaysHighlight: true
     };
-    var search = Search.createFromSelector('.fancy-container input', options);
+
+    var container: Element = dots.Query.find(".fancy-container");
+    var input = dots.Query.find(".fancy-container input");
+    var search = new fancy.Search2(config);
+
+    var renderer = fancy.search.renderer.Dom.fromInput(input, container, search);
+
+    renderer.next(function (dom) {
+      // remove all children except the first (input)
+      while (container.children.length > 1) {
+        container.removeChild(container.lastChild);
+      }
+
+      // then append the new content after the input
+      dots.Dom.append(container, [ dom ]);
+    }).run();
   }
 }

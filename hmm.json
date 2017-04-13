@@ -1,0 +1,30 @@
+{
+  "dependencies": [
+    {
+      "name": "dots",
+      "type": "git",
+      "dir": "src",
+      "ref": "9105201",
+      "url": "git@github.com:fponticelli/dots"
+    },
+    {
+      "name": "thx.core",
+      "type": "git",
+      "ref": "ac52fcd",
+      "url": "git@github.com:fponticelli/thx.core"
+    },
+    {
+      "name": "thx.stream",
+      "type": "git",
+      "ref": "bf4520c",
+      "url": "git@github.com:fponticelli/thx.stream"
+    },
+    {
+      "name": "thx.promise",
+      "type": "git",
+      "dir": "src",
+      "ref": "65379a9",
+      "url": "git@github.com:fponticelli/thx.promise"
+    }
+  ]
+}

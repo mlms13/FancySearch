@@ -1,0 +1,12 @@
+-D no-deprecation-warnings
+-cp src
+-cp demo/00.string-list/src
+-lib dots
+-lib thx.core
+-lib thx.promise
+-lib thx.stream
+
+--no-output
+-js _
+fancy.Search2
+Main
