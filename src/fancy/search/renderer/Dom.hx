@@ -8,10 +8,24 @@ import dots.Dom.create;
 import fancy.search.util.Configuration;
 
 class Dom {
+  // TODO: expose this as configuration
+  static var prefix = "fs-suggestion";
+  static var containerPrefix = prefix + "-container";
+  static var classes = {
+    container: containerPrefix,
+    containerClosed: containerPrefix + "-closed",
+    containerOpen: containerPrefix + "-open",
+    containerTooShort: containerPrefix + "-too-short",
+    containerNoResults: containerPrefix + "-empty",
+    containerLoading: containerPrefix + "-loading",
+    list: prefix + "-list",
+    item: prefix + "-item",
+    itemHighlighted: prefix + "-item-highlighted"
+  };
 
   // TODO: take a highlight T here and do something with it
   static function renderMenuItem<T>(render: T -> Element, sugg: SuggestionItem<T>): Element {
-    return create("li", [switch sugg {
+    return create("li", ["class" => classes.item], [switch sugg {
       case Suggestion(sugg): render(sugg);
       case Label(renderer): renderer();
     }]);
@@ -19,12 +33,12 @@ class Dom {
 
   static function renderMenu<T>(state: State<T>): Element {
     return switch state.menu {
-      case Closed: create("div", ["class" => "closed"]);
-      case InputTooShort: create("div", ["class" => "too-short"]);
-      case Open(Loading): create("div", "LOADING"); // TODO
-      case Open(NoResults): create("div", "NO RESULTS"); // TODO
-      case Open(Results(suggs, highlighted)): create("div", ["class" => "open"], [
-        create("ul", suggs.map(renderMenuItem.bind(state.config.renderView))
+      case Closed: create("div", ["class" => classes.container + " " + classes.containerClosed]);
+      case InputTooShort: create("div", ["class" => classes.container + " " + classes.containerTooShort]);
+      case Open(Loading): create("div", ["class" => classes.container + " " + classes.containerLoading], "LOADING"); // TODO
+      case Open(NoResults): create("div", ["class" => classes.container + " " + classes.containerNoResults], "NO RESULTS"); // TODO
+      case Open(Results(suggs, highlighted)): create("div", ["class" => classes.container + " " + classes.containerOpen], [
+        create("ul", ["class" => classes.list], suggs.map(renderMenuItem.bind(state.config.renderView))
           .toArray().toArray()) // first to ReadonlyArray, then to a real one
       ]);
     };

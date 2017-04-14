@@ -2150,21 +2150,29 @@ $hxClasses["fancy.Search2"] = fancy_Search2;
 fancy_Search2.__name__ = ["fancy","Search2"];
 fancy_Search2.loadSuggestions = function(config) {
 	return function(state,action,dispatch) {
-		if(action[1] == 1) {
-			var _e = config.filterer(state.input);
-			var _e1 = (function(success) {
-				return thx_promise__$Promise_Promise_$Impl_$.success(_e,success);
-			})(function(_) {
-				var _e2 = fancy_search_Action.PopulateSuggestions(thx__$Nel_Nel_$Impl_$.fromArray(_));
-				dispatch(_e2);
-				return;
-			});
-			(function(failure) {
-				return thx_promise__$Promise_Promise_$Impl_$.failure(_e1,failure);
-			})(function(_1) {
-				haxe_Log.trace(_1,{ fileName : "Search2.hx", lineNumber : 31, className : "fancy.Search2", methodName : "loadSuggestions"});
-				return;
-			});
+		var inputLength = thx_Options.cata(state.input,0,function(_) {
+			return _.length;
+		});
+		if(inputLength >= state.config.minLength) {
+			switch(action[1]) {
+			case 0:case 1:
+				var _e = config.filterer(state.input);
+				var _e1 = (function(success) {
+					return thx_promise__$Promise_Promise_$Impl_$.success(_e,success);
+				})(function(_1) {
+					var _e2 = fancy_search_Action.PopulateSuggestions(thx__$Nel_Nel_$Impl_$.fromArray(_1));
+					dispatch(_e2);
+					return;
+				});
+				(function(failure) {
+					return thx_promise__$Promise_Promise_$Impl_$.failure(_e1,failure);
+				})(function(_2) {
+					haxe_Log.trace(_2,{ fileName : "Search2.hx", lineNumber : 36, className : "fancy.Search2", methodName : "loadSuggestions"});
+					return;
+				});
+				break;
+			default:
+			}
 		}
 	};
 };
@@ -2331,14 +2339,21 @@ fancy_search_renderer_Dom.renderMenuItem = function(render,sugg) {
 		doc = window.document;
 	}
 	var el = doc.createElement("li");
-	var _g = 0;
-	var _g1 = [];
-	while(_g < _g1.length) {
-		var o = _g1[_g];
-		++_g;
+	var _g1 = 0;
+	var _g2 = [];
+	while(_g1 < _g2.length) {
+		var o = _g2[_g1];
+		++_g1;
 		el.setAttribute(o.name,o.value);
 	}
-	var attrs = null;
+	var _g11 = new haxe_ds_StringMap();
+	var value = fancy_search_renderer_Dom.classes.item;
+	if(__map_reserved["class"] != null) {
+		_g11.setReserved("class",value);
+	} else {
+		_g11.h["class"] = value;
+	}
+	var attrs = _g11;
 	if(null != attrs) {
 		var attr = attrs.keys();
 		while(attr.hasNext()) {
@@ -2359,10 +2374,10 @@ fancy_search_renderer_Dom.renderMenuItem = function(render,sugg) {
 	}
 	var children1 = [children];
 	if(null != children1) {
-		var _g2 = 0;
-		while(_g2 < children1.length) {
-			var child = children1[_g2];
-			++_g2;
+		var _g21 = 0;
+		while(_g21 < children1.length) {
+			var child = children1[_g21];
+			++_g21;
 			el.appendChild(child);
 		}
 	}
@@ -2389,10 +2404,11 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 			el.setAttribute(o.name,o.value);
 		}
 		var _g11 = new haxe_ds_StringMap();
+		var value = fancy_search_renderer_Dom.classes.container + " " + fancy_search_renderer_Dom.classes.containerClosed;
 		if(__map_reserved["class"] != null) {
-			_g11.setReserved("class","closed");
+			_g11.setReserved("class",value);
 		} else {
-			_g11.h["class"] = "closed";
+			_g11.h["class"] = value;
 		}
 		var attrs = _g11;
 		if(null != attrs) {
@@ -2430,10 +2446,11 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 			el1.setAttribute(o1.name,o1.value);
 		}
 		var _g13 = new haxe_ds_StringMap();
+		var value1 = fancy_search_renderer_Dom.classes.container + " " + fancy_search_renderer_Dom.classes.containerTooShort;
 		if(__map_reserved["class"] != null) {
-			_g13.setReserved("class","too-short");
+			_g13.setReserved("class",value1);
 		} else {
-			_g13.h["class"] = "too-short";
+			_g13.h["class"] = value1;
 		}
 		var attrs1 = _g13;
 		if(null != attrs1) {
@@ -2465,14 +2482,21 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 				doc2 = window.document;
 			}
 			var el2 = doc2.createElement("div");
-			var _g3 = 0;
-			var _g14 = [];
-			while(_g3 < _g14.length) {
-				var o2 = _g14[_g3];
-				++_g3;
+			var _g14 = 0;
+			var _g24 = [];
+			while(_g14 < _g24.length) {
+				var o2 = _g24[_g14];
+				++_g14;
 				el2.setAttribute(o2.name,o2.value);
 			}
-			var attrs2 = null;
+			var _g15 = new haxe_ds_StringMap();
+			var value2 = fancy_search_renderer_Dom.classes.container + " " + fancy_search_renderer_Dom.classes.containerLoading;
+			if(__map_reserved["class"] != null) {
+				_g15.setReserved("class",value2);
+			} else {
+				_g15.h["class"] = value2;
+			}
+			var attrs2 = _g15;
 			if(null != attrs2) {
 				var attr4 = attrs2.keys();
 				while(attr4.hasNext()) {
@@ -2482,10 +2506,10 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 			}
 			var children2 = null;
 			if(null != children2) {
-				var _g4 = 0;
-				while(_g4 < children2.length) {
-					var child2 = children2[_g4];
-					++_g4;
+				var _g25 = 0;
+				while(_g25 < children2.length) {
+					var child2 = children2[_g25];
+					++_g25;
 					el2.appendChild(child2);
 				}
 			}
@@ -2500,14 +2524,21 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 				doc3 = window.document;
 			}
 			var el3 = doc3.createElement("div");
-			var _g5 = 0;
-			var _g15 = [];
-			while(_g5 < _g15.length) {
-				var o3 = _g15[_g5];
-				++_g5;
+			var _g16 = 0;
+			var _g26 = [];
+			while(_g16 < _g26.length) {
+				var o3 = _g26[_g16];
+				++_g16;
 				el3.setAttribute(o3.name,o3.value);
 			}
-			var attrs3 = null;
+			var _g17 = new haxe_ds_StringMap();
+			var value3 = fancy_search_renderer_Dom.classes.container + " " + fancy_search_renderer_Dom.classes.containerNoResults;
+			if(__map_reserved["class"] != null) {
+				_g17.setReserved("class",value3);
+			} else {
+				_g17.h["class"] = value3;
+			}
+			var attrs3 = _g17;
 			if(null != attrs3) {
 				var attr6 = attrs3.keys();
 				while(attr6.hasNext()) {
@@ -2517,10 +2548,10 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 			}
 			var children3 = null;
 			if(null != children3) {
-				var _g6 = 0;
-				while(_g6 < children3.length) {
-					var child3 = children3[_g6];
-					++_g6;
+				var _g27 = 0;
+				while(_g27 < children3.length) {
+					var child3 = children3[_g27];
+					++_g27;
 					el3.appendChild(child3);
 				}
 			}
@@ -2537,20 +2568,21 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 				doc4 = window.document;
 			}
 			var el4 = doc4.createElement("div");
-			var _g16 = 0;
-			var _g24 = [];
-			while(_g16 < _g24.length) {
-				var o4 = _g24[_g16];
-				++_g16;
+			var _g28 = 0;
+			var _g3 = [];
+			while(_g28 < _g3.length) {
+				var o4 = _g3[_g28];
+				++_g28;
 				el4.setAttribute(o4.name,o4.value);
 			}
-			var _g17 = new haxe_ds_StringMap();
+			var _g29 = new haxe_ds_StringMap();
+			var value4 = fancy_search_renderer_Dom.classes.container + " " + fancy_search_renderer_Dom.classes.containerOpen;
 			if(__map_reserved["class"] != null) {
-				_g17.setReserved("class","open");
+				_g29.setReserved("class",value4);
 			} else {
-				_g17.h["class"] = "open";
+				_g29.h["class"] = value4;
 			}
-			var attrs4 = _g17;
+			var attrs4 = _g29;
 			if(null != attrs4) {
 				var attr8 = attrs4.keys();
 				while(attr8.hasNext()) {
@@ -2563,14 +2595,21 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 				doc5 = window.document;
 			}
 			var el5 = doc5.createElement("ul");
-			var _g25 = 0;
-			var _g31 = [];
-			while(_g25 < _g31.length) {
-				var o5 = _g31[_g25];
-				++_g25;
+			var _g4 = 0;
+			var _g5 = [];
+			while(_g4 < _g5.length) {
+				var o5 = _g5[_g4];
+				++_g4;
 				el5.setAttribute(o5.name,o5.value);
 			}
-			var attrs5 = null;
+			var _g41 = new haxe_ds_StringMap();
+			var value5 = fancy_search_renderer_Dom.classes.list;
+			if(__map_reserved["class"] != null) {
+				_g41.setReserved("class",value5);
+			} else {
+				_g41.h["class"] = value5;
+			}
+			var attrs5 = _g41;
 			if(null != attrs5) {
 				var attr10 = attrs5.keys();
 				while(attr10.hasNext()) {
@@ -2583,10 +2622,10 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 				return fancy_search_renderer_Dom.renderMenuItem(a1,a2);
 			})).slice();
 			if(null != children4) {
-				var _g26 = 0;
-				while(_g26 < children4.length) {
-					var child4 = children4[_g26];
-					++_g26;
+				var _g51 = 0;
+				while(_g51 < children4.length) {
+					var child4 = children4[_g51];
+					++_g51;
 					el5.appendChild(child4);
 				}
 			}
@@ -2596,10 +2635,10 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 			}
 			var children5 = [el5];
 			if(null != children5) {
-				var _g27 = 0;
-				while(_g27 < children5.length) {
-					var child5 = children5[_g27];
-					++_g27;
+				var _g42 = 0;
+				while(_g42 < children5.length) {
+					var child5 = children5[_g42];
+					++_g42;
 					el4.appendChild(child5);
 				}
 			}
@@ -2615,15 +2654,15 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 fancy_search_renderer_Dom.fromInput = function(input,container,search) {
 	var menu = search.store.stream().map(fancy_search_renderer_Dom.renderMenu);
 	input.addEventListener("focus",function(_) {
-		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "Dom.hx", lineNumber : 36, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "Dom.hx", lineNumber : 50, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
 	input.addEventListener("blur",function(_1) {
-		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "Dom.hx", lineNumber : 37, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "Dom.hx", lineNumber : 51, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
 	input.addEventListener("input",function(_2) {
-		search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 38, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 52, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
-	search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 41, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+	search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 55, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	return menu;
 };
 var fancy_search_util_SuggestionItem = $hxClasses["fancy.search.util.SuggestionItem"] = { __ename__ : ["fancy","search","util","SuggestionItem"], __constructs__ : ["Suggestion","Label"] };
@@ -16252,6 +16291,9 @@ dots_Attributes.properties = (function($this) {
 	return $r;
 }(this));
 dots_Query.doc = document;
+fancy_search_renderer_Dom.prefix = "fs-suggestion";
+fancy_search_renderer_Dom.containerPrefix = fancy_search_renderer_Dom.prefix + "-container";
+fancy_search_renderer_Dom.classes = { container : fancy_search_renderer_Dom.containerPrefix, containerClosed : fancy_search_renderer_Dom.containerPrefix + "-closed", containerOpen : fancy_search_renderer_Dom.containerPrefix + "-open", containerTooShort : fancy_search_renderer_Dom.containerPrefix + "-too-short", containerNoResults : fancy_search_renderer_Dom.containerPrefix + "-empty", containerLoading : fancy_search_renderer_Dom.containerPrefix + "-loading", list : fancy_search_renderer_Dom.prefix + "-list", item : fancy_search_renderer_Dom.prefix + "-item", itemHighlighted : fancy_search_renderer_Dom.prefix + "-item-highlighted"};
 haxe__$Int32_Int32_$Impl_$._mul = Math.imul != null ? Math.imul : function(a,b) {
 	return a * (b & 65535) + (a * (b >>> 16) << 16 | 0) | 0;
 };

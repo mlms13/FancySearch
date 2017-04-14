@@ -52,6 +52,6 @@
   color: #666;
   padding: 5px 10px;
 }
-.fs-suggestion-item-selected {
+.fs-suggestion-item-highlighted {
   background: #eee;
 }
