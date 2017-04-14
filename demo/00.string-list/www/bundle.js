@@ -2204,7 +2204,6 @@ var fancy_search_Reducer = function() { };
 $hxClasses["fancy.search.Reducer"] = fancy_search_Reducer;
 fancy_search_Reducer.__name__ = ["fancy","search","Reducer"];
 fancy_search_Reducer.reduce = function(state,action) {
-	haxe_Log.trace("reducer with action",{ fileName : "Reducer.hx", lineNumber : 10, className : "fancy.search.Reducer", methodName : "reduce", customParams : [action]});
 	var state1 = state.config;
 	var tmp;
 	if(action[1] == 0) {
@@ -2674,7 +2673,6 @@ $hxClasses["fancy.search.util.StringDefaults"] = fancy_search_util_StringDefault
 fancy_search_util_StringDefaults.__name__ = ["fancy","search","util","StringDefaults"];
 fancy_search_util_StringDefaults.filterStringsSync = function(suggestions) {
 	return function(search) {
-		haxe_Log.trace("getting string results based on search text",{ fileName : "StringDefaults.hx", lineNumber : 28, className : "fancy.search.util.StringDefaults", methodName : "filterStringsSync", customParams : [search]});
 		var filtered = thx_Options.cataf(search,function() {
 			return suggestions.map(fancy_search_util_SuggestionItem.Suggestion);
 		},function(val) {

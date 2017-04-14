@@ -7,7 +7,6 @@ import fancy.search.util.Configuration;
 
 class Reducer {
   public static function reduce<T>(state: State<T>, action: Action<T>): State<T> {
-    trace("reducer with action", action);
     return {
       // config remains unchanged, as it's always unaffected by actions
       config: state.config,

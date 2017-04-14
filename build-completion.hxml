@@ -9,4 +9,6 @@
 --no-output
 -js _
 fancy.Search2
+test.TestAll
+test.fancy.TestSearch
 Main

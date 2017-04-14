@@ -25,7 +25,6 @@ class StringDefaults {
    */
   public static function filterStringsSync(suggestions: Array<String>): Filterer<String> {
     return function (search: Option<String>): thx.promise.Promise<Array<SuggestionItem<String>>> {
-      trace("getting string results based on search text", search);
       var filtered = search.cataf(
         function () return suggestions.map(Suggestion),
         function (val) {

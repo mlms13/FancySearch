@@ -4,7 +4,8 @@ node_modules/
 .haxelib/
 *.zip
 
-# ignore dist for now
+# ignore compiled
+bin/
 dist/
 
 # system files

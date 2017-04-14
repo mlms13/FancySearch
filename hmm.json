@@ -25,6 +25,11 @@
       "dir": "src",
       "ref": "65379a9",
       "url": "git@github.com:fponticelli/thx.promise"
+    },
+    {
+      "name": "utest",
+      "type": "haxelib",
+      "version": "1.4.1"
     }
   ]
 }
