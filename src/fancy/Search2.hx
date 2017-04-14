@@ -2,6 +2,7 @@ package fancy;
 
 import haxe.ds.Option;
 using thx.Functions;
+import thx.Functions.fn;
 import thx.stream.Store;
 import thx.stream.Property;
 import thx.stream.Reducer.Middleware;
@@ -21,15 +22,20 @@ class Search2<T> {
   }
 
   static function loadSuggestions<T>(config: Configuration<T>): Middleware<State<T>, Action<T>> {
+    // TODO: inside here, we're going to have to make sure we only update the state
+    // when the currently-applicable promise returns
     return function (state, action, dispatch) {
+      var inputLength = thx.Options.cata(state.input, 0, fn(_.length));
 
-      // TODO: only if input length is long enough
-      // TODO: something like this should also happen on ChangeValue
-      switch action {
-        case OpenMenu: config.filterer(state.input)
-          .success.fn(dispatch(PopulateSuggestions(thx.Nel.fromArray(_))))
-          .failure.fn(trace(_)); // TODO: failed state
-        case _: // do nothing
+      if (inputLength >= state.config.minLength) {
+        switch action {
+          // reducer runs first, so input value is already updated by the time we get here,
+          // so we can ignore the content of ChangeValue
+          case OpenMenu | ChangeValue(_): config.filterer(state.input)
+            .success.fn(dispatch(PopulateSuggestions(thx.Nel.fromArray(_))))
+            .failure.fn(trace(_)); // TODO: failed state
+          case _: // do nothing
+        }
       }
     };
   }
