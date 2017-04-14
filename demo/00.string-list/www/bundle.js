@@ -2222,7 +2222,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 	case 0:
 		switch(action[1]) {
 		case 0:
-			tmp1 = state.menu;
+			tmp1 = fancy_search_MenuState.Closed;
 			break;
 		case 1:
 			tmp1 = fancy_search_Reducer.openMenu(state.config,thx_Options.getOrElse(state.input,""));
@@ -2244,7 +2244,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 	case 1:
 		switch(action[1]) {
 		case 0:
-			tmp1 = state.menu;
+			tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading);
 			break;
 		case 1:
 			tmp1 = state.menu;
@@ -2266,7 +2266,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 	case 2:
 		switch(action[1]) {
 		case 0:
-			tmp1 = state.menu;
+			tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading);
 			break;
 		case 1:
 			tmp1 = state.menu;

@@ -46,9 +46,12 @@ class Reducer {
         case [Closed, PopulateSuggestions(_)] |
              [InputTooShort, PopulateSuggestions(_)]: state.menu;
 
-        // we don't care about changing values here... middleware re-filters
-        // and the `input` part of state cares, but the menu doesn't
-        case [_, ChangeValue(_)]: state.menu;
+        // ignore value changes when the menu is closed
+        case [Closed, ChangeValue(_)]: Closed;
+
+        // any other time the value changes, switch the menu to a loading state
+        // the middleware will handle firing the next action
+        case [_, ChangeValue(_)]: Open(Loading);
 
         // TODO: do we care about choosing a suggestion, or is that all middleware?
         case [_, Choose(_)]: state.menu;
