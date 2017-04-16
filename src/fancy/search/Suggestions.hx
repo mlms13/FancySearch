@@ -2,15 +2,14 @@ package fancy.search;
 
 import haxe.ds.Option;
 import js.html.Element;
-import js.html.Event;
 import js.html.InputElement;
 using dots.Dom;
+import fancy.search.FancySearchSettings;
 import fancy.search.util.Types;
 using thx.Arrays;
 using thx.Functions;
 using thx.Iterators;
-using thx.Nulls;
-import thx.Objects;
+using thx.Nulls; // TODO remove after making a new class for settings
 using thx.Options;
 using thx.OrderedMap;
 using thx.Strings;
@@ -22,72 +21,41 @@ using thx.Tuple;
   selection and choose the selected option, filter on demand, and more.
 **/
 class Suggestions<T> {
-  var opts : SuggestionOptions<T>;
-  var classes : FancySearchClassNames;
+  var settings: FancySuggestionSettings<T>;
+  var classes: FancySearchClasses;
   public var elements(default, null) : OrderedMap<String, Element>;
   public var selected(default, null) : String; // key of item in `filtered`
-  public var isOpen(default, null) : Bool;
-  var filtered : OrderedMap<String, T>;
-  var el : Element;
-  var list : Element;
+  public var isOpen(default, null): Bool;
+  var filtered: OrderedMap<String, T>;
+  var el: Element;
+  var list: Element;
+  var searchInput: InputElement;
 
   /**
     When you create an instance of `Search`, it comes with a public `list` field
     that is an instance of `Suggestions`. In most cases, you will not need to
     create an instance of `Suggestions` directly.
   **/
-  public function new(options : SuggestionOptions<T>, classes : FancySearchClassNames) {
-    // `Search` should really provide these things, but they aren't actually
-    // required when `Search` is being given its options.
-    if (options.parent == null || options.input == null) {
-      throw "Cannot create `Suggestions` without input or parent element";
-    }
-
-    // defaults
+  public function new(parent: Element, input, classes, ?options: SuggestionOptions<T>) {
+    this.searchInput = input;
     this.classes = classes;
-    this.opts = initializeOptions(options);
+    this.settings = FancySuggestionSettings.createFromOptions(defaultFilterer, defaultChooseSelection, classes, options);
     isOpen = false;
     filtered = OrderedMap.createString();
 
     // create all elements and set initial suggestions
     list = Dom.create('ul', ["class" => classes.suggestionList]);
-    el = Dom.create('div', ["class" => '${classes.suggestionContainer} ${classes.suggestionsClosed}'], [list]);
-    opts.parent.append(el);
+    el = Dom.create('div', ["class" => [classes.suggestionContainer, classes.suggestionsClosed].join(" ")], [list]);
+    parent.append(el);
 
-    setSuggestions(opts.suggestions);
-  }
-
-  function initializeOptions(options : SuggestionOptions<T>) {
-    var opts : SuggestionOptions<T> = {
-      parent : options.parent,
-      input : options.input
-    };
-
-    opts.sortSuggestionsFn = options.sortSuggestionsFn;
-    opts.limit = options.limit.or(5);
-    opts.alwaysSelected = options.alwaysSelected.or(false);
-    opts.showSearchLiteralItem = options.showSearchLiteralItem.or(false);
-    opts.searchLiteralPosition = options.searchLiteralPosition.or(LiteralPosition.First);
-    opts.searchLiteralValue = options.searchLiteralValue.or(function (inpt) return inpt.value);
-    opts.searchLiteralPrefix = options.searchLiteralPrefix.or("Search for: ");
-    opts.suggestions = options.suggestions.or([]);
-    if(null == classes.suggestionHighlight)
-      classes.suggestionHighlight = "fs-suggestion-highlight";
-    if(null == classes.suggestionHighlighted)
-      classes.suggestionHighlighted = "fs-suggestion-highlighted";
-    opts.suggestionToString = options.suggestionToString.or(function (t) return Std.string(t));
-    opts.onChooseSelection = options.onChooseSelection.or(defaultChooseSelection.bind(opts.suggestionToString));
-    opts.suggestionToElement = options.suggestionToElement.or(function (t) return Dom.create('span', ["class" => classes.suggestionHighlight], opts.suggestionToString(t)));
-
-    opts.filterFn = options.filterFn.or(defaultFilterer.bind(opts.suggestionToString));
-    return opts;
+    setSuggestions(settings.suggestions);
   }
 
   function createSuggestionItem(label : Element, key : String) : Element {
     var dom = Dom.create('li', ["class" => classes.suggestionItem], [label]);
-    dom.addEventListener('mouseover', function(_) selectItem(key));
-    dom.addEventListener('mousedown', function(_) chooseSelectedItem());
-    dom.addEventListener('mouseout',  function(_) selectItem()); // select none
+    dom.on('mouseover', function(_) selectItem(key));
+    dom.on('mousedown', function(_) chooseSelectedItem());
+    dom.on('mouseout',  function(_) selectItem()); // select none
     return dom;
   }
 
@@ -98,14 +66,17 @@ class Suggestions<T> {
     return suggestions.map(toString);
   }
 
-  function getLiteralItemIndex() : Int {
-    return opts.searchLiteralPosition == Last ? elements.length - 1 : 0;
+  function getLiteralItemIndex(): Int {
+    return switch settings.searchLiteralPosition {
+      case First: 0;
+      case Last: elements.length - 1;
+    };
   }
 
   // returns `true` or `false` depending on whether the item was created
-  function shouldCreateLiteral(literal : String) : Bool {
-    return opts.showSearchLiteralItem && opts.suggestions
-      .map(opts.suggestionToString)
+  function shouldCreateLiteral(literal: String): Bool {
+    return settings.showSearchLiteralItem && settings.suggestions
+      .map(settings.suggestionToString)
       .map.fn(_.toLowerCase())
       .indexOf(literal.toLowerCase()) < 0;
   }
@@ -117,7 +88,7 @@ class Suggestions<T> {
 
     // otherwise, create a suggestion element with text like "Search for: foo"
     var literalPosition = getLiteralItemIndex(),
-        el = createSuggestionItemString(opts.searchLiteralPrefix + label, genKeyForLiteral(label));
+        el = createSuggestionItemString(settings.searchLiteralPrefix + label, genKeyForLiteral(label));
 
     if (replaceExisting) {
       elements.removeAt(literalPosition);
@@ -130,20 +101,20 @@ class Suggestions<T> {
     Allows you to modify the list of suggested items on the fly.
   **/
   public function setSuggestions(items: Array<T>) {
-    opts.suggestions = items.distinct();
+    settings.suggestions = items.distinct();
 
-    elements = opts.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
-      var node = opts.suggestionToElement(curr),
+    elements = settings.suggestions.reduce(function (acc : OrderedMap<String, Element>, curr) {
+      var node = settings.suggestionToElement(curr),
           key = genKey(curr),
           dom = createSuggestionItem(node, key);
       acc.set(key, dom);
       return acc;
     }, OrderedMap.createString());
 
-    createLiteralItem(opts.searchLiteralValue(opts.input).trim(), false);
+    createLiteralItem(settings.searchLiteralValue(searchInput).trim(), false);
 
     if (isOpen)
-      filter(opts.input.value);
+      filter(searchInput.value);
   }
 
   /**
@@ -161,12 +132,13 @@ class Suggestions<T> {
     search = search.toLowerCase();
 
     // call the provided filter function, iterating over the whole list
-    var temp = opts.suggestions.filter(opts.filterFn.bind(search));
-    if(null != opts.sortSuggestionsFn)
-      temp = temp.order(opts.sortSuggestionsFn.bind(search));
+    var temp = settings.suggestions.filter(settings.filterFn.bind(search));
 
-    filtered = temp
-      .slice(0, opts.limit)
+    filtered = settings.sortSuggestionsFn.cata(temp, function (fn) {
+        // optionally sort the filtered list first
+        return temp.order(fn.bind(search));
+      })
+      .slice(0, settings.limit)
       .reduce(function (acc : OrderedMap<String, T>, curr : T) {
         acc.set(genKey(curr), curr);
         return acc;
@@ -179,7 +151,7 @@ class Suggestions<T> {
 
     // replace the existing literal item, if the options request it
     // and add inject the literal search text as a key in `filtered`
-    var literalValue = opts.searchLiteralValue(opts.input).trim(),
+    var literalValue = settings.searchLiteralValue(searchInput).trim(),
         createLiteral = shouldCreateLiteral(literalValue);
 
     if (!search.isEmpty() && createLiteral) {
@@ -195,7 +167,7 @@ class Suggestions<T> {
       if (createLiteral)
         // ...select the literal, if we created it
         selectItem(literalValue);
-      else if (opts.alwaysSelected)
+      else if (settings.alwaysSelected)
         // ...or select the first item if we should always select _something_
         selectItem(filtered.keyAt(0));
       else
@@ -270,14 +242,14 @@ class Suggestions<T> {
     chosen (e.g. ENTER key or mouse click).
   **/
   public function chooseSelectedItem() {
-    opts.onChooseSelection(opts.input, Options.ofValue(filtered.get(selected)));
+    settings.onChooseSelection(searchInput, Options.ofValue(filtered.get(selected)));
   }
 
   /**
     Allows overriding the `onChooseSelection` function at any time.
   **/
   public function setChooseSelection(fn : SelectionChooseFunction<T>) {
-    opts.onChooseSelection = fn;
+    settings.onChooseSelection = fn;
   }
 
 
@@ -307,7 +279,7 @@ class Suggestions<T> {
   }
 
   function highlight(dom : Element, search : String) : Element {
-    if(search.isEmpty())
+    if(search.trim().isEmpty())
       return dom; // don't bother
     var elements = dom.querySelectorAll('.${classes.suggestionHighlight.split(" ").join(".")}'),
         parts = search

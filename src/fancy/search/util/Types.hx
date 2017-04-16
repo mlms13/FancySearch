@@ -4,6 +4,8 @@ import haxe.ds.Option;
 import js.html.InputElement;
 import js.html.Element;
 
+typedef EventHandler = js.html.Event -> Void;
+
 /**
   The filter function is given the search string (value from the input), and
   a suggestion item to compare. It should return true if this item will be in
@@ -15,7 +17,7 @@ import js.html.Element;
 typedef FilterFunction<T> = String -> T -> Bool;
 
 /**
-  The sort function is given a the original search string. It is also given two
+  The sort function is given the original search string. It is also given two
   suggestion items, and it should return `-1`, `0`, or `1`, similar to most
   array order-by functions.
 
@@ -33,14 +35,14 @@ typedef SortSuggestions<T> = String -> T -> T -> Int;
   The default version of this function simply sets the input's value to the
   stringified suggestion item, then it blurs the input.
 **/
-typedef SelectionChooseFunction<T> = js.html.InputElement -> Option<T> -> Void;
+typedef SelectionChooseFunction<T> = InputElement -> Option<T> -> Void;
 
 /**
   The following keys all expect string values, which will be added directly to
   the DOM as classes on the fancy search input element, the suggestion list and
   item elements, and various other buttons and components.
 **/
-typedef FancySearchClassNames = {
+typedef FancySearchClassOptions = {
   /** Default: `fs-search-input` **/
   @:optional var input : String;
 
@@ -105,7 +107,7 @@ typedef FancySearchKeyboardShortcuts = {
 **/
 typedef FancySearchOptions<T> = {
   /** Optionally override any of the default class strings **/
-  @:optional var classes : FancySearchClassNames;
+  @:optional var classes: FancySearchClassOptions;
 
   /**
     Boolean that determines whether a clear button should be shown. Default:
@@ -137,7 +139,7 @@ typedef FancySearchOptions<T> = {
     the suggestion list, given no input. This function is called on `mousedown`,
     and the provided argument is the mouse event.
   **/
-  @:optional var onClearButtonClick : js.html.Event -> Void;
+  @:optional var onClearButtonClick: EventHandler;
 
   /**
     Optional function to asynchronously update the suggestion list when the
@@ -166,24 +168,20 @@ enum LiteralPosition {
   dropdown suggestion list.
 **/
 typedef SuggestionOptions<T> = {
+  /** Whether to start with the top suggestion selected. Default: false **/
+  @:optional var alwaysSelected: Bool;
+
+  /** The maximum number of suggestions to be show. Default `5` **/
+  @:optional var limit: Int;
+
   /** Optionally override the default `FilterFunction` **/
   @:optional var filterFn : FilterFunction<T>;
 
   /** Optionally override the default `SortSuggestions` function **/
   @:optional var sortSuggestionsFn : SortSuggestions<T>;
 
-  /** The maximum number of suggestions to be show. Default `5` **/
-  @:optional var limit : Int;
-
-  /** Whether to start with the top suggestion selected. Default: false **/
-  @:optional var alwaysSelected : Bool;
-
   /** Optionally override the default `selectionChooseFunction` **/
   @:optional var onChooseSelection : SelectionChooseFunction<T>;
-
-  @:dox(hide) @:optional var input : js.html.InputElement;
-
-  @:dox(hide) @:optional var parent : js.html.Element;
 
   /** Whether to show the literal "Search for: ..." string. Default: `false` **/
   @:optional var showSearchLiteralItem : Bool;
