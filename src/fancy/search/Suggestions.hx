@@ -13,6 +13,7 @@ using thx.Nulls; // TODO remove after making a new class for settings
 using thx.Options;
 using thx.OrderedMap;
 using thx.Strings;
+using thx.Tuple;
 
 /**
   The `Suggestions` class owns the suggestion list and controls its behavior.
@@ -143,7 +144,7 @@ class Suggestions<T> {
         return acc;
       }, OrderedMap.createString());
 
-    filtered.keys().reducei(function (list : Element, key, index) {
+    filtered.keys().reduce(function (list : Element, key) {
       var dom = highlight(dehighlight(elements.get(key)), search);
       return list.append(dom);
     }, list.empty());
