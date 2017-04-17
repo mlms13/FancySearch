@@ -28,12 +28,13 @@ class Search2<T> {
       var inputLength = thx.Options.cata(state.input, 0, fn(_.length));
 
       if (inputLength >= state.config.minLength) {
-        switch action {
+        switch [state.menu, action] {
           // reducer runs first, so input value is already updated by the time we get here,
           // so we can ignore the content of ChangeValue
-          case OpenMenu | ChangeValue(_): config.filterer(state.input)
-            .success.fn(dispatch(PopulateSuggestions(thx.Nel.fromArray(_))))
-            .failure(function (_) dispatch(FailSuggestions));
+          case [Open(_, h), OpenMenu] | [Open(_, h), ChangeValue(_)]:
+            config.filterer(state.input)
+              .success.fn(dispatch(PopulateSuggestions(thx.Nel.fromArray(_), h)))
+              .failure(function (_) dispatch(FailSuggestions));
           case _: // do nothing
         }
       }

@@ -65,7 +65,7 @@ class TestSearch {
     var search = new Search2(simpleConfig);
     collectMenuState(search.store, 3)
       .next(function (val) {
-        Assert.same([Closed, Open(Loading), Open(Results(suggestionsNel, None))], val);
+        Assert.same([Closed, Open(Loading, None), Open(Results(suggestionsNel), None)], val);
       })
       .always(Assert.createAsync())
       .run();
@@ -80,10 +80,10 @@ class TestSearch {
       .next(function (val) {
         var expected = [
           Closed,
-          Open(Loading),
-          Open(Results(suggestionsNel, None)),
-          Open(Loading), // back to loading when value changes
-          Open(Results(Nel.pure(Suggestion("Zucchini")), None))
+          Open(Loading, None),
+          Open(Results(suggestionsNel), None),
+          Open(Loading, None), // back to loading when value changes
+          Open(Results(Nel.pure(Suggestion("Zucchini"))), None)
         ];
 
         Assert.same(expected, val);
@@ -110,7 +110,7 @@ class TestSearch {
     // behaves the same as above...
     collectMenuState(searchA.store, 3)
       .next(function (v) {
-        var expected = [Closed, Open(Loading), Open(Results(suggestionsNel, None))];
+        var expected = [Closed, Open(Loading, None), Open(Results(suggestionsNel), None)];
         Assert.same(expected, v);
       })
       .always(Assert.createAsync())
@@ -123,7 +123,7 @@ class TestSearch {
       .next(function (v) {
         var expected = [
           Closed,
-          Open(Loading),
+          Open(Loading, None),
           Closed, // closed when we tell it to close
           Closed // and still closed when we finish loading results
         ];
@@ -146,7 +146,7 @@ class TestSearch {
 
     collectMenuState(search.store, 3)
       .next(function (v) {
-        Assert.same([Closed, Open(Loading), Open(Failed)], v);
+        Assert.same([Closed, Open(Loading, None), Open(Failed, None)], v);
       })
       .always(Assert.createAsync())
       .run();
@@ -167,7 +167,7 @@ class TestSearch {
 
     collectMenuState(search.store, 3)
       .next(function (v) {
-        Assert.same([Closed, Open(Loading), Open(Results(suggestionsNel, Some("Apple")))], v);
+        Assert.same([Closed, Open(Loading, None), Open(Results(suggestionsNel), Some("Apple"))], v);
       })
       .always(Assert.createAsync())
       .run();
@@ -182,9 +182,9 @@ class TestSearch {
       .next(function (v) {
         var expected = [
           Closed,
-          Open(Loading),
-          Open(Results(suggestionsNel, None)),
-          Open(Results(suggestionsNel, Some("Corn")))
+          Open(Loading, None),
+          Open(Results(suggestionsNel), None),
+          Open(Results(suggestionsNel), Some("Corn"))
         ];
         Assert.same(expected, v);
       })
@@ -204,11 +204,11 @@ class TestSearch {
         var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
         var expected = [
           Closed,
-          Open(Loading),
-          Open(Results(suggestionsNel, None)),
-          Open(Results(suggestionsNel, Some("Fava Beans"))),
-          Open(Loading),
-          Open(Results(results, Some("Fava Beans")))
+          Open(Loading, None),
+          Open(Results(suggestionsNel), None),
+          Open(Results(suggestionsNel), Some("Fava Beans")),
+          Open(Loading, Some("Fava Beans")),
+          Open(Results(results), Some("Fava Beans"))
         ];
         Assert.same(expected, v);
       })
@@ -228,11 +228,11 @@ class TestSearch {
       .next(function (v) {
         var expected = [
           Closed,
-          Open(Loading),
-          Open(Results(suggestionsNel, None)),
-          Open(Results(suggestionsNel, Some("Fava Beans"))),
-          Open(Loading),
-          Open(Results(Nel.pure(Suggestion("Zucchini")), None))
+          Open(Loading, None),
+          Open(Results(suggestionsNel), None),
+          Open(Results(suggestionsNel), Some("Fava Beans")),
+          Open(Loading, Some("Fava Beans")),
+          Open(Results(Nel.pure(Suggestion("Zucchini"))), None)
         ];
         Assert.same(expected, v);
       })
@@ -253,11 +253,11 @@ class TestSearch {
       .next(function (v) {
         var expected = [
           Closed,
-          Open(Loading),
-          Open(Results(suggestionsNel, None)),
-          Open(Results(suggestionsNel, Some("Fava Beans"))),
-          Open(Loading),
-          Open(Results(Nel.pure(Suggestion("Zucchini")), Some("Zucchini")))
+          Open(Loading, None),
+          Open(Results(suggestionsNel), Some("Apple")),
+          Open(Results(suggestionsNel), Some("Fava Beans")),
+          Open(Loading, Some("Fava Beans")),
+          Open(Results(Nel.pure(Suggestion("Zucchini"))), Some("Zucchini"))
         ];
         Assert.same(expected, v);
       })

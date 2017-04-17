@@ -8,13 +8,14 @@ enum Action<T> {
   ChangeValue(newValue: String);
   OpenMenu;
   CloseMenu;
-  PopulateSuggestions(suggestions: Option<Nel<SuggestionItem<T>>>);
+  PopulateSuggestions(suggestions: Option<Nel<SuggestionItem<T>>>, highlight: Option<T>);
   FailSuggestions;
   ChangeHighlight(change: HighlightChangeType<T>);
   Choose(suggestion: T);
 }
 
 enum HighlightChangeType<T> {
+  Unhighlight;
   Specific(suggestion: T);
   Move(direction: Direction);
 }

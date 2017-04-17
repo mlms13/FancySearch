@@ -2154,20 +2154,24 @@ fancy_Search2.loadSuggestions = function(config) {
 			return _.length;
 		});
 		if(inputLength >= state.config.minLength) {
-			switch(action[1]) {
-			case 0:case 1:
-				var _e = config.filterer(state.input);
-				thx_promise__$Promise_Promise_$Impl_$.failure((function(success) {
-					return thx_promise__$Promise_Promise_$Impl_$.success(_e,success);
-				})(function(_1) {
-					var tmp = fancy_search_Action.PopulateSuggestions(thx__$Nel_Nel_$Impl_$.fromArray(_1));
-					dispatch(tmp);
-					return;
-				}),function(_2) {
-					dispatch(fancy_search_Action.FailSuggestions);
-				});
-				break;
-			default:
+			var _g = state.menu;
+			if(_g[1] == 2) {
+				switch(action[1]) {
+				case 0:case 1:
+					var h = _g[3];
+					var _e = config.filterer(state.input);
+					thx_promise__$Promise_Promise_$Impl_$.failure((function(success) {
+						return thx_promise__$Promise_Promise_$Impl_$.success(_e,success);
+					})(function(_1) {
+						var tmp = fancy_search_Action.PopulateSuggestions(thx__$Nel_Nel_$Impl_$.fromArray(_1),h);
+						dispatch(tmp);
+						return;
+					}),function(_2) {
+						dispatch(fancy_search_Action.FailSuggestions);
+					});
+					break;
+				default:
+				}
 			}
 		}
 	};
@@ -2182,16 +2186,18 @@ fancy_search_Action.OpenMenu = ["OpenMenu",1];
 fancy_search_Action.OpenMenu.__enum__ = fancy_search_Action;
 fancy_search_Action.CloseMenu = ["CloseMenu",2];
 fancy_search_Action.CloseMenu.__enum__ = fancy_search_Action;
-fancy_search_Action.PopulateSuggestions = function(suggestions) { var $x = ["PopulateSuggestions",3,suggestions]; $x.__enum__ = fancy_search_Action; return $x; };
+fancy_search_Action.PopulateSuggestions = function(suggestions,highlight) { var $x = ["PopulateSuggestions",3,suggestions,highlight]; $x.__enum__ = fancy_search_Action; return $x; };
 fancy_search_Action.FailSuggestions = ["FailSuggestions",4];
 fancy_search_Action.FailSuggestions.__enum__ = fancy_search_Action;
 fancy_search_Action.ChangeHighlight = function(change) { var $x = ["ChangeHighlight",5,change]; $x.__enum__ = fancy_search_Action; return $x; };
 fancy_search_Action.Choose = function(suggestion) { var $x = ["Choose",6,suggestion]; $x.__enum__ = fancy_search_Action; return $x; };
 fancy_search_Action.__empty_constructs__ = [fancy_search_Action.OpenMenu,fancy_search_Action.CloseMenu,fancy_search_Action.FailSuggestions];
-var fancy_search_HighlightChangeType = $hxClasses["fancy.search.HighlightChangeType"] = { __ename__ : ["fancy","search","HighlightChangeType"], __constructs__ : ["Specific","Move"] };
-fancy_search_HighlightChangeType.Specific = function(suggestion) { var $x = ["Specific",0,suggestion]; $x.__enum__ = fancy_search_HighlightChangeType; return $x; };
-fancy_search_HighlightChangeType.Move = function(direction) { var $x = ["Move",1,direction]; $x.__enum__ = fancy_search_HighlightChangeType; return $x; };
-fancy_search_HighlightChangeType.__empty_constructs__ = [];
+var fancy_search_HighlightChangeType = $hxClasses["fancy.search.HighlightChangeType"] = { __ename__ : ["fancy","search","HighlightChangeType"], __constructs__ : ["Unhighlight","Specific","Move"] };
+fancy_search_HighlightChangeType.Unhighlight = ["Unhighlight",0];
+fancy_search_HighlightChangeType.Unhighlight.__enum__ = fancy_search_HighlightChangeType;
+fancy_search_HighlightChangeType.Specific = function(suggestion) { var $x = ["Specific",1,suggestion]; $x.__enum__ = fancy_search_HighlightChangeType; return $x; };
+fancy_search_HighlightChangeType.Move = function(direction) { var $x = ["Move",2,direction]; $x.__enum__ = fancy_search_HighlightChangeType; return $x; };
+fancy_search_HighlightChangeType.__empty_constructs__ = [fancy_search_HighlightChangeType.Unhighlight];
 var fancy_search_Direction = $hxClasses["fancy.search.Direction"] = { __ename__ : ["fancy","search","Direction"], __constructs__ : ["Up","Down"] };
 fancy_search_Direction.Up = ["Up",0];
 fancy_search_Direction.Up.__enum__ = fancy_search_Direction;
@@ -2220,7 +2226,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 	case 0:
 		switch(action[1]) {
 		case 0:
-			tmp1 = fancy_search_MenuState.Closed;
+			tmp1 = state.menu;
 			break;
 		case 1:
 			tmp1 = fancy_search_Reducer.openMenu(state.config,thx_Options.getOrElse(state.input,""));
@@ -2245,7 +2251,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 	case 1:
 		switch(action[1]) {
 		case 0:
-			tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading);
+			tmp1 = state.menu;
 			break;
 		case 1:
 			tmp1 = state.menu;
@@ -2270,7 +2276,8 @@ fancy_search_Reducer.reduce = function(state,action) {
 	case 2:
 		switch(action[1]) {
 		case 0:
-			tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading);
+			var highlight = _g[3];
+			tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,highlight);
 			break;
 		case 1:
 			tmp1 = state.menu;
@@ -2281,26 +2288,57 @@ fancy_search_Reducer.reduce = function(state,action) {
 		case 3:
 			switch(action[2][1]) {
 			case 0:
+				var highlight1 = action[3];
 				var suggestions = action[2][2];
-				tmp1 = fancy_search_Reducer.showSuggestions(state.config,suggestions);
+				tmp1 = fancy_search_Reducer.showSuggestions(state.config,suggestions,highlight1);
 				break;
 			case 1:
-				tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.NoResults);
+				var highlighted = action[3];
+				tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.NoResults,highlighted);
 				break;
 			}
 			break;
 		case 4:
-			tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Failed);
+			var highlighted1 = _g[3];
+			tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Failed,highlighted1);
 			break;
 		case 5:
-			switch(_g[2][1]) {
-			case 0:case 1:case 2:
-				tmp1 = state.menu;
+			switch(action[2][1]) {
+			case 0:
+				switch(_g[2][1]) {
+				case 0:case 1:case 2:
+					tmp1 = state.menu;
+					break;
+				case 3:
+					var list = _g[2][2];
+					tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Results(list),haxe_ds_Option.None);
+					break;
+				}
 				break;
-			case 3:
-				var highlighted = _g[2][3];
-				var list = _g[2][2];
-				tmp1 = state.menu;
+			case 1:
+				switch(_g[2][1]) {
+				case 0:case 1:case 2:
+					tmp1 = state.menu;
+					break;
+				case 3:
+					var v = action[2][2];
+					var list1 = _g[2][2];
+					tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Results(list1),haxe_ds_Option.Some(v));
+					break;
+				}
+				break;
+			case 2:
+				switch(_g[2][1]) {
+				case 0:case 1:case 2:
+					tmp1 = state.menu;
+					break;
+				case 3:
+					var dir = action[2][2];
+					var highlighted2 = _g[3];
+					var list2 = _g[2][2];
+					tmp1 = fancy_search_Reducer.moveHighlight(list2,highlighted2,dir);
+					break;
+				}
 				break;
 			}
 			break;
@@ -2316,11 +2354,11 @@ fancy_search_Reducer.openMenu = function(config,inputValue) {
 	if(inputValue.length < config.minLength) {
 		return fancy_search_MenuState.InputTooShort;
 	} else {
-		return fancy_search_MenuState.Open(fancy_search_DropdownState.Loading);
+		return fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
 	}
 };
 fancy_search_Reducer.firstT = function(suggs) {
-	return thx_Arrays.findMap(thx__$Nel_Nel_$Impl_$.toArray(suggs),function(s) {
+	return thx_Arrays.findMap(suggs.slice(),function(s) {
 		switch(s[1]) {
 		case 0:
 			var v = s[2];
@@ -2330,15 +2368,43 @@ fancy_search_Reducer.firstT = function(suggs) {
 		}
 	});
 };
-fancy_search_Reducer.showSuggestions = function(config,suggestions) {
-	return fancy_search_MenuState.Open(fancy_search_DropdownState.Results(suggestions,config.alwaysHighlight ? fancy_search_Reducer.firstT(suggestions) : haxe_ds_Option.None));
+fancy_search_Reducer.hasT = function(toString,suggs,t) {
+	return thx_Arrays.contains(suggs,toString(t),function(curr,compare) {
+		switch(curr[1]) {
+		case 0:
+			var v = curr[2];
+			return toString(v) == compare;
+		case 1:
+			return false;
+		}
+	});
+};
+fancy_search_Reducer.showSuggestions = function(config,suggestions,highlight) {
+	var suggArray = thx__$Nel_Nel_$Impl_$.toArray(suggestions);
+	var h = thx_Options.cataf(thx_Options.flatMap(highlight,function(v) {
+		if(fancy_search_Reducer.hasT(config.renderString,suggArray,v)) {
+			return haxe_ds_Option.Some(v);
+		} else {
+			return haxe_ds_Option.None;
+		}
+	}),function() {
+		if(config.alwaysHighlight) {
+			return fancy_search_Reducer.firstT(suggArray);
+		} else {
+			return haxe_ds_Option.None;
+		}
+	},haxe_ds_Option.Some);
+	return fancy_search_MenuState.Open(fancy_search_DropdownState.Results(suggestions),h);
+};
+fancy_search_Reducer.moveHighlight = function(suggestions,highlighted,dir) {
+	return fancy_search_MenuState.Open(fancy_search_DropdownState.Results(suggestions),highlighted);
 };
 var fancy_search_MenuState = $hxClasses["fancy.search.MenuState"] = { __ename__ : ["fancy","search","MenuState"], __constructs__ : ["Closed","InputTooShort","Open"] };
 fancy_search_MenuState.Closed = ["Closed",0];
 fancy_search_MenuState.Closed.__enum__ = fancy_search_MenuState;
 fancy_search_MenuState.InputTooShort = ["InputTooShort",1];
 fancy_search_MenuState.InputTooShort.__enum__ = fancy_search_MenuState;
-fancy_search_MenuState.Open = function(dropdown) { var $x = ["Open",2,dropdown]; $x.__enum__ = fancy_search_MenuState; return $x; };
+fancy_search_MenuState.Open = function(dropdown,highlighted) { var $x = ["Open",2,dropdown,highlighted]; $x.__enum__ = fancy_search_MenuState; return $x; };
 fancy_search_MenuState.__empty_constructs__ = [fancy_search_MenuState.Closed,fancy_search_MenuState.InputTooShort];
 var fancy_search_DropdownState = $hxClasses["fancy.search.DropdownState"] = { __ename__ : ["fancy","search","DropdownState"], __constructs__ : ["Loading","NoResults","Failed","Results"] };
 fancy_search_DropdownState.Loading = ["Loading",0];
@@ -2347,7 +2413,7 @@ fancy_search_DropdownState.NoResults = ["NoResults",1];
 fancy_search_DropdownState.NoResults.__enum__ = fancy_search_DropdownState;
 fancy_search_DropdownState.Failed = ["Failed",2];
 fancy_search_DropdownState.Failed.__enum__ = fancy_search_DropdownState;
-fancy_search_DropdownState.Results = function(suggestions,highlighted) { var $x = ["Results",3,suggestions,highlighted]; $x.__enum__ = fancy_search_DropdownState; return $x; };
+fancy_search_DropdownState.Results = function(suggestions) { var $x = ["Results",3,suggestions]; $x.__enum__ = fancy_search_DropdownState; return $x; };
 fancy_search_DropdownState.__empty_constructs__ = [fancy_search_DropdownState.Loading,fancy_search_DropdownState.NoResults,fancy_search_DropdownState.Failed];
 var fancy_search_renderer_Dom = function() { };
 $hxClasses["fancy.search.renderer.Dom"] = fancy_search_renderer_Dom;
@@ -2668,7 +2734,7 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 			}
 			return el4;
 		case 3:
-			var highlighted = _g[2][3];
+			var highlighted = _g[3];
 			var suggs = _g[2][2];
 			var doc5 = null;
 			if(null == doc5) {

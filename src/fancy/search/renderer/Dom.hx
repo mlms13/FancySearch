@@ -50,10 +50,10 @@ class Dom {
     return switch state.menu {
       case Closed: create("div", ["class" => classes.container + " " + classes.containerClosed]);
       case InputTooShort: create("div", ["class" => classes.container + " " + classes.containerTooShort]);
-      case Open(Loading): create("div", ["class" => classes.container + " " + classes.containerLoading], "LOADING"); // TODO
-      case Open(NoResults): create("div", ["class" => classes.container + " " + classes.containerNoResults], "NO RESULTS"); // TODO
-      case Open(Failed): create("div", ["class" => classes.container + " " + classes.containerFailed], "FAILED"); // TODO
-      case Open(Results(suggs, highlighted)): create("div", ["class" => classes.container + " " + classes.containerOpen], [
+      case Open(Loading, _): create("div", ["class" => classes.container + " " + classes.containerLoading], "LOADING"); // TODO
+      case Open(NoResults, _): create("div", ["class" => classes.container + " " + classes.containerNoResults], "NO RESULTS"); // TODO
+      case Open(Failed, _): create("div", ["class" => classes.container + " " + classes.containerFailed], "FAILED"); // TODO
+      case Open(Results(suggs), highlighted): create("div", ["class" => classes.container + " " + classes.containerOpen], [
         create("ul", ["class" => classes.list], suggs.map(renderMenuItem.bind(state.config, highlighted))
           .toArray().toArray()) // first to ReadonlyArray, then to a real one
       ]);

@@ -13,12 +13,12 @@ typedef State<T> = {
 enum MenuState<T> {
   Closed;
   InputTooShort; // it's up to the renderer to decide if this appears closed
-  Open(dropdown: DropdownState<T>);
+  Open(dropdown: DropdownState<T>, highlighted: Option<T>);
 }
 
 enum DropdownState<T> {
   Loading;
   NoResults;
   Failed;
-  Results(suggestions: thx.Nel<SuggestionItem<T>>, highlighted: Option<T>);
+  Results(suggestions: thx.Nel<SuggestionItem<T>>);
 }
