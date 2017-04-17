@@ -1,5 +1,8 @@
 package fancy.search;
 
+import haxe.ds.Option;
+using thx.Arrays;
+import thx.Nel;
 using thx.Options;
 
 import fancy.search.State;
@@ -71,8 +74,18 @@ class Reducer {
     return inputValue.length < config.minLength ? InputTooShort : Open(Loading);
   }
 
-  static function showSuggestions<T>(config: Configuration<T>, suggestions: thx.Nel<SuggestionItem<T>>): MenuState<T> {
-    // TODO `Some(suggestions.head())` doesn't work because we need a true T, not a SuggestionItem
-    return Open(Results(suggestions, config.alwaysHighlight ? None : None));
+  static function firstT<T>(suggs: Nel<SuggestionItem<T>>): Option<T> {
+    return suggs.toArray().findMap(function (s) {
+      return switch s {
+        case Suggestion(v): Some(v);
+      case Label(_): None;
+      };
+    });
+  }
+
+  static function showSuggestions<T>(config: Configuration<T>, suggestions: Nel<SuggestionItem<T>>): MenuState<T> {
+    // we can't just git the head() of the nel because not all items in the list
+    // are true suggestions, but at least we have the power of `firstT`
+    return Open(Results(suggestions, config.alwaysHighlight ? firstT(suggestions) : None));
   }
 }

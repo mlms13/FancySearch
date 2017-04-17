@@ -32,7 +32,7 @@ class TestSearch {
     renderString: thx.Functions.identity,
     clearButton: None,
     minLength: 0,
-    alwaysHighlight: true
+    alwaysHighlight: false
   };
 
   public function new() {}
@@ -55,6 +55,10 @@ class TestSearch {
       .always(Assert.createAsync())
       .run();
   }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // TEST LOADING RESULTS
+  ////////////////////////////////////////////////////////////////////////////////
 
   // make sure the middleware loads suggestions when appropriate
   public function testFocusInput() {
@@ -133,6 +137,7 @@ class TestSearch {
     searchB.store.dispatch(CloseMenu);
   }
 
+  // when the filterer fails, the state should reflect that
   public function testFailedResults() {
     var config = thx.Objects.clone(simpleConfig);
     config.filterer = function (_) return Promise.fail("failed");
@@ -142,6 +147,27 @@ class TestSearch {
     collectMenuState(search.store, 3)
       .next(function (v) {
         Assert.same([Closed, Open(Loading), Open(Failed)], v);
+      })
+      .always(Assert.createAsync())
+      .run();
+    search.store.dispatch(OpenMenu);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // TEST HIGHLIGHT
+  ////////////////////////////////////////////////////////////////////////////////
+
+  // enabling the `alwaysHighlight` feature should lead to `Some(highlight)`
+  // without manually changing the highlight
+  public function testAlwaysHighlighted() {
+    var config = thx.Objects.clone(simpleConfig);
+    config.alwaysHighlight = true;
+
+    var search = new Search2(config);
+
+    collectMenuState(search.store, 3)
+      .next(function (v) {
+        Assert.same([Closed, Open(Loading), Open(Results(suggestionsNel, Some("Apple")))], v);
       })
       .always(Assert.createAsync())
       .run();

@@ -1,9 +1,11 @@
 package fancy.search.renderer;
 
+import haxe.ds.Option;
 import js.html.Element;
 import js.html.InputElement;
 using dots.Dom;
 import dots.Dom.create;
+using thx.Options;
 
 import fancy.search.util.Configuration;
 
@@ -20,16 +22,28 @@ class Dom {
     containerLoading: containerPrefix + "-loading",
     containerFailed: containerPrefix + "-failed",
     list: prefix + "-list",
+    label: prefix + "-label",
     item: prefix + "-item",
     itemHighlighted: prefix + "-item-highlighted"
   };
 
-  // TODO: take a highlight T here and do something with it
-  static function renderMenuItem<T>(render: T -> Element, sugg: SuggestionItem<T>): Element {
-    return create("li", ["class" => classes.item], [switch sugg {
-      case Suggestion(sugg): render(sugg);
-      case Label(renderer): renderer();
-    }]);
+  static function tEquals<T>(toString: T -> String, a: T, b: T): Bool {
+    return toString(a) == toString(b);
+  }
+
+  // render the item; apply special treatment if it matches the highlighted element
+  static function renderMenuItem<T>(config: Configuration<T>, highlighted: Option<T>, sugg: SuggestionItem<T>): Element {
+    return switch sugg {
+      case Suggestion(s):
+        var highlightClass = highlighted.cata("",  function (h: T) {
+          // if a highlight exists and it matches the stringified version of this suggestion
+          // return the highglight class
+          return tEquals(config.renderString, s, h) ? classes.itemHighlighted : "";
+        });
+        create("li", ["class" => classes.item + " " + highlightClass], [ config.renderView(s) ]);
+      case Label(renderer):
+        create("li", ["class" => classes.label], [ renderer() ]);
+    };
   }
 
   static function renderMenu<T>(state: State<T>): Element {
@@ -40,7 +54,7 @@ class Dom {
       case Open(NoResults): create("div", ["class" => classes.container + " " + classes.containerNoResults], "NO RESULTS"); // TODO
       case Open(Failed): create("div", ["class" => classes.container + " " + classes.containerFailed], "FAILED"); // TODO
       case Open(Results(suggs, highlighted)): create("div", ["class" => classes.container + " " + classes.containerOpen], [
-        create("ul", ["class" => classes.list], suggs.map(renderMenuItem.bind(state.config.renderView))
+        create("ul", ["class" => classes.list], suggs.map(renderMenuItem.bind(state.config, highlighted))
           .toArray().toArray()) // first to ReadonlyArray, then to a real one
       ]);
     };

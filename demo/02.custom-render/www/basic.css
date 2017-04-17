@@ -48,9 +48,12 @@
   margin: 0;
   padding: 0;
 }
+.fs-suggestion-item,
+.fs-suggestion-label {
+  padding: 5px 10px;
+}
 .fs-suggestion-item {
   color: #666;
-  padding: 5px 10px;
 }
 .fs-suggestion-item-highlighted {
   background: #eee;
