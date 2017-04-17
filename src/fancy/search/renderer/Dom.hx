@@ -7,6 +7,7 @@ using dots.Dom;
 import dots.Dom.create;
 using thx.Options;
 
+import fancy.search.Action;
 import fancy.search.util.Configuration;
 
 class Dom {
@@ -32,7 +33,7 @@ class Dom {
   }
 
   // render the item; apply special treatment if it matches the highlighted element
-  static function renderMenuItem<T>(config: Configuration<T>, highlighted: Option<T>, sugg: SuggestionItem<T>): Element {
+  static function renderMenuItem<T>(config: Configuration<T>, dispatch: Action<T> -> Void, highlighted: Option<T>, sugg: SuggestionItem<T>): Element {
     return switch sugg {
       case Suggestion(s):
         var highlightClass = highlighted.cata("",  function (h: T) {
@@ -40,13 +41,16 @@ class Dom {
           // return the highglight class
           return tEquals(config.renderString, s, h) ? classes.itemHighlighted : "";
         });
-        create("li", ["class" => classes.item + " " + highlightClass], [ config.renderView(s) ]);
+        var li = create("li", [ "class" => classes.item + " " + highlightClass, ], [ config.renderView(s) ]);
+        li.on("mouseover", function () { dispatch(ChangeHighlight(Specific(s))); });
+        li.on("mouseout", function () { dispatch(ChangeHighlight(Unhighlight)); });
+        li;
       case Label(renderer):
         create("li", ["class" => classes.label], [ renderer() ]);
     };
   }
 
-  static function renderMenu<T>(state: State<T>): Element {
+  static function renderMenu<T>(dispatch: Action<T> -> Void, state: State<T>): Element {
     return switch state.menu {
       case Closed: create("div", ["class" => classes.container + " " + classes.containerClosed]);
       case InputTooShort: create("div", ["class" => classes.container + " " + classes.containerTooShort]);
@@ -54,14 +58,14 @@ class Dom {
       case Open(NoResults, _): create("div", ["class" => classes.container + " " + classes.containerNoResults], "NO RESULTS"); // TODO
       case Open(Failed, _): create("div", ["class" => classes.container + " " + classes.containerFailed], "FAILED"); // TODO
       case Open(Results(suggs), highlighted): create("div", ["class" => classes.container + " " + classes.containerOpen], [
-        create("ul", ["class" => classes.list], suggs.map(renderMenuItem.bind(state.config, highlighted))
+        create("ul", ["class" => classes.list], suggs.map(renderMenuItem.bind(state.config, dispatch, highlighted))
           .toArray().toArray()) // first to ReadonlyArray, then to a real one
       ]);
     };
   }
 
   public static function fromInput<T>(input: InputElement, container: Element, search: fancy.Search2<T>): thx.stream.Stream<Element> {
-    var menu = search.store.stream().map(renderMenu);
+    var menu = search.store.stream().map(renderMenu.bind(function (act) search.store.dispatch(act)));
 
     input.on("focus", function (_) search.store.dispatch(OpenMenu));
     input.on("blur", function (_) search.store.dispatch(CloseMenu));
