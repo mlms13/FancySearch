@@ -45,7 +45,7 @@ class Reducer {
         // handle highlight changes
         case [Open(Results(list), _), ChangeHighlight(Unhighlight)]: Open(Results(list), None);
         case [Open(Results(list), _), ChangeHighlight(Specific(v))]: Open(Results(list), Some(v));
-        case [Open(Results(list), highlighted), ChangeHighlight(Move(dir))]: moveHighlight(list, highlighted, dir);
+        case [Open(Results(list), highlighted), ChangeHighlight(Move(dir))]: moveHighlight(state.config, list, highlighted, dir);
 
         // if the menu is closed, loading, or has no results,
         // and we receive an instruction to change hightlight... ignore it
@@ -112,9 +112,30 @@ class Reducer {
     return Open(Results(suggestions), h);
   }
 
-  static function moveHighlight<T>(suggestions: Nel<SuggestionItem<T>>, highlighted: Option<T>, dir: Direction): MenuState<T> {
-    // TODO: make sure we only move through suggestion Ts, not labels
+  static function moveHighlight<T>(config: Configuration<T>, suggestions: Nel<SuggestionItem<T>>, highlighted: Option<T>, dir: Direction): MenuState<T> {
+    // make sure we only move through suggestion Ts, not labels
     // wrap around when we Up from the first or Down from the last
-    return Open(Results(suggestions), highlighted);
+    var ts = suggestions.toArray().filterMap(function (item) {
+      return switch item {
+        case Label(_): None;
+        case Suggestion(t): Some(t);
+      };
+    });
+
+    var indexOfHighlighted = highlighted.map(config.renderString).flatMap(function (h: String) {
+      var index = ts.findIndex(function (curr: T) {
+        return config.renderString(curr) == h;
+      });
+      return index == -1 ? None : Some(index);
+    });
+
+    var newHighlight: Option<T> = switch [dir, indexOfHighlighted] {
+      case [Up, None]: ts.lastOption();
+      case [Up, Some(i)]: i - 1 < 0 ? ts.lastOption() : ts.getOption(i - 1);
+      case [Down, None]: ts.firstOption();
+      case [Down, Some(i)]: i + 1 >= ts.length ? ts.firstOption() : ts.getOption(i + 1);
+    }
+
+    return Open(Results(suggestions), newHighlight);
   }
 }

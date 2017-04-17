@@ -5,6 +5,7 @@ import js.html.Element;
 import js.html.InputElement;
 using dots.Dom;
 import dots.Dom.create;
+using thx.Arrays;
 using thx.Options;
 
 import fancy.search.Action;
@@ -27,6 +28,10 @@ class Dom {
     item: prefix + "-item",
     itemHighlighted: prefix + "-item-highlighted"
   };
+  static var keys = {
+    highlightUp: [dots.Keys.UP_ARROW],
+    highlightDown: [dots.Keys.DOWN_ARROW],
+  };
 
   static function tEquals<T>(toString: T -> String, a: T, b: T): Bool {
     return toString(a) == toString(b);
@@ -43,7 +48,7 @@ class Dom {
         });
         var li = create("li", [ "class" => classes.item + " " + highlightClass, ], [ config.renderView(s) ]);
         li.on("mouseover", function () { dispatch(ChangeHighlight(Specific(s))); });
-        li.on("mouseout", function () { dispatch(ChangeHighlight(Unhighlight)); });
+        li.on("mouseout", function () { dispatch(ChangeHighlight(Unhighlight)); }); // TODO: not happening
         li;
       case Label(renderer):
         create("li", ["class" => classes.label], [ renderer() ]);
@@ -70,6 +75,17 @@ class Dom {
     input.on("focus", function (_) search.store.dispatch(OpenMenu));
     input.on("blur", function (_) search.store.dispatch(CloseMenu));
     input.on("input", function (_) search.store.dispatch(ChangeValue(input.value)));
+    input.on("keydown", function (e: js.html.KeyboardEvent) {
+      e.stopPropagation();
+      var code = e.which != null ? e.which : e.keyCode;
+
+      if (keys.highlightUp.contains(code)) {
+        search.store.dispatch(ChangeHighlight(Move(Up)));
+      } else if (keys.highlightDown.contains(code)) {
+        search.store.dispatch(ChangeHighlight(Move(Down)));
+      }
+
+    });
 
     // initially kick things off by setting the input value
     search.store.dispatch(ChangeValue(input.value));

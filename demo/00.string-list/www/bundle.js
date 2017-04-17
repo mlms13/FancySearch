@@ -1916,6 +1916,9 @@ dots__$EventHandler_EventHandler_$Impl_$.fromFloatValueHandler = function(f) {
 dots__$EventHandler_EventHandler_$Impl_$.toCallback = function(this1) {
 	return this1;
 };
+var dots_Keys = function() { };
+$hxClasses["dots.Keys"] = dots_Keys;
+dots_Keys.__name__ = ["dots","Keys"];
 var dots_Query = function() { };
 $hxClasses["dots.Query"] = dots_Query;
 dots_Query.__name__ = ["dots","Query"];
@@ -2336,7 +2339,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 					var dir = action[2][2];
 					var highlighted2 = _g[3];
 					var list2 = _g[2][2];
-					tmp1 = fancy_search_Reducer.moveHighlight(list2,highlighted2,dir);
+					tmp1 = fancy_search_Reducer.moveHighlight(state.config,list2,highlighted2,dir);
 					break;
 				}
 				break;
@@ -2396,8 +2399,80 @@ fancy_search_Reducer.showSuggestions = function(config,suggestions,highlight) {
 	},haxe_ds_Option.Some);
 	return fancy_search_MenuState.Open(fancy_search_DropdownState.Results(suggestions),h);
 };
-fancy_search_Reducer.moveHighlight = function(suggestions,highlighted,dir) {
-	return fancy_search_MenuState.Open(fancy_search_DropdownState.Results(suggestions),highlighted);
+fancy_search_Reducer.moveHighlight = function(config,suggestions,highlighted,dir) {
+	var ts = thx_Arrays.filterMap(thx__$Nel_Nel_$Impl_$.toArray(suggestions),function(item) {
+		switch(item[1]) {
+		case 0:
+			var t = item[2];
+			return haxe_ds_Option.Some(t);
+		case 1:
+			return haxe_ds_Option.None;
+		}
+	});
+	var indexOfHighlighted = thx_Options.flatMap(thx_Options.map(highlighted,config.renderString),function(h) {
+		var index = thx_Arrays.findIndex(ts,function(curr) {
+			return config.renderString(curr) == h;
+		});
+		if(index == -1) {
+			return haxe_ds_Option.None;
+		} else {
+			return haxe_ds_Option.Some(index);
+		}
+	});
+	var newHighlight;
+	switch(dir[1]) {
+	case 0:
+		switch(indexOfHighlighted[1]) {
+		case 0:
+			var i = indexOfHighlighted[2];
+			if(i - 1 < 0) {
+				var value = ts[ts.length - 1];
+				if(null == value) {
+					newHighlight = haxe_ds_Option.None;
+				} else {
+					newHighlight = haxe_ds_Option.Some(value);
+				}
+			} else {
+				newHighlight = thx_Arrays.getOption(ts,i - 1);
+			}
+			break;
+		case 1:
+			var value1 = ts[ts.length - 1];
+			if(null == value1) {
+				newHighlight = haxe_ds_Option.None;
+			} else {
+				newHighlight = haxe_ds_Option.Some(value1);
+			}
+			break;
+		}
+		break;
+	case 1:
+		switch(indexOfHighlighted[1]) {
+		case 0:
+			var i1 = indexOfHighlighted[2];
+			if(i1 + 1 >= ts.length) {
+				var value2 = ts[0];
+				if(null == value2) {
+					newHighlight = haxe_ds_Option.None;
+				} else {
+					newHighlight = haxe_ds_Option.Some(value2);
+				}
+			} else {
+				newHighlight = thx_Arrays.getOption(ts,i1 + 1);
+			}
+			break;
+		case 1:
+			var value3 = ts[0];
+			if(null == value3) {
+				newHighlight = haxe_ds_Option.None;
+			} else {
+				newHighlight = haxe_ds_Option.Some(value3);
+			}
+			break;
+		}
+		break;
+	}
+	return fancy_search_MenuState.Open(fancy_search_DropdownState.Results(suggestions),newHighlight);
 };
 var fancy_search_MenuState = $hxClasses["fancy.search.MenuState"] = { __ename__ : ["fancy","search","MenuState"], __constructs__ : ["Closed","InputTooShort","Open"] };
 fancy_search_MenuState.Closed = ["Closed",0];
@@ -2843,22 +2918,31 @@ fancy_search_renderer_Dom.renderMenu = function(dispatch,state) {
 };
 fancy_search_renderer_Dom.fromInput = function(input,container,search) {
 	var a1 = function(act) {
-		search.store.dispatch(act,{ fileName : "Dom.hx", lineNumber : 68, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(act,{ fileName : "Dom.hx", lineNumber : 73, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	};
 	var menu = function(a2) {
 		return fancy_search_renderer_Dom.renderMenu(a1,a2);
 	};
 	var menu1 = search.store.stream().map(menu);
 	input.addEventListener("focus",function(_) {
-		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "Dom.hx", lineNumber : 70, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "Dom.hx", lineNumber : 75, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
 	input.addEventListener("blur",function(_1) {
-		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "Dom.hx", lineNumber : 71, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "Dom.hx", lineNumber : 76, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
 	input.addEventListener("input",function(_2) {
-		search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 72, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 77, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
-	search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 75, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+	input.addEventListener("keydown",function(e) {
+		e.stopPropagation();
+		var code = e.which != null ? e.which : e.keyCode;
+		if(thx_Arrays.contains(fancy_search_renderer_Dom.keys.highlightUp,code)) {
+			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Up)),{ fileName : "Dom.hx", lineNumber : 83, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		} else if(thx_Arrays.contains(fancy_search_renderer_Dom.keys.highlightDown,code)) {
+			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Down)),{ fileName : "Dom.hx", lineNumber : 85, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		}
+	});
+	search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 91, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	return menu1;
 };
 var fancy_search_util_SuggestionItem = $hxClasses["fancy.search.util.SuggestionItem"] = { __ename__ : ["fancy","search","util","SuggestionItem"], __constructs__ : ["Suggestion","Label"] };
@@ -17178,10 +17262,110 @@ dots_Attributes.properties = (function($this) {
 	$r = _g;
 	return $r;
 }(this));
+dots_Keys.BACKSPACE = 8;
+dots_Keys.TAB = 9;
+dots_Keys.ENTER = 13;
+dots_Keys.SHIFT = 16;
+dots_Keys.CTRL = 17;
+dots_Keys.ALT = 18;
+dots_Keys.BREAK = 19;
+dots_Keys.CAPS_LOCK = 20;
+dots_Keys.ESCAPE = 27;
+dots_Keys.SPACE = 32;
+dots_Keys.PAGE_UP = 33;
+dots_Keys.PAGE_DOWN = 34;
+dots_Keys.END = 35;
+dots_Keys.HOME = 36;
+dots_Keys.LEFT_ARROW = 37;
+dots_Keys.UP_ARROW = 38;
+dots_Keys.RIGHT_ARROW = 39;
+dots_Keys.DOWN_ARROW = 40;
+dots_Keys.INSERT = 45;
+dots_Keys.DELETE = 46;
+dots_Keys.N0 = 48;
+dots_Keys.N1 = 49;
+dots_Keys.N2 = 50;
+dots_Keys.N3 = 51;
+dots_Keys.N4 = 52;
+dots_Keys.N5 = 53;
+dots_Keys.N6 = 54;
+dots_Keys.N7 = 55;
+dots_Keys.N8 = 56;
+dots_Keys.N9 = 57;
+dots_Keys.A = 65;
+dots_Keys.B = 66;
+dots_Keys.C = 67;
+dots_Keys.D = 68;
+dots_Keys.E = 69;
+dots_Keys.F = 70;
+dots_Keys.G = 71;
+dots_Keys.H = 72;
+dots_Keys.I = 73;
+dots_Keys.J = 74;
+dots_Keys.K = 75;
+dots_Keys.L = 76;
+dots_Keys.M = 77;
+dots_Keys.N = 78;
+dots_Keys.O = 79;
+dots_Keys.P = 80;
+dots_Keys.Q = 81;
+dots_Keys.R = 82;
+dots_Keys.S = 83;
+dots_Keys.T = 84;
+dots_Keys.U = 85;
+dots_Keys.V = 86;
+dots_Keys.W = 87;
+dots_Keys.X = 88;
+dots_Keys.Y = 89;
+dots_Keys.Z = 90;
+dots_Keys.LEFT_WINDOW_KEY = 91;
+dots_Keys.RIGHT_WINDOW_KEY = 92;
+dots_Keys.SELECT_KEY = 93;
+dots_Keys.NUMPAD_0 = 96;
+dots_Keys.NUMPAD_1 = 97;
+dots_Keys.NUMPAD_2 = 98;
+dots_Keys.NUMPAD_3 = 99;
+dots_Keys.NUMPAD_4 = 100;
+dots_Keys.NUMPAD_5 = 101;
+dots_Keys.NUMPAD_6 = 102;
+dots_Keys.NUMPAD_7 = 103;
+dots_Keys.NUMPAD_8 = 104;
+dots_Keys.NUMPAD_9 = 105;
+dots_Keys.MULTIPLY = 106;
+dots_Keys.ADD = 107;
+dots_Keys.SUBTRACT = 109;
+dots_Keys.DECIMAL_POINT = 110;
+dots_Keys.DIVIDE = 111;
+dots_Keys.F1 = 112;
+dots_Keys.F2 = 113;
+dots_Keys.F3 = 114;
+dots_Keys.F4 = 115;
+dots_Keys.F5 = 116;
+dots_Keys.F6 = 117;
+dots_Keys.F7 = 118;
+dots_Keys.F8 = 119;
+dots_Keys.F9 = 120;
+dots_Keys.F10 = 121;
+dots_Keys.F11 = 122;
+dots_Keys.F12 = 123;
+dots_Keys.NUM_LOCK = 144;
+dots_Keys.SCROLL_LOCK = 145;
+dots_Keys.SEMI_COLON = 186;
+dots_Keys.EQUAL_SIGN = 187;
+dots_Keys.COMMA = 188;
+dots_Keys.DASH = 189;
+dots_Keys.PERIOD = 190;
+dots_Keys.FORWARD_SLASH = 191;
+dots_Keys.GRAVE_ACCENT = 192;
+dots_Keys.OPEN_BRACKET = 219;
+dots_Keys.BACK_SLASH = 220;
+dots_Keys.CLOSE_BRAKET = 221;
+dots_Keys.SINGLE_QUOTE = 222;
 dots_Query.doc = document;
 fancy_search_renderer_Dom.prefix = "fs-suggestion";
 fancy_search_renderer_Dom.containerPrefix = fancy_search_renderer_Dom.prefix + "-container";
 fancy_search_renderer_Dom.classes = { container : fancy_search_renderer_Dom.containerPrefix, containerClosed : fancy_search_renderer_Dom.containerPrefix + "-closed", containerOpen : fancy_search_renderer_Dom.containerPrefix + "-open", containerTooShort : fancy_search_renderer_Dom.containerPrefix + "-too-short", containerNoResults : fancy_search_renderer_Dom.containerPrefix + "-empty", containerLoading : fancy_search_renderer_Dom.containerPrefix + "-loading", containerFailed : fancy_search_renderer_Dom.containerPrefix + "-failed", list : fancy_search_renderer_Dom.prefix + "-list", label : fancy_search_renderer_Dom.prefix + "-label", item : fancy_search_renderer_Dom.prefix + "-item", itemHighlighted : fancy_search_renderer_Dom.prefix + "-item-highlighted"};
+fancy_search_renderer_Dom.keys = { highlightUp : [38], highlightDown : [40]};
 haxe__$Int32_Int32_$Impl_$._mul = Math.imul != null ? Math.imul : function(a,b) {
 	return a * (b & 65535) + (a * (b >>> 16) << 16 | 0) | 0;
 };

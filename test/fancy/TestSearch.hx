@@ -269,5 +269,35 @@ class TestSearch {
     search.store.dispatch(ChangeValue("z"));
   }
 
-  // TODO: test moving the highlight up and down
+  // test moving the highlight up and down
+  public function testMoveHighlight() {
+    var search = new Search2(simpleConfig);
+    collectMenuState(search.store, 10)
+      .next(function (v) {
+        var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
+        var expected = [
+          Closed,
+          Open(Loading, None),
+          Open(Results(suggestionsNel), None),
+          Open(Loading, None),
+          Open(Results(results), None),
+          Open(Results(results), Some("Black Bean")),
+          Open(Results(results), Some("Fava Beans")),
+          Open(Results(results), Some("Lima Bean")),
+          Open(Results(results), Some("Black Bean")),
+          Open(Results(results), Some("Lima Bean"))
+        ];
+        Assert.same(expected, v);
+      })
+      .always(Assert.createAsync())
+      .run();
+
+    search.store.dispatch(OpenMenu);
+    search.store.dispatch(ChangeValue("bean"));
+    search.store.dispatch(ChangeHighlight(Move(Down)));
+    search.store.dispatch(ChangeHighlight(Move(Down)));
+    search.store.dispatch(ChangeHighlight(Move(Down)));
+    search.store.dispatch(ChangeHighlight(Move(Down)));
+    search.store.dispatch(ChangeHighlight(Move(Up)));
+  }
 }
