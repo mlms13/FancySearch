@@ -2157,18 +2157,14 @@ fancy_Search2.loadSuggestions = function(config) {
 			switch(action[1]) {
 			case 0:case 1:
 				var _e = config.filterer(state.input);
-				var _e1 = (function(success) {
+				thx_promise__$Promise_Promise_$Impl_$.failure((function(success) {
 					return thx_promise__$Promise_Promise_$Impl_$.success(_e,success);
 				})(function(_1) {
-					var _e2 = fancy_search_Action.PopulateSuggestions(thx__$Nel_Nel_$Impl_$.fromArray(_1));
-					dispatch(_e2);
+					var tmp = fancy_search_Action.PopulateSuggestions(thx__$Nel_Nel_$Impl_$.fromArray(_1));
+					dispatch(tmp);
 					return;
-				});
-				(function(failure) {
-					return thx_promise__$Promise_Promise_$Impl_$.failure(_e1,failure);
-				})(function(_2) {
-					haxe_Log.trace(_2,{ fileName : "Search2.hx", lineNumber : 36, className : "fancy.Search2", methodName : "loadSuggestions"});
-					return;
+				}),function(_2) {
+					dispatch(fancy_search_Action.FailSuggestions);
 				});
 				break;
 			default:
@@ -2180,16 +2176,18 @@ fancy_Search2.prototype = {
 	store: null
 	,__class__: fancy_Search2
 };
-var fancy_search_Action = $hxClasses["fancy.search.Action"] = { __ename__ : ["fancy","search","Action"], __constructs__ : ["ChangeValue","OpenMenu","CloseMenu","PopulateSuggestions","ChangeHighlight","Choose"] };
+var fancy_search_Action = $hxClasses["fancy.search.Action"] = { __ename__ : ["fancy","search","Action"], __constructs__ : ["ChangeValue","OpenMenu","CloseMenu","PopulateSuggestions","FailSuggestions","ChangeHighlight","Choose"] };
 fancy_search_Action.ChangeValue = function(newValue) { var $x = ["ChangeValue",0,newValue]; $x.__enum__ = fancy_search_Action; return $x; };
 fancy_search_Action.OpenMenu = ["OpenMenu",1];
 fancy_search_Action.OpenMenu.__enum__ = fancy_search_Action;
 fancy_search_Action.CloseMenu = ["CloseMenu",2];
 fancy_search_Action.CloseMenu.__enum__ = fancy_search_Action;
 fancy_search_Action.PopulateSuggestions = function(suggestions) { var $x = ["PopulateSuggestions",3,suggestions]; $x.__enum__ = fancy_search_Action; return $x; };
-fancy_search_Action.ChangeHighlight = function(change) { var $x = ["ChangeHighlight",4,change]; $x.__enum__ = fancy_search_Action; return $x; };
-fancy_search_Action.Choose = function(suggestion) { var $x = ["Choose",5,suggestion]; $x.__enum__ = fancy_search_Action; return $x; };
-fancy_search_Action.__empty_constructs__ = [fancy_search_Action.OpenMenu,fancy_search_Action.CloseMenu];
+fancy_search_Action.FailSuggestions = ["FailSuggestions",4];
+fancy_search_Action.FailSuggestions.__enum__ = fancy_search_Action;
+fancy_search_Action.ChangeHighlight = function(change) { var $x = ["ChangeHighlight",5,change]; $x.__enum__ = fancy_search_Action; return $x; };
+fancy_search_Action.Choose = function(suggestion) { var $x = ["Choose",6,suggestion]; $x.__enum__ = fancy_search_Action; return $x; };
+fancy_search_Action.__empty_constructs__ = [fancy_search_Action.OpenMenu,fancy_search_Action.CloseMenu,fancy_search_Action.FailSuggestions];
 var fancy_search_HighlightChangeType = $hxClasses["fancy.search.HighlightChangeType"] = { __ename__ : ["fancy","search","HighlightChangeType"], __constructs__ : ["Specific","Move"] };
 fancy_search_HighlightChangeType.Specific = function(suggestion) { var $x = ["Specific",0,suggestion]; $x.__enum__ = fancy_search_HighlightChangeType; return $x; };
 fancy_search_HighlightChangeType.Move = function(direction) { var $x = ["Move",1,direction]; $x.__enum__ = fancy_search_HighlightChangeType; return $x; };
@@ -2239,6 +2237,9 @@ fancy_search_Reducer.reduce = function(state,action) {
 		case 5:
 			tmp1 = state.menu;
 			break;
+		case 6:
+			tmp1 = state.menu;
+			break;
 		}
 		break;
 	case 1:
@@ -2259,6 +2260,9 @@ fancy_search_Reducer.reduce = function(state,action) {
 			tmp1 = state.menu;
 			break;
 		case 5:
+			tmp1 = state.menu;
+			break;
+		case 6:
 			tmp1 = state.menu;
 			break;
 		}
@@ -2286,18 +2290,21 @@ fancy_search_Reducer.reduce = function(state,action) {
 			}
 			break;
 		case 4:
+			tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Failed);
+			break;
+		case 5:
 			switch(_g[2][1]) {
-			case 0:case 1:
+			case 0:case 1:case 2:
 				tmp1 = state.menu;
 				break;
-			case 2:
+			case 3:
 				var highlighted = _g[2][3];
 				var list = _g[2][2];
 				tmp1 = state.menu;
 				break;
 			}
 			break;
-		case 5:
+		case 6:
 			tmp1 = state.menu;
 			break;
 		}
@@ -2322,13 +2329,15 @@ fancy_search_MenuState.InputTooShort = ["InputTooShort",1];
 fancy_search_MenuState.InputTooShort.__enum__ = fancy_search_MenuState;
 fancy_search_MenuState.Open = function(dropdown) { var $x = ["Open",2,dropdown]; $x.__enum__ = fancy_search_MenuState; return $x; };
 fancy_search_MenuState.__empty_constructs__ = [fancy_search_MenuState.Closed,fancy_search_MenuState.InputTooShort];
-var fancy_search_DropdownState = $hxClasses["fancy.search.DropdownState"] = { __ename__ : ["fancy","search","DropdownState"], __constructs__ : ["Loading","NoResults","Results"] };
+var fancy_search_DropdownState = $hxClasses["fancy.search.DropdownState"] = { __ename__ : ["fancy","search","DropdownState"], __constructs__ : ["Loading","NoResults","Failed","Results"] };
 fancy_search_DropdownState.Loading = ["Loading",0];
 fancy_search_DropdownState.Loading.__enum__ = fancy_search_DropdownState;
 fancy_search_DropdownState.NoResults = ["NoResults",1];
 fancy_search_DropdownState.NoResults.__enum__ = fancy_search_DropdownState;
-fancy_search_DropdownState.Results = function(suggestions,highlighted) { var $x = ["Results",2,suggestions,highlighted]; $x.__enum__ = fancy_search_DropdownState; return $x; };
-fancy_search_DropdownState.__empty_constructs__ = [fancy_search_DropdownState.Loading,fancy_search_DropdownState.NoResults];
+fancy_search_DropdownState.Failed = ["Failed",2];
+fancy_search_DropdownState.Failed.__enum__ = fancy_search_DropdownState;
+fancy_search_DropdownState.Results = function(suggestions,highlighted) { var $x = ["Results",3,suggestions,highlighted]; $x.__enum__ = fancy_search_DropdownState; return $x; };
+fancy_search_DropdownState.__empty_constructs__ = [fancy_search_DropdownState.Loading,fancy_search_DropdownState.NoResults,fancy_search_DropdownState.Failed];
 var fancy_search_renderer_Dom = function() { };
 $hxClasses["fancy.search.renderer.Dom"] = fancy_search_renderer_Dom;
 fancy_search_renderer_Dom.__name__ = ["fancy","search","renderer","Dom"];
@@ -2560,28 +2569,26 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 			}
 			return el3;
 		case 2:
-			var highlighted = _g[2][3];
-			var suggs = _g[2][2];
 			var doc4 = null;
 			if(null == doc4) {
 				doc4 = window.document;
 			}
 			var el4 = doc4.createElement("div");
-			var _g28 = 0;
-			var _g3 = [];
-			while(_g28 < _g3.length) {
-				var o4 = _g3[_g28];
-				++_g28;
+			var _g18 = 0;
+			var _g28 = [];
+			while(_g18 < _g28.length) {
+				var o4 = _g28[_g18];
+				++_g18;
 				el4.setAttribute(o4.name,o4.value);
 			}
-			var _g29 = new haxe_ds_StringMap();
-			var value4 = fancy_search_renderer_Dom.classes.container + " " + fancy_search_renderer_Dom.classes.containerOpen;
+			var _g19 = new haxe_ds_StringMap();
+			var value4 = fancy_search_renderer_Dom.classes.container + " " + fancy_search_renderer_Dom.classes.containerFailed;
 			if(__map_reserved["class"] != null) {
-				_g29.setReserved("class",value4);
+				_g19.setReserved("class",value4);
 			} else {
-				_g29.h["class"] = value4;
+				_g19.h["class"] = value4;
 			}
-			var attrs4 = _g29;
+			var attrs4 = _g19;
 			if(null != attrs4) {
 				var attr8 = attrs4.keys();
 				while(attr8.hasNext()) {
@@ -2589,26 +2596,43 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 					el4.setAttribute(attr9,__map_reserved[attr9] != null ? attrs4.getReserved(attr9) : attrs4.h[attr9]);
 				}
 			}
+			var children4 = null;
+			if(null != children4) {
+				var _g29 = 0;
+				while(_g29 < children4.length) {
+					var child4 = children4[_g29];
+					++_g29;
+					el4.appendChild(child4);
+				}
+			}
+			var textContent4 = "FAILED";
+			if(null != textContent4) {
+				el4.appendChild(doc4.createTextNode(textContent4));
+			}
+			return el4;
+		case 3:
+			var highlighted = _g[2][3];
+			var suggs = _g[2][2];
 			var doc5 = null;
 			if(null == doc5) {
 				doc5 = window.document;
 			}
-			var el5 = doc5.createElement("ul");
-			var _g4 = 0;
-			var _g5 = [];
-			while(_g4 < _g5.length) {
-				var o5 = _g5[_g4];
-				++_g4;
+			var el5 = doc5.createElement("div");
+			var _g210 = 0;
+			var _g3 = [];
+			while(_g210 < _g3.length) {
+				var o5 = _g3[_g210];
+				++_g210;
 				el5.setAttribute(o5.name,o5.value);
 			}
-			var _g41 = new haxe_ds_StringMap();
-			var value5 = fancy_search_renderer_Dom.classes.list;
+			var _g211 = new haxe_ds_StringMap();
+			var value5 = fancy_search_renderer_Dom.classes.container + " " + fancy_search_renderer_Dom.classes.containerOpen;
 			if(__map_reserved["class"] != null) {
-				_g41.setReserved("class",value5);
+				_g211.setReserved("class",value5);
 			} else {
-				_g41.h["class"] = value5;
+				_g211.h["class"] = value5;
 			}
-			var attrs5 = _g41;
+			var attrs5 = _g211;
 			if(null != attrs5) {
 				var attr10 = attrs5.keys();
 				while(attr10.hasNext()) {
@@ -2616,36 +2640,63 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 					el5.setAttribute(attr11,__map_reserved[attr11] != null ? attrs5.getReserved(attr11) : attrs5.h[attr11]);
 				}
 			}
-			var a1 = state.config.renderView;
-			var children4 = thx__$Nel_Nel_$Impl_$.toArray(thx__$Nel_Nel_$Impl_$.map(suggs,function(a2) {
-				return fancy_search_renderer_Dom.renderMenuItem(a1,a2);
-			})).slice();
-			if(null != children4) {
-				var _g51 = 0;
-				while(_g51 < children4.length) {
-					var child4 = children4[_g51];
-					++_g51;
-					el5.appendChild(child4);
+			var doc6 = null;
+			if(null == doc6) {
+				doc6 = window.document;
+			}
+			var el6 = doc6.createElement("ul");
+			var _g4 = 0;
+			var _g5 = [];
+			while(_g4 < _g5.length) {
+				var o6 = _g5[_g4];
+				++_g4;
+				el6.setAttribute(o6.name,o6.value);
+			}
+			var _g41 = new haxe_ds_StringMap();
+			var value6 = fancy_search_renderer_Dom.classes.list;
+			if(__map_reserved["class"] != null) {
+				_g41.setReserved("class",value6);
+			} else {
+				_g41.h["class"] = value6;
+			}
+			var attrs6 = _g41;
+			if(null != attrs6) {
+				var attr12 = attrs6.keys();
+				while(attr12.hasNext()) {
+					var attr13 = attr12.next();
+					el6.setAttribute(attr13,__map_reserved[attr13] != null ? attrs6.getReserved(attr13) : attrs6.h[attr13]);
 				}
 			}
-			var textContent4 = null;
-			if(null != textContent4) {
-				el5.appendChild(doc5.createTextNode(textContent4));
-			}
-			var children5 = [el5];
+			var a1 = state.config.renderView;
+			var children5 = thx__$Nel_Nel_$Impl_$.toArray(thx__$Nel_Nel_$Impl_$.map(suggs,function(a2) {
+				return fancy_search_renderer_Dom.renderMenuItem(a1,a2);
+			})).slice();
 			if(null != children5) {
-				var _g42 = 0;
-				while(_g42 < children5.length) {
-					var child5 = children5[_g42];
-					++_g42;
-					el4.appendChild(child5);
+				var _g51 = 0;
+				while(_g51 < children5.length) {
+					var child5 = children5[_g51];
+					++_g51;
+					el6.appendChild(child5);
 				}
 			}
 			var textContent5 = null;
 			if(null != textContent5) {
-				el4.appendChild(doc4.createTextNode(textContent5));
+				el6.appendChild(doc6.createTextNode(textContent5));
 			}
-			return el4;
+			var children6 = [el6];
+			if(null != children6) {
+				var _g42 = 0;
+				while(_g42 < children6.length) {
+					var child6 = children6[_g42];
+					++_g42;
+					el5.appendChild(child6);
+				}
+			}
+			var textContent6 = null;
+			if(null != textContent6) {
+				el5.appendChild(doc5.createTextNode(textContent6));
+			}
+			return el5;
 		}
 		break;
 	}
@@ -2653,15 +2704,15 @@ fancy_search_renderer_Dom.renderMenu = function(state) {
 fancy_search_renderer_Dom.fromInput = function(input,container,search) {
 	var menu = search.store.stream().map(fancy_search_renderer_Dom.renderMenu);
 	input.addEventListener("focus",function(_) {
-		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "Dom.hx", lineNumber : 50, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "Dom.hx", lineNumber : 52, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
 	input.addEventListener("blur",function(_1) {
-		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "Dom.hx", lineNumber : 51, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "Dom.hx", lineNumber : 53, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
 	input.addEventListener("input",function(_2) {
-		search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 52, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 54, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
-	search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 55, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+	search.store.dispatch(fancy_search_Action.ChangeValue(input.value),{ fileName : "Dom.hx", lineNumber : 57, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	return menu;
 };
 var fancy_search_util_SuggestionItem = $hxClasses["fancy.search.util.SuggestionItem"] = { __ename__ : ["fancy","search","util","SuggestionItem"], __constructs__ : ["Suggestion","Label"] };
@@ -16291,7 +16342,7 @@ dots_Attributes.properties = (function($this) {
 dots_Query.doc = document;
 fancy_search_renderer_Dom.prefix = "fs-suggestion";
 fancy_search_renderer_Dom.containerPrefix = fancy_search_renderer_Dom.prefix + "-container";
-fancy_search_renderer_Dom.classes = { container : fancy_search_renderer_Dom.containerPrefix, containerClosed : fancy_search_renderer_Dom.containerPrefix + "-closed", containerOpen : fancy_search_renderer_Dom.containerPrefix + "-open", containerTooShort : fancy_search_renderer_Dom.containerPrefix + "-too-short", containerNoResults : fancy_search_renderer_Dom.containerPrefix + "-empty", containerLoading : fancy_search_renderer_Dom.containerPrefix + "-loading", list : fancy_search_renderer_Dom.prefix + "-list", item : fancy_search_renderer_Dom.prefix + "-item", itemHighlighted : fancy_search_renderer_Dom.prefix + "-item-highlighted"};
+fancy_search_renderer_Dom.classes = { container : fancy_search_renderer_Dom.containerPrefix, containerClosed : fancy_search_renderer_Dom.containerPrefix + "-closed", containerOpen : fancy_search_renderer_Dom.containerPrefix + "-open", containerTooShort : fancy_search_renderer_Dom.containerPrefix + "-too-short", containerNoResults : fancy_search_renderer_Dom.containerPrefix + "-empty", containerLoading : fancy_search_renderer_Dom.containerPrefix + "-loading", containerFailed : fancy_search_renderer_Dom.containerPrefix + "-failed", list : fancy_search_renderer_Dom.prefix + "-list", item : fancy_search_renderer_Dom.prefix + "-item", itemHighlighted : fancy_search_renderer_Dom.prefix + "-item-highlighted"};
 haxe__$Int32_Int32_$Impl_$._mul = Math.imul != null ? Math.imul : function(a,b) {
 	return a * (b & 65535) + (a * (b >>> 16) << 16 | 0) | 0;
 };

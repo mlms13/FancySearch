@@ -4,6 +4,7 @@ import haxe.ds.Option;
 using thx.Functions;
 using thx.Nel;
 using thx.Options;
+import thx.promise.Promise;
 import thx.stream.Stream;
 import thx.stream.Store;
 import utest.Assert;
@@ -95,7 +96,7 @@ class TestSearch {
   public function testDelayedResults() {
     var config = thx.Objects.clone(simpleConfig);
     config.filterer = function (optString) {
-      return thx.promise.Promise.nil.delay(20)
+      return Promise.nil.delay(20)
         .flatMap(function (_) return StringDefaults.filterStringsSync(suggestions)(optString));
     };
 
@@ -130,5 +131,20 @@ class TestSearch {
 
     searchB.store.dispatch(OpenMenu);
     searchB.store.dispatch(CloseMenu);
+  }
+
+  public function testFailedResults() {
+    var config = thx.Objects.clone(simpleConfig);
+    config.filterer = function (_) return Promise.fail("failed");
+
+    var search = new Search2(config);
+
+    collectMenuState(search.store, 3)
+      .next(function (v) {
+        Assert.same([Closed, Open(Loading), Open(Failed)], v);
+      })
+      .always(Assert.createAsync())
+      .run();
+    search.store.dispatch(OpenMenu);
   }
 }

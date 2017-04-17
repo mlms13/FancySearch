@@ -18,6 +18,7 @@ class Dom {
     containerTooShort: containerPrefix + "-too-short",
     containerNoResults: containerPrefix + "-empty",
     containerLoading: containerPrefix + "-loading",
+    containerFailed: containerPrefix + "-failed",
     list: prefix + "-list",
     item: prefix + "-item",
     itemHighlighted: prefix + "-item-highlighted"
@@ -37,6 +38,7 @@ class Dom {
       case InputTooShort: create("div", ["class" => classes.container + " " + classes.containerTooShort]);
       case Open(Loading): create("div", ["class" => classes.container + " " + classes.containerLoading], "LOADING"); // TODO
       case Open(NoResults): create("div", ["class" => classes.container + " " + classes.containerNoResults], "NO RESULTS"); // TODO
+      case Open(Failed): create("div", ["class" => classes.container + " " + classes.containerFailed], "FAILED"); // TODO
       case Open(Results(suggs, highlighted)): create("div", ["class" => classes.container + " " + classes.containerOpen], [
         create("ul", ["class" => classes.list], suggs.map(renderMenuItem.bind(state.config.renderView))
           .toArray().toArray()) // first to ReadonlyArray, then to a real one

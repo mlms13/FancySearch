@@ -29,6 +29,12 @@ class Reducer {
         case [Open(_), PopulateSuggestions(None)]: Open(NoResults);
         case [Open(_), PopulateSuggestions(Some(suggestions))]: showSuggestions(state.config, suggestions);
 
+        // if the menu is open and results have failed, show the failure state
+        case [Open(_), FailSuggestions]: Open(Failed);
+
+        // but if the menu is not open when results fail, leave it as is
+        case [Closed, FailSuggestions] | [InputTooShort, FailSuggestions]: state.menu;
+
         // if we're told to close the menu, just do it
         case [_, CloseMenu]: Closed;
 
@@ -40,7 +46,8 @@ class Reducer {
         case [Closed, ChangeHighlight(_)] |
              [InputTooShort, ChangeHighlight(_)] |
              [Open(Loading), ChangeHighlight(_)] |
-             [Open(NoResults), ChangeHighlight(_)]: state.menu;
+             [Open(NoResults), ChangeHighlight(_)] |
+             [Open(Failed), ChangeHighlight(_)]: state.menu;
 
         // ignore requests to populate suggestions if the menu isn't open
         case [Closed, PopulateSuggestions(_)] |

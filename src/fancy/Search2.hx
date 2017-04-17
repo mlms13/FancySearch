@@ -33,7 +33,7 @@ class Search2<T> {
           // so we can ignore the content of ChangeValue
           case OpenMenu | ChangeValue(_): config.filterer(state.input)
             .success.fn(dispatch(PopulateSuggestions(thx.Nel.fromArray(_))))
-            .failure.fn(trace(_)); // TODO: failed state
+            .failure(function (_) dispatch(FailSuggestions));
           case _: // do nothing
         }
       }

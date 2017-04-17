@@ -9,6 +9,7 @@ enum Action<T> {
   OpenMenu;
   CloseMenu;
   PopulateSuggestions(suggestions: Option<Nel<SuggestionItem<T>>>);
+  FailSuggestions;
   ChangeHighlight(change: HighlightChangeType<T>);
   Choose(suggestion: T);
 }

@@ -19,5 +19,6 @@ enum MenuState<T> {
 enum DropdownState<T> {
   Loading;
   NoResults;
+  Failed;
   Results(suggestions: thx.Nel<SuggestionItem<T>>, highlighted: Option<T>);
 }
