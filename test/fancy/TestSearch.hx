@@ -153,9 +153,9 @@ class TestSearch {
     search.store.dispatch(OpenMenu);
   }
 
-  ////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // TEST HIGHLIGHT
-  ////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
 
   // enabling the `alwaysHighlight` feature should lead to `Some(highlight)`
   // without manually changing the highlight
@@ -173,4 +173,101 @@ class TestSearch {
       .run();
     search.store.dispatch(OpenMenu);
   }
+
+  // allow changing the highlight to a specific value (mimicing mouse hover)
+  public function testHighlightSpecific() {
+    var search = new Search2(simpleConfig);
+
+    collectMenuState(search.store, 4)
+      .next(function (v) {
+        var expected = [
+          Closed,
+          Open(Loading),
+          Open(Results(suggestionsNel, None)),
+          Open(Results(suggestionsNel, Some("Corn")))
+        ];
+        Assert.same(expected, v);
+      })
+      .always(Assert.createAsync())
+      .run();
+
+    search.store.dispatch(OpenMenu);
+    search.store.dispatch(ChangeHighlight(Specific("Corn")));
+  }
+
+  // subsequent changes should preserve your highlight if the field
+  // you highlighted is still in the list after changes
+  public function testSearchAfterHighlight() {
+    var search = new Search2(simpleConfig);
+    collectMenuState(search.store, 6)
+      .next(function (v) {
+        var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
+        var expected = [
+          Closed,
+          Open(Loading),
+          Open(Results(suggestionsNel, None)),
+          Open(Results(suggestionsNel, Some("Fava Beans"))),
+          Open(Loading),
+          Open(Results(results, Some("Fava Beans")))
+        ];
+        Assert.same(expected, v);
+      })
+      .always(Assert.createAsync())
+      .run();
+
+    search.store.dispatch(OpenMenu);
+    search.store.dispatch(ChangeHighlight(Specific("Fava Beans")));
+    search.store.dispatch(ChangeValue("bean"));
+  }
+
+  // ...but, if input changes made your highlight no longer part of the results
+  // highlight `None`
+  public function testHighlightNotMatching() {
+    var search = new Search2(simpleConfig);
+    collectMenuState(search.store, 6)
+      .next(function (v) {
+        var expected = [
+          Closed,
+          Open(Loading),
+          Open(Results(suggestionsNel, None)),
+          Open(Results(suggestionsNel, Some("Fava Beans"))),
+          Open(Loading),
+          Open(Results(Nel.pure(Suggestion("Zucchini")), None))
+        ];
+        Assert.same(expected, v);
+      })
+      .always(Assert.createAsync())
+      .run();
+
+    search.store.dispatch(OpenMenu);
+    search.store.dispatch(ChangeHighlight(Specific("Fava Beans")));
+    search.store.dispatch(ChangeValue("z"));
+  }
+
+  // ...unless `alwaysHighlight` is true, in which case the first is highlighted
+  public function testAlwaysHighlightNotMatching() {
+    var config = thx.Objects.clone(simpleConfig);
+    config.alwaysHighlight = true;
+    var search = new Search2(config);
+    collectMenuState(search.store, 6)
+      .next(function (v) {
+        var expected = [
+          Closed,
+          Open(Loading),
+          Open(Results(suggestionsNel, None)),
+          Open(Results(suggestionsNel, Some("Fava Beans"))),
+          Open(Loading),
+          Open(Results(Nel.pure(Suggestion("Zucchini")), Some("Zucchini")))
+        ];
+        Assert.same(expected, v);
+      })
+      .always(Assert.createAsync())
+      .run();
+
+    search.store.dispatch(OpenMenu);
+    search.store.dispatch(ChangeHighlight(Specific("Fava Beans")));
+    search.store.dispatch(ChangeValue("z"));
+  }
+
+  // TODO: test moving the highlight up and down
 }
