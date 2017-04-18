@@ -7,7 +7,7 @@ import thx.Lazy;
 typedef Configuration<T> = {
   filterer: Filterer<T>,
   renderView: T -> js.html.Element,
-  renderString: T -> String, // used for populating the input element
+  equals: T -> T -> Bool,
   clearButton: Option<Lazy<Element>>,
   minLength: Int,
   alwaysHighlight: Bool

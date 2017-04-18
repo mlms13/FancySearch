@@ -13,7 +13,7 @@ class Main {
           "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
       ]),
       renderView: StringDefaults.renderStringElement,
-      renderString: thx.Functions.identity,
+      equals: function (a, b) return a == b,
       clearButton: None,
       minLength: 0,
       alwaysHighlight: true

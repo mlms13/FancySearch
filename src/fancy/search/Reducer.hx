@@ -86,11 +86,11 @@ class Reducer {
     });
   }
 
-  static function hasT<T>(toString: T -> String, suggs: thx.ReadonlyArray<SuggestionItem<T>>, t: T): Bool {
-    return suggs.contains(toString(t), function (curr: SuggestionItem<T>, compare: String): Bool {
+  static function hasT<T>(suggs: thx.ReadonlyArray<SuggestionItem<T>>, t: T, eq: T -> T -> Bool): Bool {
+    return suggs.contains(t, function (curr: SuggestionItem<T>, t: T) {
       return switch curr {
         case Label(_): false;
-        case Suggestion(v): toString(v) == compare;
+        case Suggestion(v): eq(t, v);
       };
     });
   }
@@ -101,7 +101,7 @@ class Reducer {
     // T exists in the list, then highlight it. Otherwise, if config tells us to
     // always highlight, pick the first
     var h: Option<T> = highlight.flatMap(function (v) {
-      return hasT(config.renderString, suggArray, v) ? Some(v) : None;
+      return hasT(suggArray, v, config.equals) ? Some(v) : None;
     }).cataf(
       function () {
         // PopulateSuggestions didn't give us an element to highlight
@@ -122,10 +122,8 @@ class Reducer {
       };
     });
 
-    var indexOfHighlighted = highlighted.map(config.renderString).flatMap(function (h: String) {
-      var index = ts.findIndex(function (curr: T) {
-        return config.renderString(curr) == h;
-      });
+    var indexOfHighlighted = highlighted.flatMap(function (h: T) {
+      var index = ts.findIndex(config.equals.bind(h));
       return index == -1 ? None : Some(index);
     });
 

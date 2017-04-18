@@ -29,7 +29,7 @@ class TestSearch {
   static var simpleConfig: Configuration<String> = {
     filterer: StringDefaults.filterStringsSync(suggestions),
     renderView: StringDefaults.renderStringElement,
-    renderString: thx.Functions.identity,
+    equals: function (a, b) return a == b,
     clearButton: None,
     minLength: 0,
     alwaysHighlight: false

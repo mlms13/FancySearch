@@ -33,10 +33,6 @@ class Dom {
     highlightDown: [dots.Keys.DOWN_ARROW],
   };
 
-  static function tEquals<T>(toString: T -> String, a: T, b: T): Bool {
-    return toString(a) == toString(b);
-  }
-
   // render the item; apply special treatment if it matches the highlighted element
   static function renderMenuItem<T>(config: Configuration<T>, dispatch: Action<T> -> Void, highlighted: Option<T>, sugg: SuggestionItem<T>): Element {
     return switch sugg {
@@ -44,7 +40,7 @@ class Dom {
         var highlightClass = highlighted.cata("",  function (h: T) {
           // if a highlight exists and it matches the stringified version of this suggestion
           // return the highglight class
-          return tEquals(config.renderString, s, h) ? classes.itemHighlighted : "";
+          return config.equals(s, h) ? classes.itemHighlighted : "";
         });
         var li = create("li", [ "class" => classes.item + " " + highlightClass, ], [ config.renderView(s) ]);
         li.on("mouseover", function () { dispatch(ChangeHighlight(Specific(s))); });
