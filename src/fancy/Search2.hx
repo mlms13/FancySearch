@@ -13,12 +13,14 @@ import fancy.search.util.Configuration;
 
 class Search2<TSugg, TValue> {
   public var store(default, null): Store<State<TSugg, TValue>, Action<TSugg, TValue>>;
+  public var stream(default, null): thx.stream.Stream<Option<TValue>>;
 
   public function new(config: Configuration<TSugg, TValue>) {
     var state = { config: config, input: None, menu: Closed(Inactive) };
     var middleware = Middleware.empty() + loadSuggestions(config);
 
     store = new thx.stream.Store(new Property(state), fancy.search.Reducer.reduce, middleware);
+    stream = store.stream().map.fn(_.input);
   }
 
   static function loadSuggestions<TSugg, TValue>(config: Configuration<TSugg, TValue>): Middleware<State<TSugg, TValue>, Action<TSugg, TValue>> {

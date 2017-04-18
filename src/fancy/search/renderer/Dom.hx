@@ -72,9 +72,8 @@ class Dom {
   public static function fromInput<T, TValue>(input: InputElement, container: Element, search: fancy.Search2<T, TValue>, parse: String -> Option<TValue>, render: Option<TValue> -> String): thx.stream.Stream<Element> {
     var menu = search.store.stream().map(renderMenu.bind(function (act) search.store.dispatch(act)));
 
-
-    search.store.stream().next(function (state: State<T, TValue>) {
-      input.value = render(state.input);
+    search.stream.next(function (inputVal: Option<TValue>) {
+      input.value = render(inputVal);
     }).run();
 
     input.on("focus", function (_) search.store.dispatch(OpenMenu));
