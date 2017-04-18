@@ -42,10 +42,17 @@ class Reducer {
         // if we're told to close the menu, just do it
         case [_, CloseMenu]: Closed;
 
-        // handle highlight changes
-        case [Open(Results(list), _), ChangeHighlight(Unhighlight)]: Open(Results(list), None);
-        case [Open(Results(list), _), ChangeHighlight(Specific(v))]: Open(Results(list), Some(v));
-        case [Open(Results(list), highlighted), ChangeHighlight(Move(dir))]: moveHighlight(state.config, list, highlighted, dir);
+        // only unhighlight when not in `alwaysHighlight` mode
+        case [Open(Results(list), h), ChangeHighlight(Unhighlight)]:
+          Open(Results(list), state.config.alwaysHighlight ? h : None);
+
+        // highlight a specific result
+        case [Open(Results(list), _), ChangeHighlight(Specific(v))]:
+          Open(Results(list), Some(v));
+
+        // move the highlight up or down
+        case [Open(Results(list), highlighted), ChangeHighlight(Move(dir))]:
+          moveHighlight(state.config, list, highlighted, dir);
 
         // if the menu is closed, loading, or has no results,
         // and we receive an instruction to change hightlight... ignore it

@@ -269,6 +269,32 @@ class TestSearch {
     search.store.dispatch(ChangeValue("z"));
   }
 
+  // in `alwaysHighlight` mode, ignore unhighlight
+  public function testAlwaysHighlightUnhighlight() {
+    var config = thx.Objects.clone(simpleConfig);
+    config.alwaysHighlight = true;
+    var search = new Search2(config);
+
+    collectMenuState(search.store, 5)
+      .next(function (v) {
+        var expected = [
+          Closed,
+          Open(Loading, None),
+          Open(Results(suggestionsNel), Some("Apple")),
+          Open(Results(suggestionsNel), Some("Black Bean")),
+          Open(Results(suggestionsNel), Some("Black Bean"))
+        ];
+
+        Assert.same(expected, v);
+      })
+      .always(Assert.createAsync())
+      .run();
+
+    search.store.dispatch(OpenMenu);
+    search.store.dispatch(ChangeHighlight(Specific("Black Bean")));
+    search.store.dispatch(ChangeHighlight(Unhighlight));
+  }
+
   // test moving the highlight up and down
   public function testMoveHighlight() {
     var search = new Search2(simpleConfig);

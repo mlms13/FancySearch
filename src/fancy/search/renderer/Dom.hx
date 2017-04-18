@@ -43,8 +43,7 @@ class Dom {
           return config.equals(s, h) ? classes.itemHighlighted : "";
         });
         var li = create("li", [ "class" => classes.item + " " + highlightClass, ], [ config.renderView(s) ]);
-        li.on("mouseover", function () { dispatch(ChangeHighlight(Specific(s))); });
-        li.on("mouseout", function () { dispatch(ChangeHighlight(Unhighlight)); }); // TODO: not happening
+        li.on("mouseover", function () dispatch(ChangeHighlight(Specific(s))));
         li;
       case Label(renderer):
         create("li", ["class" => classes.label], [ renderer() ]);
@@ -58,10 +57,13 @@ class Dom {
       case Open(Loading, _): create("div", ["class" => classes.container + " " + classes.containerLoading], "LOADING"); // TODO
       case Open(NoResults, _): create("div", ["class" => classes.container + " " + classes.containerNoResults], "NO RESULTS"); // TODO
       case Open(Failed, _): create("div", ["class" => classes.container + " " + classes.containerFailed], "FAILED"); // TODO
-      case Open(Results(suggs), highlighted): create("div", ["class" => classes.container + " " + classes.containerOpen], [
-        create("ul", ["class" => classes.list], suggs.map(renderMenuItem.bind(state.config, dispatch, highlighted))
-          .toArray().toArray()) // first to ReadonlyArray, then to a real one
-      ]);
+      case Open(Results(suggs), highlighted):
+        var div = create("div", ["class" => classes.container + " " + classes.containerOpen], [
+          create("ul", ["class" => classes.list], suggs.map(renderMenuItem.bind(state.config, dispatch, highlighted))
+            .toArray().toArray()) // first to ReadonlyArray, then to a real one
+        ]);
+        div.on("mouseout", function () dispatch(ChangeHighlight(Unhighlight)));
+        div;
     };
   }
 
