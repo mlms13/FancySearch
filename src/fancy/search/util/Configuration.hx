@@ -6,10 +6,8 @@ import thx.Lazy;
 
 typedef Configuration<TSugg, TValue> = {
   filterer: Filterer<TSugg, TValue>,
-  choose: Option<TValue> -> Option<TSugg> -> Option<TValue>,
-  renderView: TSugg -> js.html.Element,
+  choose: Option<TSugg> -> Option<TValue> -> Option<TValue>,
   equals: TSugg -> TSugg -> Bool,
-  clearButton: Option<Lazy<Element>>,
   hideMenuCondition: Option<TValue> -> Option<String>, // TODO: add documentation
   alwaysHighlight: Bool
 };

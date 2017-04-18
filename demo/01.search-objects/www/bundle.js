@@ -699,12 +699,190 @@ _$List_ListIterator.prototype = {
 	}
 	,__class__: _$List_ListIterator
 };
+var SearchPerson = $hxClasses["SearchPerson"] = { __ename__ : ["SearchPerson"], __constructs__ : ["Text","Person"] };
+SearchPerson.Text = function(search) { var $x = ["Text",0,search]; $x.__enum__ = SearchPerson; return $x; };
+SearchPerson.Person = function(p) { var $x = ["Person",1,p]; $x.__enum__ = SearchPerson; return $x; };
+SearchPerson.__empty_constructs__ = [];
 var Main = function() { };
 $hxClasses["Main"] = Main;
 Main.__name__ = ["Main"];
 Main.main = function() {
-	var options = { minLength : 0, suggestionOptions : { suggestions : ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"], limit : 6, showSearchLiteralItem : true}};
-	var search = fancy_Search.createFromSelector(".fancy-container input",options);
+	var people = [{ firstName : "Michael", lastName : "Martin", github : "mlms13"},{ firstName : "Franco", lastName : "Ponticelli", github : "fponticelli"},{ firstName : "Andy", lastName : "White", github : "andywhite37"}];
+	var config = { filterer : Main.makeFilterer(people), choose : function(sugg,val) {
+		return thx_Options.orElse(thx_Options.map(sugg,SearchPerson.Person),val);
+	}, equals : function(a,b) {
+		return a.github == b.github;
+	}, hideMenuCondition : function(a1) {
+		return haxe_ds_Option.None;
+	}, alwaysHighlight : true};
+	var container = dots_Query.find(".fancy-container");
+	var input = dots_Query.find(".fancy-container input");
+	var search = new fancy_Search2(config);
+	var renderer = fancy_search_renderer_Dom.fromInput(input,container,search,{ classes : fancy_search_util_ClassNameConfigs.defaultClasses, keys : fancy_search_util_KeyboardConfigs.defaultKeys, parseInput : Main.parseValue, renderInput : Main.renderValue, renderSuggestion : function(p) {
+		var doc = null;
+		if(null == doc) {
+			doc = window.document;
+		}
+		var el = doc.createElement("div");
+		var _g1 = 0;
+		var _g2 = [];
+		while(_g1 < _g2.length) {
+			var o = _g2[_g1];
+			++_g1;
+			el.setAttribute(o.name,o.value);
+		}
+		var attrs = null;
+		if(null != attrs) {
+			var attr = attrs.keys();
+			while(attr.hasNext()) {
+				var attr1 = attr.next();
+				el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
+			}
+		}
+		var doc1 = null;
+		if(null == doc1) {
+			doc1 = window.document;
+		}
+		var el1 = doc1.createElement("div");
+		var _g11 = 0;
+		var _g21 = [];
+		while(_g11 < _g21.length) {
+			var o1 = _g21[_g11];
+			++_g11;
+			el1.setAttribute(o1.name,o1.value);
+		}
+		var attrs1 = null;
+		if(null != attrs1) {
+			var attr2 = attrs1.keys();
+			while(attr2.hasNext()) {
+				var attr3 = attr2.next();
+				el1.setAttribute(attr3,__map_reserved[attr3] != null ? attrs1.getReserved(attr3) : attrs1.h[attr3]);
+			}
+		}
+		var children = null;
+		if(null != children) {
+			var _g12 = 0;
+			while(_g12 < children.length) {
+				var child = children[_g12];
+				++_g12;
+				el1.appendChild(child);
+			}
+		}
+		var textContent = p.firstName + " " + p.lastName;
+		if(null != textContent) {
+			el1.appendChild(doc1.createTextNode(textContent));
+		}
+		var children1 = el1;
+		var doc2 = null;
+		if(null == doc2) {
+			doc2 = window.document;
+		}
+		var el2 = doc2.createElement("div");
+		var _g22 = 0;
+		var _g3 = [];
+		while(_g22 < _g3.length) {
+			var o2 = _g3[_g22];
+			++_g22;
+			el2.setAttribute(o2.name,o2.value);
+		}
+		var _g23 = new haxe_ds_StringMap();
+		if(__map_reserved["style"] != null) {
+			_g23.setReserved("style","color: #aaa; ");
+		} else {
+			_g23.h["style"] = "color: #aaa; ";
+		}
+		var attrs2 = _g23;
+		if(null != attrs2) {
+			var attr4 = attrs2.keys();
+			while(attr4.hasNext()) {
+				var attr5 = attr4.next();
+				el2.setAttribute(attr5,__map_reserved[attr5] != null ? attrs2.getReserved(attr5) : attrs2.h[attr5]);
+			}
+		}
+		var children2 = null;
+		if(null != children2) {
+			var _g31 = 0;
+			while(_g31 < children2.length) {
+				var child1 = children2[_g31];
+				++_g31;
+				el2.appendChild(child1);
+			}
+		}
+		var textContent1 = p.github;
+		if(null != textContent1) {
+			el2.appendChild(doc2.createTextNode(textContent1));
+		}
+		var children3 = [children1,el2];
+		if(null != children3) {
+			var _g24 = 0;
+			while(_g24 < children3.length) {
+				var child2 = children3[_g24];
+				++_g24;
+				el.appendChild(child2);
+			}
+		}
+		var textContent2 = null;
+		if(null != textContent2) {
+			el.appendChild(doc.createTextNode(textContent2));
+		}
+		return el;
+	}, clearButton : haxe_ds_Option.None});
+	renderer.next(function(dom) {
+		while(container.children.length > 1) container.removeChild(container.lastChild);
+		dots_Dom.append(container,null,[dom]);
+	}).run();
+};
+Main.renderValue = function(v) {
+	switch(v[1]) {
+	case 0:
+		switch(v[2][1]) {
+		case 0:
+			var t = v[2][2];
+			return t;
+		case 1:
+			var p = v[2][2];
+			return Main.personToString(p);
+		}
+		break;
+	case 1:
+		return "";
+	}
+};
+Main.parseValue = function(v) {
+	if(thx_Strings.isEmpty(v)) {
+		return haxe_ds_Option.None;
+	} else {
+		return haxe_ds_Option.Some(SearchPerson.Text(v));
+	}
+};
+Main.personToString = function(p) {
+	return p.firstName + " " + p.lastName + " " + p.github;
+};
+Main.makeFilterer = function(people) {
+	var filterer = function(search) {
+		var filterer1;
+		switch(search[1]) {
+		case 0:
+			switch(search[2][1]) {
+			case 0:
+				var t = search[2][2];
+				filterer1 = people.filter(function(p) {
+					return Main.personToString(p).toLowerCase().indexOf(t.toLowerCase()) >= 0;
+				}).map(fancy_search_util_SuggestionItem.Suggestion);
+				break;
+			case 1:
+				var p1 = search[2][2];
+				filterer1 = [fancy_search_util_SuggestionItem.Suggestion(p1)];
+				break;
+			}
+			break;
+		case 1:
+			filterer1 = people.map(fancy_search_util_SuggestionItem.Suggestion);
+			break;
+		}
+		return thx_promise__$Promise_Promise_$Impl_$.value(filterer1);
+	};
+	return filterer;
 };
 var _$Map_Map_$Impl_$ = {};
 $hxClasses["_Map.Map_Impl_"] = _$Map_Map_$Impl_$;
@@ -1361,128 +1539,6 @@ Type.enumIndex = function(e) {
 Type.allEnums = function(e) {
 	return e.__empty_constructs__;
 };
-var haxe_IMap = function() { };
-$hxClasses["haxe.IMap"] = haxe_IMap;
-haxe_IMap.__name__ = ["haxe","IMap"];
-haxe_IMap.prototype = {
-	get: null
-	,set: null
-	,exists: null
-	,remove: null
-	,keys: null
-	,iterator: null
-	,toString: null
-	,__class__: haxe_IMap
-};
-var haxe_ds_StringMap = function() {
-	this.h = { };
-};
-$hxClasses["haxe.ds.StringMap"] = haxe_ds_StringMap;
-haxe_ds_StringMap.__name__ = ["haxe","ds","StringMap"];
-haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
-haxe_ds_StringMap.prototype = {
-	h: null
-	,rh: null
-	,isReserved: function(key) {
-		return __map_reserved[key] != null;
-	}
-	,set: function(key,value) {
-		if(__map_reserved[key] != null) {
-			this.setReserved(key,value);
-		} else {
-			this.h[key] = value;
-		}
-	}
-	,get: function(key) {
-		if(__map_reserved[key] != null) {
-			return this.getReserved(key);
-		}
-		return this.h[key];
-	}
-	,exists: function(key) {
-		if(__map_reserved[key] != null) {
-			return this.existsReserved(key);
-		}
-		return this.h.hasOwnProperty(key);
-	}
-	,setReserved: function(key,value) {
-		if(this.rh == null) {
-			this.rh = { };
-		}
-		this.rh["$" + key] = value;
-	}
-	,getReserved: function(key) {
-		if(this.rh == null) {
-			return null;
-		} else {
-			return this.rh["$" + key];
-		}
-	}
-	,existsReserved: function(key) {
-		if(this.rh == null) {
-			return false;
-		}
-		return this.rh.hasOwnProperty("$" + key);
-	}
-	,remove: function(key) {
-		if(__map_reserved[key] != null) {
-			key = "$" + key;
-			if(this.rh == null || !this.rh.hasOwnProperty(key)) {
-				return false;
-			}
-			delete(this.rh[key]);
-			return true;
-		} else {
-			if(!this.h.hasOwnProperty(key)) {
-				return false;
-			}
-			delete(this.h[key]);
-			return true;
-		}
-	}
-	,keys: function() {
-		return HxOverrides.iter(this.arrayKeys());
-	}
-	,arrayKeys: function() {
-		var out = [];
-		for( var key in this.h ) {
-		if(this.h.hasOwnProperty(key)) {
-			out.push(key);
-		}
-		}
-		if(this.rh != null) {
-			for( var key in this.rh ) {
-			if(key.charCodeAt(0) == 36) {
-				out.push(key.substr(1));
-			}
-			}
-		}
-		return out;
-	}
-	,iterator: function() {
-		return new haxe_ds__$StringMap_StringMapIterator(this,this.arrayKeys());
-	}
-	,toString: function() {
-		var s_b = "";
-		s_b += "{";
-		var keys = this.arrayKeys();
-		var _g1 = 0;
-		var _g = keys.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			var k = keys[i];
-			s_b += k == null ? "null" : "" + k;
-			s_b += " => ";
-			s_b += Std.string(Std.string(__map_reserved[k] != null ? this.getReserved(k) : this.h[k]));
-			if(i < keys.length - 1) {
-				s_b += ", ";
-			}
-		}
-		s_b += "}";
-		return s_b;
-	}
-	,__class__: haxe_ds_StringMap
-};
 var dots_AttributeType = $hxClasses["dots.AttributeType"] = { __ename__ : ["dots","AttributeType"], __constructs__ : ["BooleanAttribute","Property","BooleanProperty","OverloadedBooleanAttribute","NumericAttribute","PositiveNumericAttribute","SideEffectProperty"] };
 dots_AttributeType.BooleanAttribute = ["BooleanAttribute",0];
 dots_AttributeType.BooleanAttribute.__enum__ = dots_AttributeType;
@@ -1606,6 +1662,18 @@ dots_Attributes.toggleBoolAttribute = function(el,name,value) {
 };
 dots_Attributes.removeAttribute = function(el,name) {
 	el.removeAttribute(name);
+};
+var dots_HTMLCollections = function() { };
+$hxClasses["dots.HTMLCollections"] = dots_HTMLCollections;
+dots_HTMLCollections.__name__ = ["dots","HTMLCollections"];
+dots_HTMLCollections.toArray = function(it) {
+	return Array.prototype.slice.call(it);
+};
+var dots_NodeLists = function() { };
+$hxClasses["dots.NodeLists"] = dots_NodeLists;
+dots_NodeLists.__name__ = ["dots","NodeLists"];
+dots_NodeLists.toArray = function(it) {
+	return Array.prototype.slice.call(it);
 };
 var dots_Dom = function() { };
 $hxClasses["dots.Dom"] = dots_Dom;
@@ -2022,6 +2090,41 @@ dots__$EventHandler_EventHandler_$Impl_$.toCallback = function(this1) {
 var dots_Keys = function() { };
 $hxClasses["dots.Keys"] = dots_Keys;
 dots_Keys.__name__ = ["dots","Keys"];
+var dots_Query = function() { };
+$hxClasses["dots.Query"] = dots_Query;
+dots_Query.__name__ = ["dots","Query"];
+dots_Query.find = function(selector,ctx) {
+	return (ctx != null ? ctx : dots_Query.doc).querySelector(selector);
+};
+dots_Query.selectNodes = function(selector,ctx) {
+	return (ctx != null ? ctx : dots_Query.doc).querySelectorAll(selector);
+};
+dots_Query.select = function(selector,ctx) {
+	var list = dots_Query.selectNodes(selector,ctx);
+	return Array.prototype.slice.call(list,0);
+};
+dots_Query.getElementIndex = function(el) {
+	var index = 0;
+	while(true) {
+		el = el.previousElementSibling;
+		if(!(null != el)) {
+			break;
+		}
+		++index;
+	}
+	return index;
+};
+dots_Query.siblings = function(node) {
+	var it = node.parentNode.children;
+	return Array.prototype.slice.call(it).filter(function(n) {
+		return n != node;
+	});
+};
+dots_Query.childrenOf = function(children,parent) {
+	return children.filter(function(child) {
+		return child.parentElement == parent;
+	});
+};
 var dots_SelectorParser = function(selector) {
 	this.selector = selector;
 	this.index = 0;
@@ -2358,6 +2461,71 @@ fancy_Search.prototype = {
 	}
 	,__class__: fancy_Search
 };
+var fancy_Search2 = function(config) {
+	var state = { config : config, input : haxe_ds_Option.None, menu : fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive)};
+	var middleware = thx_stream__$Reducer_Middleware_$Impl_$.compose(thx_stream__$Reducer_Middleware_$Impl_$.empty(),fancy_Search2.loadSuggestions(config));
+	this.store = new thx_stream_Store(new thx_stream_Property(state),fancy_search_Reducer.reduce,middleware);
+	this.stream = this.store.stream().map(function(_) {
+		return _.input;
+	});
+};
+$hxClasses["fancy.Search2"] = fancy_Search2;
+fancy_Search2.__name__ = ["fancy","Search2"];
+fancy_Search2.loadSuggestions = function(config) {
+	return function(state,action,dispatch) {
+		var _g = state.config.hideMenuCondition(state.input);
+		if(_g[1] == 1) {
+			var _g1 = state.menu;
+			if(_g1[1] == 1) {
+				switch(action[1]) {
+				case 0:case 1:
+					var h = _g1[3];
+					var _e = config.filterer(state.input);
+					thx_promise__$Promise_Promise_$Impl_$.failure((function(success) {
+						return thx_promise__$Promise_Promise_$Impl_$.success(_e,success);
+					})(function(_) {
+						var tmp = fancy_search_Action.PopulateSuggestions(thx__$Nel_Nel_$Impl_$.fromArray(_),h);
+						dispatch(tmp);
+						return;
+					}),function(_1) {
+						dispatch(fancy_search_Action.FailSuggestions);
+					});
+					break;
+				default:
+				}
+			}
+		}
+	};
+};
+fancy_Search2.prototype = {
+	store: null
+	,stream: null
+	,__class__: fancy_Search2
+};
+var fancy_search_Action = $hxClasses["fancy.search.Action"] = { __ename__ : ["fancy","search","Action"], __constructs__ : ["ChangeValue","OpenMenu","CloseMenu","PopulateSuggestions","FailSuggestions","ChangeHighlight","Choose"] };
+fancy_search_Action.ChangeValue = function(newValue) { var $x = ["ChangeValue",0,newValue]; $x.__enum__ = fancy_search_Action; return $x; };
+fancy_search_Action.OpenMenu = ["OpenMenu",1];
+fancy_search_Action.OpenMenu.__enum__ = fancy_search_Action;
+fancy_search_Action.CloseMenu = ["CloseMenu",2];
+fancy_search_Action.CloseMenu.__enum__ = fancy_search_Action;
+fancy_search_Action.PopulateSuggestions = function(suggestions,highlight) { var $x = ["PopulateSuggestions",3,suggestions,highlight]; $x.__enum__ = fancy_search_Action; return $x; };
+fancy_search_Action.FailSuggestions = ["FailSuggestions",4];
+fancy_search_Action.FailSuggestions.__enum__ = fancy_search_Action;
+fancy_search_Action.ChangeHighlight = function(change) { var $x = ["ChangeHighlight",5,change]; $x.__enum__ = fancy_search_Action; return $x; };
+fancy_search_Action.Choose = function(suggestion,val) { var $x = ["Choose",6,suggestion,val]; $x.__enum__ = fancy_search_Action; return $x; };
+fancy_search_Action.__empty_constructs__ = [fancy_search_Action.OpenMenu,fancy_search_Action.CloseMenu,fancy_search_Action.FailSuggestions];
+var fancy_search_HighlightChangeType = $hxClasses["fancy.search.HighlightChangeType"] = { __ename__ : ["fancy","search","HighlightChangeType"], __constructs__ : ["Unhighlight","Specific","Move"] };
+fancy_search_HighlightChangeType.Unhighlight = ["Unhighlight",0];
+fancy_search_HighlightChangeType.Unhighlight.__enum__ = fancy_search_HighlightChangeType;
+fancy_search_HighlightChangeType.Specific = function(suggestion) { var $x = ["Specific",1,suggestion]; $x.__enum__ = fancy_search_HighlightChangeType; return $x; };
+fancy_search_HighlightChangeType.Move = function(direction) { var $x = ["Move",2,direction]; $x.__enum__ = fancy_search_HighlightChangeType; return $x; };
+fancy_search_HighlightChangeType.__empty_constructs__ = [fancy_search_HighlightChangeType.Unhighlight];
+var fancy_search_Direction = $hxClasses["fancy.search.Direction"] = { __ename__ : ["fancy","search","Direction"], __constructs__ : ["Up","Down"] };
+fancy_search_Direction.Up = ["Up",0];
+fancy_search_Direction.Up.__enum__ = fancy_search_Direction;
+fancy_search_Direction.Down = ["Down",1];
+fancy_search_Direction.Down.__enum__ = fancy_search_Direction;
+fancy_search_Direction.__empty_constructs__ = [fancy_search_Direction.Up,fancy_search_Direction.Down];
 var fancy_search_FancySearchSettings = function(classes,clearBtn,container,keys,minLength,onClearButtonClick,populateSuggestions) {
 	this.classes = classes;
 	this.clearBtn = clearBtn;
@@ -2511,6 +2679,305 @@ fancy_search_FancySuggestionSettings.prototype = {
 	,suggestionToString: null
 	,__class__: fancy_search_FancySuggestionSettings
 };
+var fancy_search_Reducer = function() { };
+$hxClasses["fancy.search.Reducer"] = fancy_search_Reducer;
+fancy_search_Reducer.__name__ = ["fancy","search","Reducer"];
+fancy_search_Reducer.reduce = function(state,action) {
+	var state1 = state.config;
+	var tmp;
+	switch(action[1]) {
+	case 0:
+		var val = action[2];
+		tmp = val;
+		break;
+	case 6:
+		var val1 = action[3];
+		var suggOpt = action[2];
+		tmp = state.config.choose(suggOpt,val1);
+		break;
+	default:
+		tmp = state.input;
+	}
+	var _g = state.menu;
+	var tmp1;
+	switch(_g[1]) {
+	case 0:
+		switch(_g[2][1]) {
+		case 0:
+			switch(action[1]) {
+			case 0:
+				tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+				break;
+			case 1:
+				tmp1 = fancy_search_Reducer.openMenu(state.config,state.input);
+				break;
+			case 2:
+				tmp1 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+				break;
+			case 3:
+				tmp1 = state.menu;
+				break;
+			case 4:
+				tmp1 = state.menu;
+				break;
+			case 5:
+				tmp1 = state.menu;
+				break;
+			case 6:
+				tmp1 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+				break;
+			}
+			break;
+		case 1:
+			switch(action[1]) {
+			case 0:
+				tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+				break;
+			case 1:
+				tmp1 = state.menu;
+				break;
+			case 2:
+				tmp1 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+				break;
+			case 3:
+				tmp1 = state.menu;
+				break;
+			case 4:
+				tmp1 = state.menu;
+				break;
+			case 5:
+				tmp1 = state.menu;
+				break;
+			case 6:
+				tmp1 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+				break;
+			}
+			break;
+		}
+		break;
+	case 1:
+		switch(action[1]) {
+		case 0:
+			var highlight = _g[3];
+			tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,highlight);
+			break;
+		case 1:
+			tmp1 = state.menu;
+			break;
+		case 2:
+			tmp1 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+			break;
+		case 3:
+			switch(action[2][1]) {
+			case 0:
+				var highlight1 = action[3];
+				var suggestions = action[2][2];
+				tmp1 = fancy_search_Reducer.showSuggestions(state.config,suggestions,highlight1);
+				break;
+			case 1:
+				var highlighted = action[3];
+				tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.NoResults,highlighted);
+				break;
+			}
+			break;
+		case 4:
+			var highlighted1 = _g[3];
+			tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Failed,highlighted1);
+			break;
+		case 5:
+			switch(action[2][1]) {
+			case 0:
+				switch(_g[2][1]) {
+				case 0:case 1:case 2:
+					tmp1 = state.menu;
+					break;
+				case 3:
+					var h = _g[3];
+					var list = _g[2][2];
+					tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Results(list),state.config.alwaysHighlight ? h : haxe_ds_Option.None);
+					break;
+				}
+				break;
+			case 1:
+				switch(_g[2][1]) {
+				case 0:case 1:case 2:
+					tmp1 = state.menu;
+					break;
+				case 3:
+					var v = action[2][2];
+					var list1 = _g[2][2];
+					tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.Results(list1),haxe_ds_Option.Some(v));
+					break;
+				}
+				break;
+			case 2:
+				switch(_g[2][1]) {
+				case 0:case 1:case 2:
+					tmp1 = state.menu;
+					break;
+				case 3:
+					var dir = action[2][2];
+					var highlighted2 = _g[3];
+					var list2 = _g[2][2];
+					tmp1 = fancy_search_Reducer.moveHighlight(state.config,list2,highlighted2,dir);
+					break;
+				}
+				break;
+			}
+			break;
+		case 6:
+			tmp1 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+			break;
+		}
+		break;
+	}
+	return { config : state1, input : tmp, menu : tmp1};
+};
+fancy_search_Reducer.openMenu = function(config,inputValue) {
+	var _g = config.hideMenuCondition(inputValue);
+	switch(_g[1]) {
+	case 0:
+		var reason = _g[2];
+		return fancy_search_MenuState.Closed(fancy_search_ClosedReason.FailedCondition(reason));
+	case 1:
+		return fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+	}
+};
+fancy_search_Reducer.firstT = function(suggs) {
+	return thx_Arrays.findMap(suggs.slice(),function(s) {
+		switch(s[1]) {
+		case 0:
+			var v = s[2];
+			return haxe_ds_Option.Some(v);
+		case 1:
+			return haxe_ds_Option.None;
+		}
+	});
+};
+fancy_search_Reducer.hasT = function(suggs,t,eq) {
+	return thx_Arrays.contains(suggs,t,function(curr,t1) {
+		switch(curr[1]) {
+		case 0:
+			var v = curr[2];
+			return eq(t1,v);
+		case 1:
+			return false;
+		}
+	});
+};
+fancy_search_Reducer.showSuggestions = function(config,suggestions,highlight) {
+	var suggArray = thx__$Nel_Nel_$Impl_$.toArray(suggestions);
+	var h = thx_Options.cataf(thx_Options.flatMap(highlight,function(v) {
+		if(fancy_search_Reducer.hasT(suggArray,v,config.equals)) {
+			return haxe_ds_Option.Some(v);
+		} else {
+			return haxe_ds_Option.None;
+		}
+	}),function() {
+		if(config.alwaysHighlight) {
+			return fancy_search_Reducer.firstT(suggArray);
+		} else {
+			return haxe_ds_Option.None;
+		}
+	},haxe_ds_Option.Some);
+	return fancy_search_MenuState.Open(fancy_search_DropdownState.Results(suggestions),h);
+};
+fancy_search_Reducer.moveHighlight = function(config,suggestions,highlighted,dir) {
+	var ts = thx_Arrays.filterMap(thx__$Nel_Nel_$Impl_$.toArray(suggestions),function(item) {
+		switch(item[1]) {
+		case 0:
+			var t = item[2];
+			return haxe_ds_Option.Some(t);
+		case 1:
+			return haxe_ds_Option.None;
+		}
+	});
+	var indexOfHighlighted = thx_Options.flatMap(highlighted,function(h) {
+		var f = config.equals;
+		var a1 = h;
+		var index = function(a2) {
+			return f(a1,a2);
+		};
+		var index1 = thx_Arrays.findIndex(ts,index);
+		if(index1 == -1) {
+			return haxe_ds_Option.None;
+		} else {
+			return haxe_ds_Option.Some(index1);
+		}
+	});
+	var newHighlight;
+	switch(dir[1]) {
+	case 0:
+		switch(indexOfHighlighted[1]) {
+		case 0:
+			var i = indexOfHighlighted[2];
+			if(i - 1 < 0) {
+				var value = ts[ts.length - 1];
+				if(null == value) {
+					newHighlight = haxe_ds_Option.None;
+				} else {
+					newHighlight = haxe_ds_Option.Some(value);
+				}
+			} else {
+				newHighlight = thx_Arrays.getOption(ts,i - 1);
+			}
+			break;
+		case 1:
+			var value1 = ts[ts.length - 1];
+			if(null == value1) {
+				newHighlight = haxe_ds_Option.None;
+			} else {
+				newHighlight = haxe_ds_Option.Some(value1);
+			}
+			break;
+		}
+		break;
+	case 1:
+		switch(indexOfHighlighted[1]) {
+		case 0:
+			var i1 = indexOfHighlighted[2];
+			if(i1 + 1 >= ts.length) {
+				var value2 = ts[0];
+				if(null == value2) {
+					newHighlight = haxe_ds_Option.None;
+				} else {
+					newHighlight = haxe_ds_Option.Some(value2);
+				}
+			} else {
+				newHighlight = thx_Arrays.getOption(ts,i1 + 1);
+			}
+			break;
+		case 1:
+			var value3 = ts[0];
+			if(null == value3) {
+				newHighlight = haxe_ds_Option.None;
+			} else {
+				newHighlight = haxe_ds_Option.Some(value3);
+			}
+			break;
+		}
+		break;
+	}
+	return fancy_search_MenuState.Open(fancy_search_DropdownState.Results(suggestions),newHighlight);
+};
+var fancy_search_MenuState = $hxClasses["fancy.search.MenuState"] = { __ename__ : ["fancy","search","MenuState"], __constructs__ : ["Closed","Open"] };
+fancy_search_MenuState.Closed = function(reason) { var $x = ["Closed",0,reason]; $x.__enum__ = fancy_search_MenuState; return $x; };
+fancy_search_MenuState.Open = function(dropdown,highlighted) { var $x = ["Open",1,dropdown,highlighted]; $x.__enum__ = fancy_search_MenuState; return $x; };
+fancy_search_MenuState.__empty_constructs__ = [];
+var fancy_search_ClosedReason = $hxClasses["fancy.search.ClosedReason"] = { __ename__ : ["fancy","search","ClosedReason"], __constructs__ : ["Inactive","FailedCondition"] };
+fancy_search_ClosedReason.Inactive = ["Inactive",0];
+fancy_search_ClosedReason.Inactive.__enum__ = fancy_search_ClosedReason;
+fancy_search_ClosedReason.FailedCondition = function(reason) { var $x = ["FailedCondition",1,reason]; $x.__enum__ = fancy_search_ClosedReason; return $x; };
+fancy_search_ClosedReason.__empty_constructs__ = [fancy_search_ClosedReason.Inactive];
+var fancy_search_DropdownState = $hxClasses["fancy.search.DropdownState"] = { __ename__ : ["fancy","search","DropdownState"], __constructs__ : ["Loading","NoResults","Failed","Results"] };
+fancy_search_DropdownState.Loading = ["Loading",0];
+fancy_search_DropdownState.Loading.__enum__ = fancy_search_DropdownState;
+fancy_search_DropdownState.NoResults = ["NoResults",1];
+fancy_search_DropdownState.NoResults.__enum__ = fancy_search_DropdownState;
+fancy_search_DropdownState.Failed = ["Failed",2];
+fancy_search_DropdownState.Failed.__enum__ = fancy_search_DropdownState;
+fancy_search_DropdownState.Results = function(suggestions) { var $x = ["Results",3,suggestions]; $x.__enum__ = fancy_search_DropdownState; return $x; };
+fancy_search_DropdownState.__empty_constructs__ = [fancy_search_DropdownState.Loading,fancy_search_DropdownState.NoResults,fancy_search_DropdownState.Failed];
 var fancy_search_Suggestions = function(parent,input,classes,options) {
 	this.searchInput = input;
 	this.classes = classes;
@@ -3007,6 +3474,550 @@ fancy_search_Suggestions.prototype = {
 	}
 	,__class__: fancy_search_Suggestions
 };
+var fancy_search_renderer_Dom = function() { };
+$hxClasses["fancy.search.renderer.Dom"] = fancy_search_renderer_Dom;
+fancy_search_renderer_Dom.__name__ = ["fancy","search","renderer","Dom"];
+fancy_search_renderer_Dom.renderMenuItem = function(config,renderCfg,dispatch,highlighted,sugg) {
+	switch(sugg[1]) {
+	case 0:
+		var s = sugg[2];
+		var highlightClass = thx_Options.cata(highlighted,"",function(h) {
+			if(config.equals(s,h)) {
+				return renderCfg.classes.itemHighlighted;
+			} else {
+				return "";
+			}
+		});
+		var doc = null;
+		if(null == doc) {
+			doc = window.document;
+		}
+		var el = doc.createElement("li");
+		var _g1 = 0;
+		var _g2 = [];
+		while(_g1 < _g2.length) {
+			var o = _g2[_g1];
+			++_g1;
+			el.setAttribute(o.name,o.value);
+		}
+		var _g11 = new haxe_ds_StringMap();
+		var value = renderCfg.classes.item + " " + highlightClass;
+		if(__map_reserved["class"] != null) {
+			_g11.setReserved("class",value);
+		} else {
+			_g11.h["class"] = value;
+		}
+		var attrs = _g11;
+		if(null != attrs) {
+			var attr = attrs.keys();
+			while(attr.hasNext()) {
+				var attr1 = attr.next();
+				el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
+			}
+		}
+		var children = [renderCfg.renderSuggestion(s)];
+		if(null != children) {
+			var _g21 = 0;
+			while(_g21 < children.length) {
+				var child = children[_g21];
+				++_g21;
+				el.appendChild(child);
+			}
+		}
+		var textContent = null;
+		if(null != textContent) {
+			el.appendChild(doc.createTextNode(textContent));
+		}
+		var li = el;
+		var f = function() {
+			dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Specific(s)));
+		};
+		li.addEventListener("mouseover",function(e) {
+			e.preventDefault();
+			f();
+		});
+		var f1 = function() {
+			dispatch(fancy_search_Action.Choose(haxe_ds_Option.Some(s),haxe_ds_Option.None));
+		};
+		li.addEventListener("mouseup",function(e1) {
+			e1.preventDefault();
+			f1();
+		});
+		return li;
+	case 1:
+		var renderer = sugg[2];
+		var doc1 = null;
+		if(null == doc1) {
+			doc1 = window.document;
+		}
+		var el1 = doc1.createElement("li");
+		var _g12 = 0;
+		var _g22 = [];
+		while(_g12 < _g22.length) {
+			var o1 = _g22[_g12];
+			++_g12;
+			el1.setAttribute(o1.name,o1.value);
+		}
+		var _g13 = new haxe_ds_StringMap();
+		var value1 = renderCfg.classes.label;
+		if(__map_reserved["class"] != null) {
+			_g13.setReserved("class",value1);
+		} else {
+			_g13.h["class"] = value1;
+		}
+		var attrs1 = _g13;
+		if(null != attrs1) {
+			var attr2 = attrs1.keys();
+			while(attr2.hasNext()) {
+				var attr3 = attr2.next();
+				el1.setAttribute(attr3,__map_reserved[attr3] != null ? attrs1.getReserved(attr3) : attrs1.h[attr3]);
+			}
+		}
+		var children1 = [renderer()];
+		if(null != children1) {
+			var _g23 = 0;
+			while(_g23 < children1.length) {
+				var child1 = children1[_g23];
+				++_g23;
+				el1.appendChild(child1);
+			}
+		}
+		var textContent1 = null;
+		if(null != textContent1) {
+			el1.appendChild(doc1.createTextNode(textContent1));
+		}
+		return el1;
+	}
+};
+fancy_search_renderer_Dom.renderMenu = function(cfg,dispatch,state) {
+	var _g = state.menu;
+	switch(_g[1]) {
+	case 0:
+		switch(_g[2][1]) {
+		case 0:
+			var doc = null;
+			if(null == doc) {
+				doc = window.document;
+			}
+			var el = doc.createElement("div");
+			var _g1 = 0;
+			var _g2 = [];
+			while(_g1 < _g2.length) {
+				var o = _g2[_g1];
+				++_g1;
+				el.setAttribute(o.name,o.value);
+			}
+			var _g11 = new haxe_ds_StringMap();
+			var value = cfg.classes.container + " " + cfg.classes.containerClosed;
+			if(__map_reserved["class"] != null) {
+				_g11.setReserved("class",value);
+			} else {
+				_g11.h["class"] = value;
+			}
+			var attrs = _g11;
+			if(null != attrs) {
+				var attr = attrs.keys();
+				while(attr.hasNext()) {
+					var attr1 = attr.next();
+					el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
+				}
+			}
+			var children = null;
+			if(null != children) {
+				var _g21 = 0;
+				while(_g21 < children.length) {
+					var child = children[_g21];
+					++_g21;
+					el.appendChild(child);
+				}
+			}
+			var textContent = null;
+			if(null != textContent) {
+				el.appendChild(doc.createTextNode(textContent));
+			}
+			return el;
+		case 1:
+			var reason = _g[2][2];
+			var doc1 = null;
+			if(null == doc1) {
+				doc1 = window.document;
+			}
+			var el1 = doc1.createElement("div");
+			var _g12 = 0;
+			var _g22 = [];
+			while(_g12 < _g22.length) {
+				var o1 = _g22[_g12];
+				++_g12;
+				el1.setAttribute(o1.name,o1.value);
+			}
+			var _g13 = new haxe_ds_StringMap();
+			var value1 = cfg.classes.container + " " + cfg.classes.containerTooShort;
+			if(__map_reserved["class"] != null) {
+				_g13.setReserved("class",value1);
+			} else {
+				_g13.h["class"] = value1;
+			}
+			var attrs1 = _g13;
+			if(null != attrs1) {
+				var attr2 = attrs1.keys();
+				while(attr2.hasNext()) {
+					var attr3 = attr2.next();
+					el1.setAttribute(attr3,__map_reserved[attr3] != null ? attrs1.getReserved(attr3) : attrs1.h[attr3]);
+				}
+			}
+			var children1 = null;
+			if(null != children1) {
+				var _g23 = 0;
+				while(_g23 < children1.length) {
+					var child1 = children1[_g23];
+					++_g23;
+					el1.appendChild(child1);
+				}
+			}
+			var textContent1 = reason;
+			if(null != textContent1) {
+				el1.appendChild(doc1.createTextNode(textContent1));
+			}
+			return el1;
+		}
+		break;
+	case 1:
+		switch(_g[2][1]) {
+		case 0:
+			var doc2 = null;
+			if(null == doc2) {
+				doc2 = window.document;
+			}
+			var el2 = doc2.createElement("div");
+			var _g14 = 0;
+			var _g24 = [];
+			while(_g14 < _g24.length) {
+				var o2 = _g24[_g14];
+				++_g14;
+				el2.setAttribute(o2.name,o2.value);
+			}
+			var _g15 = new haxe_ds_StringMap();
+			var value2 = cfg.classes.container + " " + cfg.classes.containerLoading;
+			if(__map_reserved["class"] != null) {
+				_g15.setReserved("class",value2);
+			} else {
+				_g15.h["class"] = value2;
+			}
+			var attrs2 = _g15;
+			if(null != attrs2) {
+				var attr4 = attrs2.keys();
+				while(attr4.hasNext()) {
+					var attr5 = attr4.next();
+					el2.setAttribute(attr5,__map_reserved[attr5] != null ? attrs2.getReserved(attr5) : attrs2.h[attr5]);
+				}
+			}
+			var children2 = null;
+			if(null != children2) {
+				var _g25 = 0;
+				while(_g25 < children2.length) {
+					var child2 = children2[_g25];
+					++_g25;
+					el2.appendChild(child2);
+				}
+			}
+			var textContent2 = "LOADING";
+			if(null != textContent2) {
+				el2.appendChild(doc2.createTextNode(textContent2));
+			}
+			return el2;
+		case 1:
+			var doc3 = null;
+			if(null == doc3) {
+				doc3 = window.document;
+			}
+			var el3 = doc3.createElement("div");
+			var _g16 = 0;
+			var _g26 = [];
+			while(_g16 < _g26.length) {
+				var o3 = _g26[_g16];
+				++_g16;
+				el3.setAttribute(o3.name,o3.value);
+			}
+			var _g17 = new haxe_ds_StringMap();
+			var value3 = cfg.classes.container + " " + cfg.classes.containerNoResults;
+			if(__map_reserved["class"] != null) {
+				_g17.setReserved("class",value3);
+			} else {
+				_g17.h["class"] = value3;
+			}
+			var attrs3 = _g17;
+			if(null != attrs3) {
+				var attr6 = attrs3.keys();
+				while(attr6.hasNext()) {
+					var attr7 = attr6.next();
+					el3.setAttribute(attr7,__map_reserved[attr7] != null ? attrs3.getReserved(attr7) : attrs3.h[attr7]);
+				}
+			}
+			var children3 = null;
+			if(null != children3) {
+				var _g27 = 0;
+				while(_g27 < children3.length) {
+					var child3 = children3[_g27];
+					++_g27;
+					el3.appendChild(child3);
+				}
+			}
+			var textContent3 = "NO RESULTS";
+			if(null != textContent3) {
+				el3.appendChild(doc3.createTextNode(textContent3));
+			}
+			return el3;
+		case 2:
+			var doc4 = null;
+			if(null == doc4) {
+				doc4 = window.document;
+			}
+			var el4 = doc4.createElement("div");
+			var _g18 = 0;
+			var _g28 = [];
+			while(_g18 < _g28.length) {
+				var o4 = _g28[_g18];
+				++_g18;
+				el4.setAttribute(o4.name,o4.value);
+			}
+			var _g19 = new haxe_ds_StringMap();
+			var value4 = cfg.classes.container + " " + cfg.classes.containerFailed;
+			if(__map_reserved["class"] != null) {
+				_g19.setReserved("class",value4);
+			} else {
+				_g19.h["class"] = value4;
+			}
+			var attrs4 = _g19;
+			if(null != attrs4) {
+				var attr8 = attrs4.keys();
+				while(attr8.hasNext()) {
+					var attr9 = attr8.next();
+					el4.setAttribute(attr9,__map_reserved[attr9] != null ? attrs4.getReserved(attr9) : attrs4.h[attr9]);
+				}
+			}
+			var children4 = null;
+			if(null != children4) {
+				var _g29 = 0;
+				while(_g29 < children4.length) {
+					var child4 = children4[_g29];
+					++_g29;
+					el4.appendChild(child4);
+				}
+			}
+			var textContent4 = "FAILED";
+			if(null != textContent4) {
+				el4.appendChild(doc4.createTextNode(textContent4));
+			}
+			return el4;
+		case 3:
+			var highlighted = _g[3];
+			var suggs = _g[2][2];
+			var doc5 = null;
+			if(null == doc5) {
+				doc5 = window.document;
+			}
+			var el5 = doc5.createElement("div");
+			var _g210 = 0;
+			var _g3 = [];
+			while(_g210 < _g3.length) {
+				var o5 = _g3[_g210];
+				++_g210;
+				el5.setAttribute(o5.name,o5.value);
+			}
+			var _g211 = new haxe_ds_StringMap();
+			var value5 = cfg.classes.container + " " + cfg.classes.containerOpen;
+			if(__map_reserved["class"] != null) {
+				_g211.setReserved("class",value5);
+			} else {
+				_g211.h["class"] = value5;
+			}
+			var attrs5 = _g211;
+			if(null != attrs5) {
+				var attr10 = attrs5.keys();
+				while(attr10.hasNext()) {
+					var attr11 = attr10.next();
+					el5.setAttribute(attr11,__map_reserved[attr11] != null ? attrs5.getReserved(attr11) : attrs5.h[attr11]);
+				}
+			}
+			var doc6 = null;
+			if(null == doc6) {
+				doc6 = window.document;
+			}
+			var el6 = doc6.createElement("ul");
+			var _g4 = 0;
+			var _g5 = [];
+			while(_g4 < _g5.length) {
+				var o6 = _g5[_g4];
+				++_g4;
+				el6.setAttribute(o6.name,o6.value);
+			}
+			var _g41 = new haxe_ds_StringMap();
+			var value6 = cfg.classes.list;
+			if(__map_reserved["class"] != null) {
+				_g41.setReserved("class",value6);
+			} else {
+				_g41.h["class"] = value6;
+			}
+			var attrs6 = _g41;
+			if(null != attrs6) {
+				var attr12 = attrs6.keys();
+				while(attr12.hasNext()) {
+					var attr13 = attr12.next();
+					el6.setAttribute(attr13,__map_reserved[attr13] != null ? attrs6.getReserved(attr13) : attrs6.h[attr13]);
+				}
+			}
+			var a1 = state.config;
+			var a2 = cfg;
+			var a3 = dispatch;
+			var a4 = highlighted;
+			var children5 = thx__$Nel_Nel_$Impl_$.toArray(thx__$Nel_Nel_$Impl_$.map(suggs,function(a5) {
+				return fancy_search_renderer_Dom.renderMenuItem(a1,a2,a3,a4,a5);
+			})).slice();
+			if(null != children5) {
+				var _g51 = 0;
+				while(_g51 < children5.length) {
+					var child5 = children5[_g51];
+					++_g51;
+					el6.appendChild(child5);
+				}
+			}
+			var textContent5 = null;
+			if(null != textContent5) {
+				el6.appendChild(doc6.createTextNode(textContent5));
+			}
+			var children6 = [el6];
+			if(null != children6) {
+				var _g42 = 0;
+				while(_g42 < children6.length) {
+					var child6 = children6[_g42];
+					++_g42;
+					el5.appendChild(child6);
+				}
+			}
+			var textContent6 = null;
+			if(null != textContent6) {
+				el5.appendChild(doc5.createTextNode(textContent6));
+			}
+			var div = el5;
+			var f = function() {
+				dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Unhighlight));
+			};
+			div.addEventListener("mouseout",function(e) {
+				e.preventDefault();
+				f();
+			});
+			return div;
+		}
+		break;
+	}
+};
+fancy_search_renderer_Dom.fromInput = function(input,container,search,cfg) {
+	var a1 = cfg;
+	var a2 = function(act) {
+		search.store.dispatch(act,{ fileName : "Dom.hx", lineNumber : 63, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+	};
+	var menu = function(a3) {
+		return fancy_search_renderer_Dom.renderMenu(a1,a2,a3);
+	};
+	var menu1 = search.store.stream().map(menu);
+	var initVal = input.value;
+	search.stream.next(function(inputVal) {
+		input.value = cfg.renderInput(inputVal);
+	}).run();
+	input.addEventListener("focus",function(_) {
+		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "Dom.hx", lineNumber : 73, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+	});
+	input.addEventListener("blur",function(_1) {
+		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "Dom.hx", lineNumber : 74, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+	});
+	input.addEventListener("input",function(_2) {
+		search.store.dispatch(fancy_search_Action.ChangeValue(cfg.parseInput(input.value)),{ fileName : "Dom.hx", lineNumber : 75, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+	});
+	input.addEventListener("keydown",function(e) {
+		e.stopPropagation();
+		var code = e.which != null ? e.which : e.keyCode;
+		var highlighted;
+		var _g = search.store.get().menu;
+		if(_g[1] == 1) {
+			var highlight = _g[3];
+			highlighted = highlight;
+		} else {
+			highlighted = haxe_ds_Option.None;
+		}
+		if(thx_Arrays.contains(cfg.keys.highlightUp,code)) {
+			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Up)),{ fileName : "Dom.hx", lineNumber : 85, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		} else if(thx_Arrays.contains(cfg.keys.highlightDown,code)) {
+			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Down)),{ fileName : "Dom.hx", lineNumber : 87, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		} else if(thx_Arrays.contains(cfg.keys.choose,code)) {
+			search.store.dispatch(highlighted[1] == 1 ? fancy_search_Action.Choose(haxe_ds_Option.None,cfg.parseInput(input.value)) : fancy_search_Action.Choose(highlighted,haxe_ds_Option.None),{ fileName : "Dom.hx", lineNumber : 89, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+		}
+	});
+	search.store.dispatch(fancy_search_Action.Choose(haxe_ds_Option.None,cfg.parseInput(initVal)),{ fileName : "Dom.hx", lineNumber : 97, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+	return menu1;
+};
+var fancy_search_util_ClassNameConfigs = function() { };
+$hxClasses["fancy.search.util.ClassNameConfigs"] = fancy_search_util_ClassNameConfigs;
+fancy_search_util_ClassNameConfigs.__name__ = ["fancy","search","util","ClassNameConfigs"];
+var fancy_search_util_SuggestionItem = $hxClasses["fancy.search.util.SuggestionItem"] = { __ename__ : ["fancy","search","util","SuggestionItem"], __constructs__ : ["Suggestion","Label"] };
+fancy_search_util_SuggestionItem.Suggestion = function(value) { var $x = ["Suggestion",0,value]; $x.__enum__ = fancy_search_util_SuggestionItem; return $x; };
+fancy_search_util_SuggestionItem.Label = function(label) { var $x = ["Label",1,label]; $x.__enum__ = fancy_search_util_SuggestionItem; return $x; };
+fancy_search_util_SuggestionItem.__empty_constructs__ = [];
+var fancy_search_util_KeyboardConfigs = function() { };
+$hxClasses["fancy.search.util.KeyboardConfigs"] = fancy_search_util_KeyboardConfigs;
+fancy_search_util_KeyboardConfigs.__name__ = ["fancy","search","util","KeyboardConfigs"];
+var fancy_search_util_StringDefaults = function() { };
+$hxClasses["fancy.search.util.StringDefaults"] = fancy_search_util_StringDefaults;
+fancy_search_util_StringDefaults.__name__ = ["fancy","search","util","StringDefaults"];
+fancy_search_util_StringDefaults.filterStringsSync = function(suggestions) {
+	return function(search) {
+		var filtered = thx_Options.cataf(search,function() {
+			return suggestions.map(fancy_search_util_SuggestionItem.Suggestion);
+		},function(val) {
+			var a1 = val;
+			var filtered1 = function(s) {
+				return thx_Strings.caseInsensitiveContains(s,a1);
+			};
+			return suggestions.filter(filtered1).map(fancy_search_util_SuggestionItem.Suggestion);
+		});
+		return thx_promise__$Promise_Promise_$Impl_$.value(filtered);
+	};
+};
+fancy_search_util_StringDefaults.renderStringElement = function(suggestion) {
+	var doc = null;
+	if(null == doc) {
+		doc = window.document;
+	}
+	var el = doc.createElement("span");
+	var _g = 0;
+	var _g1 = [];
+	while(_g < _g1.length) {
+		var o = _g1[_g];
+		++_g;
+		el.setAttribute(o.name,o.value);
+	}
+	var attrs = null;
+	if(null != attrs) {
+		var attr = attrs.keys();
+		while(attr.hasNext()) {
+			var attr1 = attr.next();
+			el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
+		}
+	}
+	var children = null;
+	if(null != children) {
+		var _g2 = 0;
+		while(_g2 < children.length) {
+			var child = children[_g2];
+			++_g2;
+			el.appendChild(child);
+		}
+	}
+	var textContent = suggestion;
+	if(null != textContent) {
+		el.appendChild(doc.createTextNode(textContent));
+	}
+	return el;
+};
 var fancy_search_util_LiteralPosition = $hxClasses["fancy.search.util.LiteralPosition"] = { __ename__ : ["fancy","search","util","LiteralPosition"], __constructs__ : ["First","Last"] };
 fancy_search_util_LiteralPosition.First = ["First",0];
 fancy_search_util_LiteralPosition.First.__enum__ = fancy_search_util_LiteralPosition;
@@ -3150,6 +4161,19 @@ haxe_CallStack.makeStack = function(s) {
 	} else {
 		return s;
 	}
+};
+var haxe_IMap = function() { };
+$hxClasses["haxe.IMap"] = haxe_IMap;
+haxe_IMap.__name__ = ["haxe","IMap"];
+haxe_IMap.prototype = {
+	get: null
+	,set: null
+	,exists: null
+	,remove: null
+	,keys: null
+	,iterator: null
+	,toString: null
+	,__class__: haxe_IMap
 };
 var haxe__$Int32_Int32_$Impl_$ = {};
 $hxClasses["haxe._Int32.Int32_Impl_"] = haxe__$Int32_Int32_$Impl_$;
@@ -4125,6 +5149,15 @@ haxe_Int64Helper.fromFloat = function(f) {
 	}
 	return result;
 };
+var haxe_Log = function() { };
+$hxClasses["haxe.Log"] = haxe_Log;
+haxe_Log.__name__ = ["haxe","Log"];
+haxe_Log.trace = function(v,infos) {
+	js_Boot.__trace(v,infos);
+};
+haxe_Log.clear = function() {
+	js_Boot.__clear_trace();
+};
 var haxe_Utf8 = function(size) {
 	this.__b = "";
 };
@@ -4986,6 +6019,115 @@ haxe_ds__$StringMap_StringMapIterator.prototype = {
 	}
 	,__class__: haxe_ds__$StringMap_StringMapIterator
 };
+var haxe_ds_StringMap = function() {
+	this.h = { };
+};
+$hxClasses["haxe.ds.StringMap"] = haxe_ds_StringMap;
+haxe_ds_StringMap.__name__ = ["haxe","ds","StringMap"];
+haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
+haxe_ds_StringMap.prototype = {
+	h: null
+	,rh: null
+	,isReserved: function(key) {
+		return __map_reserved[key] != null;
+	}
+	,set: function(key,value) {
+		if(__map_reserved[key] != null) {
+			this.setReserved(key,value);
+		} else {
+			this.h[key] = value;
+		}
+	}
+	,get: function(key) {
+		if(__map_reserved[key] != null) {
+			return this.getReserved(key);
+		}
+		return this.h[key];
+	}
+	,exists: function(key) {
+		if(__map_reserved[key] != null) {
+			return this.existsReserved(key);
+		}
+		return this.h.hasOwnProperty(key);
+	}
+	,setReserved: function(key,value) {
+		if(this.rh == null) {
+			this.rh = { };
+		}
+		this.rh["$" + key] = value;
+	}
+	,getReserved: function(key) {
+		if(this.rh == null) {
+			return null;
+		} else {
+			return this.rh["$" + key];
+		}
+	}
+	,existsReserved: function(key) {
+		if(this.rh == null) {
+			return false;
+		}
+		return this.rh.hasOwnProperty("$" + key);
+	}
+	,remove: function(key) {
+		if(__map_reserved[key] != null) {
+			key = "$" + key;
+			if(this.rh == null || !this.rh.hasOwnProperty(key)) {
+				return false;
+			}
+			delete(this.rh[key]);
+			return true;
+		} else {
+			if(!this.h.hasOwnProperty(key)) {
+				return false;
+			}
+			delete(this.h[key]);
+			return true;
+		}
+	}
+	,keys: function() {
+		return HxOverrides.iter(this.arrayKeys());
+	}
+	,arrayKeys: function() {
+		var out = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) {
+			out.push(key);
+		}
+		}
+		if(this.rh != null) {
+			for( var key in this.rh ) {
+			if(key.charCodeAt(0) == 36) {
+				out.push(key.substr(1));
+			}
+			}
+		}
+		return out;
+	}
+	,iterator: function() {
+		return new haxe_ds__$StringMap_StringMapIterator(this,this.arrayKeys());
+	}
+	,toString: function() {
+		var s_b = "";
+		s_b += "{";
+		var keys = this.arrayKeys();
+		var _g1 = 0;
+		var _g = keys.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var k = keys[i];
+			s_b += k == null ? "null" : "" + k;
+			s_b += " => ";
+			s_b += Std.string(Std.string(__map_reserved[k] != null ? this.getReserved(k) : this.h[k]));
+			if(i < keys.length - 1) {
+				s_b += ", ";
+			}
+		}
+		s_b += "}";
+		return s_b;
+	}
+	,__class__: haxe_ds_StringMap
+};
 var haxe_ds_WeakMap = function() {
 	throw new js__$Boot_HaxeError("Not implemented for this platform");
 };
@@ -5087,6 +6229,169 @@ haxe_io_FPHelper.doubleToI64 = function(v) {
 	}
 	return i64;
 };
+var haxe_macro_Constant = $hxClasses["haxe.macro.Constant"] = { __ename__ : ["haxe","macro","Constant"], __constructs__ : ["CInt","CFloat","CString","CIdent","CRegexp"] };
+haxe_macro_Constant.CInt = function(v) { var $x = ["CInt",0,v]; $x.__enum__ = haxe_macro_Constant; return $x; };
+haxe_macro_Constant.CFloat = function(f) { var $x = ["CFloat",1,f]; $x.__enum__ = haxe_macro_Constant; return $x; };
+haxe_macro_Constant.CString = function(s) { var $x = ["CString",2,s]; $x.__enum__ = haxe_macro_Constant; return $x; };
+haxe_macro_Constant.CIdent = function(s) { var $x = ["CIdent",3,s]; $x.__enum__ = haxe_macro_Constant; return $x; };
+haxe_macro_Constant.CRegexp = function(r,opt) { var $x = ["CRegexp",4,r,opt]; $x.__enum__ = haxe_macro_Constant; return $x; };
+haxe_macro_Constant.__empty_constructs__ = [];
+var haxe_macro_Binop = $hxClasses["haxe.macro.Binop"] = { __ename__ : ["haxe","macro","Binop"], __constructs__ : ["OpAdd","OpMult","OpDiv","OpSub","OpAssign","OpEq","OpNotEq","OpGt","OpGte","OpLt","OpLte","OpAnd","OpOr","OpXor","OpBoolAnd","OpBoolOr","OpShl","OpShr","OpUShr","OpMod","OpAssignOp","OpInterval","OpArrow"] };
+haxe_macro_Binop.OpAdd = ["OpAdd",0];
+haxe_macro_Binop.OpAdd.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpMult = ["OpMult",1];
+haxe_macro_Binop.OpMult.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpDiv = ["OpDiv",2];
+haxe_macro_Binop.OpDiv.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpSub = ["OpSub",3];
+haxe_macro_Binop.OpSub.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpAssign = ["OpAssign",4];
+haxe_macro_Binop.OpAssign.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpEq = ["OpEq",5];
+haxe_macro_Binop.OpEq.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpNotEq = ["OpNotEq",6];
+haxe_macro_Binop.OpNotEq.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpGt = ["OpGt",7];
+haxe_macro_Binop.OpGt.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpGte = ["OpGte",8];
+haxe_macro_Binop.OpGte.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpLt = ["OpLt",9];
+haxe_macro_Binop.OpLt.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpLte = ["OpLte",10];
+haxe_macro_Binop.OpLte.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpAnd = ["OpAnd",11];
+haxe_macro_Binop.OpAnd.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpOr = ["OpOr",12];
+haxe_macro_Binop.OpOr.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpXor = ["OpXor",13];
+haxe_macro_Binop.OpXor.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpBoolAnd = ["OpBoolAnd",14];
+haxe_macro_Binop.OpBoolAnd.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpBoolOr = ["OpBoolOr",15];
+haxe_macro_Binop.OpBoolOr.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpShl = ["OpShl",16];
+haxe_macro_Binop.OpShl.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpShr = ["OpShr",17];
+haxe_macro_Binop.OpShr.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpUShr = ["OpUShr",18];
+haxe_macro_Binop.OpUShr.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpMod = ["OpMod",19];
+haxe_macro_Binop.OpMod.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpAssignOp = function(op) { var $x = ["OpAssignOp",20,op]; $x.__enum__ = haxe_macro_Binop; return $x; };
+haxe_macro_Binop.OpInterval = ["OpInterval",21];
+haxe_macro_Binop.OpInterval.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.OpArrow = ["OpArrow",22];
+haxe_macro_Binop.OpArrow.__enum__ = haxe_macro_Binop;
+haxe_macro_Binop.__empty_constructs__ = [haxe_macro_Binop.OpAdd,haxe_macro_Binop.OpMult,haxe_macro_Binop.OpDiv,haxe_macro_Binop.OpSub,haxe_macro_Binop.OpAssign,haxe_macro_Binop.OpEq,haxe_macro_Binop.OpNotEq,haxe_macro_Binop.OpGt,haxe_macro_Binop.OpGte,haxe_macro_Binop.OpLt,haxe_macro_Binop.OpLte,haxe_macro_Binop.OpAnd,haxe_macro_Binop.OpOr,haxe_macro_Binop.OpXor,haxe_macro_Binop.OpBoolAnd,haxe_macro_Binop.OpBoolOr,haxe_macro_Binop.OpShl,haxe_macro_Binop.OpShr,haxe_macro_Binop.OpUShr,haxe_macro_Binop.OpMod,haxe_macro_Binop.OpInterval,haxe_macro_Binop.OpArrow];
+var haxe_macro_Unop = $hxClasses["haxe.macro.Unop"] = { __ename__ : ["haxe","macro","Unop"], __constructs__ : ["OpIncrement","OpDecrement","OpNot","OpNeg","OpNegBits"] };
+haxe_macro_Unop.OpIncrement = ["OpIncrement",0];
+haxe_macro_Unop.OpIncrement.__enum__ = haxe_macro_Unop;
+haxe_macro_Unop.OpDecrement = ["OpDecrement",1];
+haxe_macro_Unop.OpDecrement.__enum__ = haxe_macro_Unop;
+haxe_macro_Unop.OpNot = ["OpNot",2];
+haxe_macro_Unop.OpNot.__enum__ = haxe_macro_Unop;
+haxe_macro_Unop.OpNeg = ["OpNeg",3];
+haxe_macro_Unop.OpNeg.__enum__ = haxe_macro_Unop;
+haxe_macro_Unop.OpNegBits = ["OpNegBits",4];
+haxe_macro_Unop.OpNegBits.__enum__ = haxe_macro_Unop;
+haxe_macro_Unop.__empty_constructs__ = [haxe_macro_Unop.OpIncrement,haxe_macro_Unop.OpDecrement,haxe_macro_Unop.OpNot,haxe_macro_Unop.OpNeg,haxe_macro_Unop.OpNegBits];
+var haxe_macro_ExprDef = $hxClasses["haxe.macro.ExprDef"] = { __ename__ : ["haxe","macro","ExprDef"], __constructs__ : ["EConst","EArray","EBinop","EField","EParenthesis","EObjectDecl","EArrayDecl","ECall","ENew","EUnop","EVars","EFunction","EBlock","EFor","EIn","EIf","EWhile","ESwitch","ETry","EReturn","EBreak","EContinue","EUntyped","EThrow","ECast","EDisplay","EDisplayNew","ETernary","ECheckType","EMeta"] };
+haxe_macro_ExprDef.EConst = function(c) { var $x = ["EConst",0,c]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EArray = function(e1,e2) { var $x = ["EArray",1,e1,e2]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EBinop = function(op,e1,e2) { var $x = ["EBinop",2,op,e1,e2]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EField = function(e,field) { var $x = ["EField",3,e,field]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EParenthesis = function(e) { var $x = ["EParenthesis",4,e]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EObjectDecl = function(fields) { var $x = ["EObjectDecl",5,fields]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EArrayDecl = function(values) { var $x = ["EArrayDecl",6,values]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.ECall = function(e,params) { var $x = ["ECall",7,e,params]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.ENew = function(t,params) { var $x = ["ENew",8,t,params]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EUnop = function(op,postFix,e) { var $x = ["EUnop",9,op,postFix,e]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EVars = function(vars) { var $x = ["EVars",10,vars]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EFunction = function(name,f) { var $x = ["EFunction",11,name,f]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EBlock = function(exprs) { var $x = ["EBlock",12,exprs]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EFor = function(it,expr) { var $x = ["EFor",13,it,expr]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EIn = function(e1,e2) { var $x = ["EIn",14,e1,e2]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EIf = function(econd,eif,eelse) { var $x = ["EIf",15,econd,eif,eelse]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EWhile = function(econd,e,normalWhile) { var $x = ["EWhile",16,econd,e,normalWhile]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.ESwitch = function(e,cases,edef) { var $x = ["ESwitch",17,e,cases,edef]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.ETry = function(e,catches) { var $x = ["ETry",18,e,catches]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EReturn = function(e) { var $x = ["EReturn",19,e]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EBreak = ["EBreak",20];
+haxe_macro_ExprDef.EBreak.__enum__ = haxe_macro_ExprDef;
+haxe_macro_ExprDef.EContinue = ["EContinue",21];
+haxe_macro_ExprDef.EContinue.__enum__ = haxe_macro_ExprDef;
+haxe_macro_ExprDef.EUntyped = function(e) { var $x = ["EUntyped",22,e]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EThrow = function(e) { var $x = ["EThrow",23,e]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.ECast = function(e,t) { var $x = ["ECast",24,e,t]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EDisplay = function(e,isCall) { var $x = ["EDisplay",25,e,isCall]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EDisplayNew = function(t) { var $x = ["EDisplayNew",26,t]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.ETernary = function(econd,eif,eelse) { var $x = ["ETernary",27,econd,eif,eelse]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.ECheckType = function(e,t) { var $x = ["ECheckType",28,e,t]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.EMeta = function(s,e) { var $x = ["EMeta",29,s,e]; $x.__enum__ = haxe_macro_ExprDef; return $x; };
+haxe_macro_ExprDef.__empty_constructs__ = [haxe_macro_ExprDef.EBreak,haxe_macro_ExprDef.EContinue];
+var haxe_macro_ComplexType = $hxClasses["haxe.macro.ComplexType"] = { __ename__ : ["haxe","macro","ComplexType"], __constructs__ : ["TPath","TFunction","TAnonymous","TParent","TExtend","TOptional"] };
+haxe_macro_ComplexType.TPath = function(p) { var $x = ["TPath",0,p]; $x.__enum__ = haxe_macro_ComplexType; return $x; };
+haxe_macro_ComplexType.TFunction = function(args,ret) { var $x = ["TFunction",1,args,ret]; $x.__enum__ = haxe_macro_ComplexType; return $x; };
+haxe_macro_ComplexType.TAnonymous = function(fields) { var $x = ["TAnonymous",2,fields]; $x.__enum__ = haxe_macro_ComplexType; return $x; };
+haxe_macro_ComplexType.TParent = function(t) { var $x = ["TParent",3,t]; $x.__enum__ = haxe_macro_ComplexType; return $x; };
+haxe_macro_ComplexType.TExtend = function(p,fields) { var $x = ["TExtend",4,p,fields]; $x.__enum__ = haxe_macro_ComplexType; return $x; };
+haxe_macro_ComplexType.TOptional = function(t) { var $x = ["TOptional",5,t]; $x.__enum__ = haxe_macro_ComplexType; return $x; };
+haxe_macro_ComplexType.__empty_constructs__ = [];
+var haxe_macro_TypeParam = $hxClasses["haxe.macro.TypeParam"] = { __ename__ : ["haxe","macro","TypeParam"], __constructs__ : ["TPType","TPExpr"] };
+haxe_macro_TypeParam.TPType = function(t) { var $x = ["TPType",0,t]; $x.__enum__ = haxe_macro_TypeParam; return $x; };
+haxe_macro_TypeParam.TPExpr = function(e) { var $x = ["TPExpr",1,e]; $x.__enum__ = haxe_macro_TypeParam; return $x; };
+haxe_macro_TypeParam.__empty_constructs__ = [];
+var haxe_macro_Access = $hxClasses["haxe.macro.Access"] = { __ename__ : ["haxe","macro","Access"], __constructs__ : ["APublic","APrivate","AStatic","AOverride","ADynamic","AInline","AMacro"] };
+haxe_macro_Access.APublic = ["APublic",0];
+haxe_macro_Access.APublic.__enum__ = haxe_macro_Access;
+haxe_macro_Access.APrivate = ["APrivate",1];
+haxe_macro_Access.APrivate.__enum__ = haxe_macro_Access;
+haxe_macro_Access.AStatic = ["AStatic",2];
+haxe_macro_Access.AStatic.__enum__ = haxe_macro_Access;
+haxe_macro_Access.AOverride = ["AOverride",3];
+haxe_macro_Access.AOverride.__enum__ = haxe_macro_Access;
+haxe_macro_Access.ADynamic = ["ADynamic",4];
+haxe_macro_Access.ADynamic.__enum__ = haxe_macro_Access;
+haxe_macro_Access.AInline = ["AInline",5];
+haxe_macro_Access.AInline.__enum__ = haxe_macro_Access;
+haxe_macro_Access.AMacro = ["AMacro",6];
+haxe_macro_Access.AMacro.__enum__ = haxe_macro_Access;
+haxe_macro_Access.__empty_constructs__ = [haxe_macro_Access.APublic,haxe_macro_Access.APrivate,haxe_macro_Access.AStatic,haxe_macro_Access.AOverride,haxe_macro_Access.ADynamic,haxe_macro_Access.AInline,haxe_macro_Access.AMacro];
+var haxe_macro_FieldType = $hxClasses["haxe.macro.FieldType"] = { __ename__ : ["haxe","macro","FieldType"], __constructs__ : ["FVar","FFun","FProp"] };
+haxe_macro_FieldType.FVar = function(t,e) { var $x = ["FVar",0,t,e]; $x.__enum__ = haxe_macro_FieldType; return $x; };
+haxe_macro_FieldType.FFun = function(f) { var $x = ["FFun",1,f]; $x.__enum__ = haxe_macro_FieldType; return $x; };
+haxe_macro_FieldType.FProp = function(get,set,t,e) { var $x = ["FProp",2,get,set,t,e]; $x.__enum__ = haxe_macro_FieldType; return $x; };
+haxe_macro_FieldType.__empty_constructs__ = [];
+var haxe_macro_TypeDefKind = $hxClasses["haxe.macro.TypeDefKind"] = { __ename__ : ["haxe","macro","TypeDefKind"], __constructs__ : ["TDEnum","TDStructure","TDClass","TDAlias","TDAbstract"] };
+haxe_macro_TypeDefKind.TDEnum = ["TDEnum",0];
+haxe_macro_TypeDefKind.TDEnum.__enum__ = haxe_macro_TypeDefKind;
+haxe_macro_TypeDefKind.TDStructure = ["TDStructure",1];
+haxe_macro_TypeDefKind.TDStructure.__enum__ = haxe_macro_TypeDefKind;
+haxe_macro_TypeDefKind.TDClass = function(superClass,interfaces,isInterface) { var $x = ["TDClass",2,superClass,interfaces,isInterface]; $x.__enum__ = haxe_macro_TypeDefKind; return $x; };
+haxe_macro_TypeDefKind.TDAlias = function(t) { var $x = ["TDAlias",3,t]; $x.__enum__ = haxe_macro_TypeDefKind; return $x; };
+haxe_macro_TypeDefKind.TDAbstract = function(tthis,from,to) { var $x = ["TDAbstract",4,tthis,from,to]; $x.__enum__ = haxe_macro_TypeDefKind; return $x; };
+haxe_macro_TypeDefKind.__empty_constructs__ = [haxe_macro_TypeDefKind.TDEnum,haxe_macro_TypeDefKind.TDStructure];
+var haxe_macro_Error = function(m,p) {
+	this.message = m;
+	this.pos = p;
+};
+$hxClasses["haxe.macro.Error"] = haxe_macro_Error;
+haxe_macro_Error.__name__ = ["haxe","macro","Error"];
+haxe_macro_Error.prototype = {
+	message: null
+	,pos: null
+	,toString: function() {
+		return this.message;
+	}
+	,__class__: haxe_macro_Error
+};
+var haxe_macro_ImportMode = $hxClasses["haxe.macro.ImportMode"] = { __ename__ : ["haxe","macro","ImportMode"], __constructs__ : ["INormal","IAsName","IAll"] };
+haxe_macro_ImportMode.INormal = ["INormal",0];
+haxe_macro_ImportMode.INormal.__enum__ = haxe_macro_ImportMode;
+haxe_macro_ImportMode.IAsName = function(alias) { var $x = ["IAsName",1,alias]; $x.__enum__ = haxe_macro_ImportMode; return $x; };
+haxe_macro_ImportMode.IAll = ["IAll",2];
+haxe_macro_ImportMode.IAll.__enum__ = haxe_macro_ImportMode;
+haxe_macro_ImportMode.__empty_constructs__ = [haxe_macro_ImportMode.INormal,haxe_macro_ImportMode.IAll];
 var js__$Boot_HaxeError = function(val) {
 	Error.call(this);
 	this.val = val;
@@ -8026,7 +9331,7 @@ thx_Eithers.orThrow = function(either,message) {
 	switch(either[1]) {
 	case 0:
 		var v = either[2];
-		throw new thx_Error("" + message + ": " + Std.string(v),null,{ fileName : "Eithers.hx", lineNumber : 103, className : "thx.Eithers", methodName : "orThrow"});
+		throw new thx_Error("" + message + ": " + Std.string(v),null,{ fileName : "Eithers.hx", lineNumber : 104, className : "thx.Eithers", methodName : "orThrow"});
 		break;
 	case 1:
 		var v1 = either[2];
@@ -8047,6 +9352,16 @@ thx_Eithers.cata = function(either,l,r) {
 	case 1:
 		var r0 = either[2];
 		return r(r0);
+	}
+};
+thx_Eithers.bimap = function(either,l,r) {
+	switch(either[1]) {
+	case 0:
+		var l0 = either[2];
+		return thx_Either.Left(l(l0));
+	case 1:
+		var r0 = either[2];
+		return thx_Either.Right(r(r0));
 	}
 };
 thx_Eithers.foldLeft = function(either,a,f) {
@@ -8110,6 +9425,64 @@ thx_Eithers.ensure = function(either,p,error) {
 	} else {
 		return either;
 	}
+};
+var thx__$Eithers_EitherK_$Impl_$ = {};
+$hxClasses["thx._Eithers.EitherK_Impl_"] = thx__$Eithers_EitherK_$Impl_$;
+thx__$Eithers_EitherK_$Impl_$.__name__ = ["thx","_Eithers","EitherK_Impl_"];
+thx__$Eithers_EitherK_$Impl_$.apply = function(this1,a) {
+	return this1(a);
+};
+thx__$Eithers_EitherK_$Impl_$.compose = function(this1,f) {
+	return function(a0) {
+		return thx_Eithers.flatMap(thx__$Eithers_EitherK_$Impl_$.apply(f,a0),this1);
+	};
+};
+thx__$Eithers_EitherK_$Impl_$.andThen = function(this1,f) {
+	return function(a) {
+		var tmp = this1(a);
+		var _e = f;
+		return thx_Eithers.flatMap(tmp,function(a1) {
+			return thx__$Eithers_EitherK_$Impl_$.apply(_e,a1);
+		});
+	};
+};
+thx__$Eithers_EitherK_$Impl_$.pure = function(r) {
+	return function(a) {
+		return thx_Either.Right(r);
+	};
+};
+thx__$Eithers_EitherK_$Impl_$.map = function(this1,f) {
+	var fb = f;
+	return thx__$Eithers_EitherK_$Impl_$.flatMap(this1,function(v) {
+		return thx__$Eithers_EitherK_$Impl_$.pure(fb(v));
+	});
+};
+thx__$Eithers_EitherK_$Impl_$.ap = function(this1,e) {
+	return thx__$Eithers_EitherK_$Impl_$.flatMap(this1,function(r) {
+		return thx__$Eithers_EitherK_$Impl_$.map(e,function(f) {
+			return f(r);
+		});
+	});
+};
+thx__$Eithers_EitherK_$Impl_$.flatMap = function(this1,f) {
+	return function(a) {
+		return thx_Eithers.flatMap(this1(a),function(r) {
+			return thx__$Eithers_EitherK_$Impl_$.apply(f(r),a);
+		});
+	};
+};
+thx__$Eithers_EitherK_$Impl_$.monoid = function() {
+	return { zero : function(r) {
+		return thx_Either.Right(r);
+	}, append : function(f0,f1) {
+		return function(r1) {
+			var tmp = thx__$Eithers_EitherK_$Impl_$.apply(f0,r1);
+			var _e = f1;
+			return thx_Eithers.flatMap(tmp,function(a) {
+				return thx__$Eithers_EitherK_$Impl_$.apply(_e,a);
+			});
+		};
+	}};
 };
 var thx_Enums = function() { };
 $hxClasses["thx.Enums"] = thx_Enums;
@@ -8413,6 +9786,15 @@ thx_Functions0.join = function(fa,fb) {
 		fb();
 	};
 };
+thx_Functions0.memoize = function(callback) {
+	var result = null;
+	return function() {
+		if(result == null) {
+			result = callback();
+		}
+		return result;
+	};
+};
 thx_Functions0.once = function(f) {
 	return function() {
 		var t = f;
@@ -8688,6 +10070,76 @@ thx_Functions13.curry = function(f) {
 	return function(a,b,c,d,e,f0,g,h,i,j,k,l) {
 		return function(m) {
 			return f(a,b,c,d,e,f0,g,h,i,j,k,l,m);
+		};
+	};
+};
+var thx_Functions14 = function() { };
+$hxClasses["thx.Functions14"] = thx_Functions14;
+thx_Functions14.__name__ = ["thx","Functions14"];
+thx_Functions14.curry = function(f) {
+	return function(a,b,c,d,e,f0,g,h,i,j,k,l,m) {
+		return function(n) {
+			return f(a,b,c,d,e,f0,g,h,i,j,k,l,m,n);
+		};
+	};
+};
+var thx_Functions15 = function() { };
+$hxClasses["thx.Functions15"] = thx_Functions15;
+thx_Functions15.__name__ = ["thx","Functions15"];
+thx_Functions15.curry = function(f) {
+	return function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n) {
+		return function(o) {
+			return f(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o);
+		};
+	};
+};
+var thx_Functions16 = function() { };
+$hxClasses["thx.Functions16"] = thx_Functions16;
+thx_Functions16.__name__ = ["thx","Functions16"];
+thx_Functions16.curry = function(f) {
+	return function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o) {
+		return function(p) {
+			return f(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p);
+		};
+	};
+};
+var thx_Functions17 = function() { };
+$hxClasses["thx.Functions17"] = thx_Functions17;
+thx_Functions17.__name__ = ["thx","Functions17"];
+thx_Functions17.curry = function(f) {
+	return function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p) {
+		return function(q) {
+			return f(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q);
+		};
+	};
+};
+var thx_Functions18 = function() { };
+$hxClasses["thx.Functions18"] = thx_Functions18;
+thx_Functions18.__name__ = ["thx","Functions18"];
+thx_Functions18.curry = function(f) {
+	return function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q) {
+		return function(r) {
+			return f(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q,r);
+		};
+	};
+};
+var thx_Functions19 = function() { };
+$hxClasses["thx.Functions19"] = thx_Functions19;
+thx_Functions19.__name__ = ["thx","Functions19"];
+thx_Functions19.curry = function(f) {
+	return function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q,r) {
+		return function(s) {
+			return f(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q,r,s);
+		};
+	};
+};
+var thx_Functions20 = function() { };
+$hxClasses["thx.Functions20"] = thx_Functions20;
+thx_Functions20.__name__ = ["thx","Functions20"];
+thx_Functions20.curry = function(f) {
+	return function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q,r,s) {
+		return function(t) {
+			return f(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q,r,s,t);
 		};
 	};
 };
@@ -9545,6 +10997,140 @@ thx_MapIIterator.prototype = {
 	}
 	,__class__: thx_MapIIterator
 };
+var thx__$Lazy_Lazy_$Impl_$ = {};
+$hxClasses["thx._Lazy.Lazy_Impl_"] = thx__$Lazy_Lazy_$Impl_$;
+thx__$Lazy_Lazy_$Impl_$.__name__ = ["thx","_Lazy","Lazy_Impl_"];
+thx__$Lazy_Lazy_$Impl_$.__properties__ = {get_value:"get_value"};
+thx__$Lazy_Lazy_$Impl_$.ofValue = function(value) {
+	return function() {
+		return value;
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.get_value = function(this1) {
+	return this1();
+};
+thx__$Lazy_Lazy_$Impl_$.map = function(this1,f) {
+	return function() {
+		var tmp = this1();
+		return f(tmp);
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.toValue = function(this1) {
+	return this1();
+};
+thx__$Lazy_Lazy_$Impl_$.toString = function(this1) {
+	return "Lazy[" + Std.string(thx__$Lazy_Lazy_$Impl_$.get_value(this1)) + "]";
+};
+thx__$Lazy_Lazy_$Impl_$.negatef = function(l) {
+	return thx__$Lazy_Lazy_$Impl_$.map(l,function(v) {
+		return -v;
+	});
+};
+thx__$Lazy_Lazy_$Impl_$.addf = function(l1,l2) {
+	return function() {
+		return thx__$Lazy_Lazy_$Impl_$.get_value(l1) + thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.subtractf = function(l1,l2) {
+	return function() {
+		return thx__$Lazy_Lazy_$Impl_$.get_value(l1) - thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.multiplyf = function(l1,l2) {
+	return function() {
+		return thx__$Lazy_Lazy_$Impl_$.get_value(l1) * thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.dividef = function(l1,l2) {
+	return function() {
+		return thx__$Lazy_Lazy_$Impl_$.get_value(l1) / thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.modf = function(l1,l2) {
+	return function() {
+		return thx__$Lazy_Lazy_$Impl_$.get_value(l1) % thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.negate = function(l) {
+	return thx__$Lazy_Lazy_$Impl_$.map(l,function(v) {
+		return -v;
+	});
+};
+thx__$Lazy_Lazy_$Impl_$.add = function(l1,l2) {
+	return function() {
+		return thx__$Lazy_Lazy_$Impl_$.get_value(l1) + thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.subtract = function(l1,l2) {
+	return function() {
+		return thx__$Lazy_Lazy_$Impl_$.get_value(l1) - thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.multiply = function(l1,l2) {
+	return function() {
+		return thx__$Lazy_Lazy_$Impl_$.get_value(l1) * thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.divide = function(l1,l2) {
+	return function() {
+		return thx__$Lazy_Lazy_$Impl_$.get_value(l1) / thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+	};
+};
+thx__$Lazy_Lazy_$Impl_$.mod = function(l1,l2) {
+	return function() {
+		return thx__$Lazy_Lazy_$Impl_$.get_value(l1) % thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+	};
+};
+var thx_LazyFloatExtensions = function() { };
+$hxClasses["thx.LazyFloatExtensions"] = thx_LazyFloatExtensions;
+thx_LazyFloatExtensions.__name__ = ["thx","LazyFloatExtensions"];
+thx_LazyFloatExtensions.min = function(l1,l2) {
+	return function() {
+		var a = thx__$Lazy_Lazy_$Impl_$.get_value(l1);
+		var b = thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+		if(a < b) {
+			return a;
+		} else {
+			return b;
+		}
+	};
+};
+thx_LazyFloatExtensions.max = function(l1,l2) {
+	return function() {
+		var a = thx__$Lazy_Lazy_$Impl_$.get_value(l1);
+		var b = thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+		if(a > b) {
+			return a;
+		} else {
+			return b;
+		}
+	};
+};
+var thx_LazyIntExtensions = function() { };
+$hxClasses["thx.LazyIntExtensions"] = thx_LazyIntExtensions;
+thx_LazyIntExtensions.__name__ = ["thx","LazyIntExtensions"];
+thx_LazyIntExtensions.min = function(l1,l2) {
+	return function() {
+		var a = thx__$Lazy_Lazy_$Impl_$.get_value(l1);
+		var b = thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+		if(a < b) {
+			return a;
+		} else {
+			return b;
+		}
+	};
+};
+thx_LazyIntExtensions.max = function(l1,l2) {
+	return function() {
+		var a = thx__$Lazy_Lazy_$Impl_$.get_value(l1);
+		var b = thx__$Lazy_Lazy_$Impl_$.get_value(l2);
+		if(a > b) {
+			return a;
+		} else {
+			return b;
+		}
+	};
+};
 var thx_Maps = function() { };
 $hxClasses["thx.Maps"] = thx_Maps;
 thx_Maps.__name__ = ["thx","Maps"];
@@ -9602,6 +11188,18 @@ thx_Maps.getAlt = function(map,key,alt) {
 	} else {
 		return v;
 	}
+};
+thx_Maps.getAltSet = function(map,key,alt) {
+	var v = map.get(key);
+	if(v != null) {
+		return v;
+	} else {
+		map.set(key,alt);
+		return alt;
+	}
+};
+thx_Maps.isEmpty = function(map) {
+	return !map.iterator().hasNext();
 };
 thx_Maps.isMap = function(v) {
 	return js_Boot.__instanceof(v,haxe_IMap);
@@ -9832,36 +11430,40 @@ thx_Objects.deflate = function(o,flattenArrays) {
 	f = function(v) {
 		if((v instanceof Array) && v.__enum__ == null) {
 			if(flattenArrays) {
-				var a = v;
-				return thx_Either.Right(thx_Arrays.reducei(a,function(map,value,i) {
-					var _g = f(value);
-					switch(_g[1]) {
-					case 0:
-						var v1 = _g[2];
-						var key = "" + i;
-						if(__map_reserved[key] != null) {
-							map.setReserved(key,v1);
-						} else {
-							map.h[key] = v1;
-						}
-						break;
-					case 1:
-						var m = _g[2];
-						var k = m.keys();
-						while(k.hasNext()) {
-							var k1 = k.next();
-							var key1 = "" + i + "." + k1;
-							var value1 = __map_reserved[k1] != null ? m.getReserved(k1) : m.h[k1];
-							if(__map_reserved[key1] != null) {
-								map.setReserved(key1,value1);
+				if(v.length == 0) {
+					return thx_Either.Left([]);
+				} else {
+					var a = v;
+					return thx_Either.Right(thx_Arrays.reducei(a,function(map,value,i) {
+						var _g = f(value);
+						switch(_g[1]) {
+						case 0:
+							var v1 = _g[2];
+							var key = "" + i;
+							if(__map_reserved[key] != null) {
+								map.setReserved(key,v1);
 							} else {
-								map.h[key1] = value1;
+								map.h[key] = v1;
 							}
+							break;
+						case 1:
+							var m = _g[2];
+							var k = m.keys();
+							while(k.hasNext()) {
+								var k1 = k.next();
+								var key1 = "" + i + "." + k1;
+								var value1 = __map_reserved[k1] != null ? m.getReserved(k1) : m.h[k1];
+								if(__map_reserved[key1] != null) {
+									map.setReserved(key1,value1);
+								} else {
+									map.h[key1] = value1;
+								}
+							}
+							break;
 						}
-						break;
-					}
-					return map;
-				},new haxe_ds_StringMap()));
+						return map;
+					},new haxe_ds_StringMap()));
+				}
 			} else {
 				return thx_Either.Left(v);
 			}
@@ -9889,15 +11491,25 @@ thx_Objects.deflate = function(o,flattenArrays) {
 						break;
 					case 1:
 						var m1 = _g2[2];
-						var k2 = m1.keys();
-						while(k2.hasNext()) {
-							var k3 = k2.next();
-							var key4 = "" + key2 + "." + k3;
-							var value2 = __map_reserved[k3] != null ? m1.getReserved(k3) : m1.h[k3];
+						if(!new haxe_ds__$StringMap_StringMapIterator(m1,m1.arrayKeys()).hasNext()) {
+							var key4 = "" + key2;
+							var value2 = { };
 							if(__map_reserved[key4] != null) {
 								map1.setReserved(key4,value2);
 							} else {
 								map1.h[key4] = value2;
+							}
+						} else {
+							var k2 = m1.keys();
+							while(k2.hasNext()) {
+								var k3 = k2.next();
+								var key5 = "" + key2 + "." + k3;
+								var value3 = __map_reserved[k3] != null ? m1.getReserved(k3) : m1.h[k3];
+								if(__map_reserved[key5] != null) {
+									map1.setReserved(key5,value3);
+								} else {
+									map1.h[key5] = value3;
+								}
 							}
 						}
 						break;
@@ -11045,21 +12657,21 @@ thx__$ReadonlyArray_ReadonlyArray_$Impl_$.head = function(this1) {
 thx__$ReadonlyArray_ReadonlyArray_$Impl_$.tail = function(this1) {
 	return this1.slice(1);
 };
-thx__$ReadonlyArray_ReadonlyArray_$Impl_$.reduce = function(this1,arr,f,initial) {
+thx__$ReadonlyArray_ReadonlyArray_$Impl_$.reduce = function(this1,f,initial) {
 	var _g = 0;
-	while(_g < arr.length) {
-		var v = arr[_g];
+	while(_g < this1.length) {
+		var v = this1[_g];
 		++_g;
 		initial = f(initial,v);
 	}
 	return initial;
 };
-thx__$ReadonlyArray_ReadonlyArray_$Impl_$.reducei = function(array,f,initial) {
+thx__$ReadonlyArray_ReadonlyArray_$Impl_$.reducei = function(this1,f,initial) {
 	var _g1 = 0;
-	var _g = array.length;
+	var _g = this1.length;
 	while(_g1 < _g) {
 		var i = _g1++;
-		initial = f(initial,array[i],i);
+		initial = f(initial,this1[i],i);
 	}
 	return initial;
 };
@@ -12405,6 +14017,10 @@ thx_Types.anyValueToString = function(value) {
 	}
 	return thx_Types.toString(Type["typeof"](value));
 };
+var thx_Unit = $hxClasses["thx.Unit"] = { __ename__ : ["thx","Unit"], __constructs__ : ["unit"] };
+thx_Unit.unit = ["unit",0];
+thx_Unit.unit.__enum__ = thx_Unit;
+thx_Unit.__empty_constructs__ = [thx_Unit.unit];
 var thx__$Validation_Validation_$Impl_$ = {};
 $hxClasses["thx._Validation.Validation_Impl_"] = thx__$Validation_Validation_$Impl_$;
 thx__$Validation_Validation_$Impl_$.__name__ = ["thx","_Validation","Validation_Impl_"];
@@ -12516,6 +14132,9 @@ thx__$Validation_Validation_$Impl_$.ensure = function(this1,p,error) {
 };
 thx__$Validation_Validation_$Impl_$.vnel = function(e) {
 	return e;
+};
+thx__$Validation_Validation_$Impl_$.val1 = function(f,v1) {
+	return thx__$Validation_Validation_$Impl_$.map(v1,f);
 };
 thx__$Validation_Validation_$Impl_$.val2 = function(f,v1,v2,s) {
 	return thx__$Validation_Validation_$Impl_$.ap(v2,thx__$Validation_Validation_$Impl_$.map(v1,thx_Functions2.curry(f)),s);
@@ -12882,6 +14501,552 @@ thx__$Validation_Validation_$Impl_$.val13 = function(f,v1,v2,v3,v4,v5,v6,v7,v8,v
 			return f11(a10,b10,c10);
 		};
 	})),s),s),s),s),s),s),s),s),s),s),s),s);
+};
+thx__$Validation_Validation_$Impl_$.val14 = function(f,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,s) {
+	var f1 = f;
+	var f2 = function(a,b,c,d,e,f0,g,h,i,j,k,l,m) {
+		return function(n) {
+			return f1(a,b,c,d,e,f0,g,h,i,j,k,l,m,n);
+		};
+	};
+	var f3 = function(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1) {
+		return function(m1) {
+			return f2(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1);
+		};
+	};
+	var f4 = function(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2) {
+		return function(l2) {
+			return f3(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2);
+		};
+	};
+	var f5 = function(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3) {
+		return function(k3) {
+			return f4(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3);
+		};
+	};
+	var f6 = function(a4,b4,c4,d4,e4,f04,g4,h4,i4) {
+		return function(j4) {
+			return f5(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4);
+		};
+	};
+	var f7 = function(a5,b5,c5,d5,e5,f05,g5,h5) {
+		return function(i5) {
+			return f6(a5,b5,c5,d5,e5,f05,g5,h5,i5);
+		};
+	};
+	var f8 = function(a6,b6,c6,d6,e6,f06,g6) {
+		return function(h6) {
+			return f7(a6,b6,c6,d6,e6,f06,g6,h6);
+		};
+	};
+	var f9 = function(a7,b7,c7,d7,e7,f07) {
+		return function(g7) {
+			return f8(a7,b7,c7,d7,e7,f07,g7);
+		};
+	};
+	var f10 = function(a8,b8,c8,d8,e8) {
+		return function(f08) {
+			return f9(a8,b8,c8,d8,e8,f08);
+		};
+	};
+	var f11 = function(a9,b9,c9,d9) {
+		return function(e9) {
+			return f10(a9,b9,c9,d9,e9);
+		};
+	};
+	var f12 = function(a10,b10,c10) {
+		return function(d10) {
+			return f11(a10,b10,c10,d10);
+		};
+	};
+	return thx__$Validation_Validation_$Impl_$.ap(v14,thx__$Validation_Validation_$Impl_$.ap(v13,thx__$Validation_Validation_$Impl_$.ap(v12,thx__$Validation_Validation_$Impl_$.ap(v11,thx__$Validation_Validation_$Impl_$.ap(v10,thx__$Validation_Validation_$Impl_$.ap(v9,thx__$Validation_Validation_$Impl_$.ap(v8,thx__$Validation_Validation_$Impl_$.ap(v7,thx__$Validation_Validation_$Impl_$.ap(v6,thx__$Validation_Validation_$Impl_$.ap(v5,thx__$Validation_Validation_$Impl_$.ap(v4,thx__$Validation_Validation_$Impl_$.ap(v3,thx__$Validation_Validation_$Impl_$.ap(v2,thx__$Validation_Validation_$Impl_$.map(v1,thx_Functions2.curry(function(a11,b11) {
+		return function(c11) {
+			return f12(a11,b11,c11);
+		};
+	})),s),s),s),s),s),s),s),s),s),s),s),s),s);
+};
+thx__$Validation_Validation_$Impl_$.val15 = function(f,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,s) {
+	var f1 = f;
+	var f2 = function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n) {
+		return function(o) {
+			return f1(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o);
+		};
+	};
+	var f3 = function(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1) {
+		return function(n1) {
+			return f2(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1);
+		};
+	};
+	var f4 = function(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2) {
+		return function(m2) {
+			return f3(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2);
+		};
+	};
+	var f5 = function(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3) {
+		return function(l3) {
+			return f4(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3);
+		};
+	};
+	var f6 = function(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4) {
+		return function(k4) {
+			return f5(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4);
+		};
+	};
+	var f7 = function(a5,b5,c5,d5,e5,f05,g5,h5,i5) {
+		return function(j5) {
+			return f6(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5);
+		};
+	};
+	var f8 = function(a6,b6,c6,d6,e6,f06,g6,h6) {
+		return function(i6) {
+			return f7(a6,b6,c6,d6,e6,f06,g6,h6,i6);
+		};
+	};
+	var f9 = function(a7,b7,c7,d7,e7,f07,g7) {
+		return function(h7) {
+			return f8(a7,b7,c7,d7,e7,f07,g7,h7);
+		};
+	};
+	var f10 = function(a8,b8,c8,d8,e8,f08) {
+		return function(g8) {
+			return f9(a8,b8,c8,d8,e8,f08,g8);
+		};
+	};
+	var f11 = function(a9,b9,c9,d9,e9) {
+		return function(f09) {
+			return f10(a9,b9,c9,d9,e9,f09);
+		};
+	};
+	var f12 = function(a10,b10,c10,d10) {
+		return function(e10) {
+			return f11(a10,b10,c10,d10,e10);
+		};
+	};
+	var f13 = function(a11,b11,c11) {
+		return function(d11) {
+			return f12(a11,b11,c11,d11);
+		};
+	};
+	return thx__$Validation_Validation_$Impl_$.ap(v15,thx__$Validation_Validation_$Impl_$.ap(v14,thx__$Validation_Validation_$Impl_$.ap(v13,thx__$Validation_Validation_$Impl_$.ap(v12,thx__$Validation_Validation_$Impl_$.ap(v11,thx__$Validation_Validation_$Impl_$.ap(v10,thx__$Validation_Validation_$Impl_$.ap(v9,thx__$Validation_Validation_$Impl_$.ap(v8,thx__$Validation_Validation_$Impl_$.ap(v7,thx__$Validation_Validation_$Impl_$.ap(v6,thx__$Validation_Validation_$Impl_$.ap(v5,thx__$Validation_Validation_$Impl_$.ap(v4,thx__$Validation_Validation_$Impl_$.ap(v3,thx__$Validation_Validation_$Impl_$.ap(v2,thx__$Validation_Validation_$Impl_$.map(v1,thx_Functions2.curry(function(a12,b12) {
+		return function(c12) {
+			return f13(a12,b12,c12);
+		};
+	})),s),s),s),s),s),s),s),s),s),s),s),s),s),s);
+};
+thx__$Validation_Validation_$Impl_$.val16 = function(f,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,s) {
+	var f1 = f;
+	var f2 = function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o) {
+		return function(p) {
+			return f1(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p);
+		};
+	};
+	var f3 = function(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1) {
+		return function(o1) {
+			return f2(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1,o1);
+		};
+	};
+	var f4 = function(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2) {
+		return function(n2) {
+			return f3(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2,n2);
+		};
+	};
+	var f5 = function(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3) {
+		return function(m3) {
+			return f4(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3,m3);
+		};
+	};
+	var f6 = function(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4) {
+		return function(l4) {
+			return f5(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4,l4);
+		};
+	};
+	var f7 = function(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5) {
+		return function(k5) {
+			return f6(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5,k5);
+		};
+	};
+	var f8 = function(a6,b6,c6,d6,e6,f06,g6,h6,i6) {
+		return function(j6) {
+			return f7(a6,b6,c6,d6,e6,f06,g6,h6,i6,j6);
+		};
+	};
+	var f9 = function(a7,b7,c7,d7,e7,f07,g7,h7) {
+		return function(i7) {
+			return f8(a7,b7,c7,d7,e7,f07,g7,h7,i7);
+		};
+	};
+	var f10 = function(a8,b8,c8,d8,e8,f08,g8) {
+		return function(h8) {
+			return f9(a8,b8,c8,d8,e8,f08,g8,h8);
+		};
+	};
+	var f11 = function(a9,b9,c9,d9,e9,f09) {
+		return function(g9) {
+			return f10(a9,b9,c9,d9,e9,f09,g9);
+		};
+	};
+	var f12 = function(a10,b10,c10,d10,e10) {
+		return function(f010) {
+			return f11(a10,b10,c10,d10,e10,f010);
+		};
+	};
+	var f13 = function(a11,b11,c11,d11) {
+		return function(e11) {
+			return f12(a11,b11,c11,d11,e11);
+		};
+	};
+	var f14 = function(a12,b12,c12) {
+		return function(d12) {
+			return f13(a12,b12,c12,d12);
+		};
+	};
+	return thx__$Validation_Validation_$Impl_$.ap(v16,thx__$Validation_Validation_$Impl_$.ap(v15,thx__$Validation_Validation_$Impl_$.ap(v14,thx__$Validation_Validation_$Impl_$.ap(v13,thx__$Validation_Validation_$Impl_$.ap(v12,thx__$Validation_Validation_$Impl_$.ap(v11,thx__$Validation_Validation_$Impl_$.ap(v10,thx__$Validation_Validation_$Impl_$.ap(v9,thx__$Validation_Validation_$Impl_$.ap(v8,thx__$Validation_Validation_$Impl_$.ap(v7,thx__$Validation_Validation_$Impl_$.ap(v6,thx__$Validation_Validation_$Impl_$.ap(v5,thx__$Validation_Validation_$Impl_$.ap(v4,thx__$Validation_Validation_$Impl_$.ap(v3,thx__$Validation_Validation_$Impl_$.ap(v2,thx__$Validation_Validation_$Impl_$.map(v1,thx_Functions2.curry(function(a13,b13) {
+		return function(c13) {
+			return f14(a13,b13,c13);
+		};
+	})),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s);
+};
+thx__$Validation_Validation_$Impl_$.val17 = function(f,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,s) {
+	var f1 = f;
+	var f2 = function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p) {
+		return function(q) {
+			return f1(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q);
+		};
+	};
+	var f3 = function(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1,o1) {
+		return function(p1) {
+			return f2(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1,o1,p1);
+		};
+	};
+	var f4 = function(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2,n2) {
+		return function(o2) {
+			return f3(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2,n2,o2);
+		};
+	};
+	var f5 = function(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3,m3) {
+		return function(n3) {
+			return f4(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3,m3,n3);
+		};
+	};
+	var f6 = function(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4,l4) {
+		return function(m4) {
+			return f5(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4,l4,m4);
+		};
+	};
+	var f7 = function(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5,k5) {
+		return function(l5) {
+			return f6(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5,k5,l5);
+		};
+	};
+	var f8 = function(a6,b6,c6,d6,e6,f06,g6,h6,i6,j6) {
+		return function(k6) {
+			return f7(a6,b6,c6,d6,e6,f06,g6,h6,i6,j6,k6);
+		};
+	};
+	var f9 = function(a7,b7,c7,d7,e7,f07,g7,h7,i7) {
+		return function(j7) {
+			return f8(a7,b7,c7,d7,e7,f07,g7,h7,i7,j7);
+		};
+	};
+	var f10 = function(a8,b8,c8,d8,e8,f08,g8,h8) {
+		return function(i8) {
+			return f9(a8,b8,c8,d8,e8,f08,g8,h8,i8);
+		};
+	};
+	var f11 = function(a9,b9,c9,d9,e9,f09,g9) {
+		return function(h9) {
+			return f10(a9,b9,c9,d9,e9,f09,g9,h9);
+		};
+	};
+	var f12 = function(a10,b10,c10,d10,e10,f010) {
+		return function(g10) {
+			return f11(a10,b10,c10,d10,e10,f010,g10);
+		};
+	};
+	var f13 = function(a11,b11,c11,d11,e11) {
+		return function(f011) {
+			return f12(a11,b11,c11,d11,e11,f011);
+		};
+	};
+	var f14 = function(a12,b12,c12,d12) {
+		return function(e12) {
+			return f13(a12,b12,c12,d12,e12);
+		};
+	};
+	var f15 = function(a13,b13,c13) {
+		return function(d13) {
+			return f14(a13,b13,c13,d13);
+		};
+	};
+	return thx__$Validation_Validation_$Impl_$.ap(v17,thx__$Validation_Validation_$Impl_$.ap(v16,thx__$Validation_Validation_$Impl_$.ap(v15,thx__$Validation_Validation_$Impl_$.ap(v14,thx__$Validation_Validation_$Impl_$.ap(v13,thx__$Validation_Validation_$Impl_$.ap(v12,thx__$Validation_Validation_$Impl_$.ap(v11,thx__$Validation_Validation_$Impl_$.ap(v10,thx__$Validation_Validation_$Impl_$.ap(v9,thx__$Validation_Validation_$Impl_$.ap(v8,thx__$Validation_Validation_$Impl_$.ap(v7,thx__$Validation_Validation_$Impl_$.ap(v6,thx__$Validation_Validation_$Impl_$.ap(v5,thx__$Validation_Validation_$Impl_$.ap(v4,thx__$Validation_Validation_$Impl_$.ap(v3,thx__$Validation_Validation_$Impl_$.ap(v2,thx__$Validation_Validation_$Impl_$.map(v1,thx_Functions2.curry(function(a14,b14) {
+		return function(c14) {
+			return f15(a14,b14,c14);
+		};
+	})),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s);
+};
+thx__$Validation_Validation_$Impl_$.val18 = function(f,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,s) {
+	var f1 = f;
+	var f2 = function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q) {
+		return function(r) {
+			return f1(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q,r);
+		};
+	};
+	var f3 = function(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1,o1,p1) {
+		return function(q1) {
+			return f2(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1,o1,p1,q1);
+		};
+	};
+	var f4 = function(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2,n2,o2) {
+		return function(p2) {
+			return f3(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2,n2,o2,p2);
+		};
+	};
+	var f5 = function(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3,m3,n3) {
+		return function(o3) {
+			return f4(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3,m3,n3,o3);
+		};
+	};
+	var f6 = function(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4,l4,m4) {
+		return function(n4) {
+			return f5(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4,l4,m4,n4);
+		};
+	};
+	var f7 = function(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5,k5,l5) {
+		return function(m5) {
+			return f6(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5,k5,l5,m5);
+		};
+	};
+	var f8 = function(a6,b6,c6,d6,e6,f06,g6,h6,i6,j6,k6) {
+		return function(l6) {
+			return f7(a6,b6,c6,d6,e6,f06,g6,h6,i6,j6,k6,l6);
+		};
+	};
+	var f9 = function(a7,b7,c7,d7,e7,f07,g7,h7,i7,j7) {
+		return function(k7) {
+			return f8(a7,b7,c7,d7,e7,f07,g7,h7,i7,j7,k7);
+		};
+	};
+	var f10 = function(a8,b8,c8,d8,e8,f08,g8,h8,i8) {
+		return function(j8) {
+			return f9(a8,b8,c8,d8,e8,f08,g8,h8,i8,j8);
+		};
+	};
+	var f11 = function(a9,b9,c9,d9,e9,f09,g9,h9) {
+		return function(i9) {
+			return f10(a9,b9,c9,d9,e9,f09,g9,h9,i9);
+		};
+	};
+	var f12 = function(a10,b10,c10,d10,e10,f010,g10) {
+		return function(h10) {
+			return f11(a10,b10,c10,d10,e10,f010,g10,h10);
+		};
+	};
+	var f13 = function(a11,b11,c11,d11,e11,f011) {
+		return function(g11) {
+			return f12(a11,b11,c11,d11,e11,f011,g11);
+		};
+	};
+	var f14 = function(a12,b12,c12,d12,e12) {
+		return function(f012) {
+			return f13(a12,b12,c12,d12,e12,f012);
+		};
+	};
+	var f15 = function(a13,b13,c13,d13) {
+		return function(e13) {
+			return f14(a13,b13,c13,d13,e13);
+		};
+	};
+	var f16 = function(a14,b14,c14) {
+		return function(d14) {
+			return f15(a14,b14,c14,d14);
+		};
+	};
+	return thx__$Validation_Validation_$Impl_$.ap(v18,thx__$Validation_Validation_$Impl_$.ap(v17,thx__$Validation_Validation_$Impl_$.ap(v16,thx__$Validation_Validation_$Impl_$.ap(v15,thx__$Validation_Validation_$Impl_$.ap(v14,thx__$Validation_Validation_$Impl_$.ap(v13,thx__$Validation_Validation_$Impl_$.ap(v12,thx__$Validation_Validation_$Impl_$.ap(v11,thx__$Validation_Validation_$Impl_$.ap(v10,thx__$Validation_Validation_$Impl_$.ap(v9,thx__$Validation_Validation_$Impl_$.ap(v8,thx__$Validation_Validation_$Impl_$.ap(v7,thx__$Validation_Validation_$Impl_$.ap(v6,thx__$Validation_Validation_$Impl_$.ap(v5,thx__$Validation_Validation_$Impl_$.ap(v4,thx__$Validation_Validation_$Impl_$.ap(v3,thx__$Validation_Validation_$Impl_$.ap(v2,thx__$Validation_Validation_$Impl_$.map(v1,thx_Functions2.curry(function(a15,b15) {
+		return function(c15) {
+			return f16(a15,b15,c15);
+		};
+	})),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s);
+};
+thx__$Validation_Validation_$Impl_$.val19 = function(f,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,s) {
+	var f1 = f;
+	var f2 = function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q,r) {
+		return function(s1) {
+			return f1(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q,r,s1);
+		};
+	};
+	var f3 = function(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1,o1,p1,q1) {
+		return function(r1) {
+			return f2(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1,o1,p1,q1,r1);
+		};
+	};
+	var f4 = function(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2,n2,o2,p2) {
+		return function(q2) {
+			return f3(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2,n2,o2,p2,q2);
+		};
+	};
+	var f5 = function(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3,m3,n3,o3) {
+		return function(p3) {
+			return f4(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3,m3,n3,o3,p3);
+		};
+	};
+	var f6 = function(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4,l4,m4,n4) {
+		return function(o4) {
+			return f5(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4,l4,m4,n4,o4);
+		};
+	};
+	var f7 = function(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5,k5,l5,m5) {
+		return function(n5) {
+			return f6(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5,k5,l5,m5,n5);
+		};
+	};
+	var f8 = function(a6,b6,c6,d6,e6,f06,g6,h6,i6,j6,k6,l6) {
+		return function(m6) {
+			return f7(a6,b6,c6,d6,e6,f06,g6,h6,i6,j6,k6,l6,m6);
+		};
+	};
+	var f9 = function(a7,b7,c7,d7,e7,f07,g7,h7,i7,j7,k7) {
+		return function(l7) {
+			return f8(a7,b7,c7,d7,e7,f07,g7,h7,i7,j7,k7,l7);
+		};
+	};
+	var f10 = function(a8,b8,c8,d8,e8,f08,g8,h8,i8,j8) {
+		return function(k8) {
+			return f9(a8,b8,c8,d8,e8,f08,g8,h8,i8,j8,k8);
+		};
+	};
+	var f11 = function(a9,b9,c9,d9,e9,f09,g9,h9,i9) {
+		return function(j9) {
+			return f10(a9,b9,c9,d9,e9,f09,g9,h9,i9,j9);
+		};
+	};
+	var f12 = function(a10,b10,c10,d10,e10,f010,g10,h10) {
+		return function(i10) {
+			return f11(a10,b10,c10,d10,e10,f010,g10,h10,i10);
+		};
+	};
+	var f13 = function(a11,b11,c11,d11,e11,f011,g11) {
+		return function(h11) {
+			return f12(a11,b11,c11,d11,e11,f011,g11,h11);
+		};
+	};
+	var f14 = function(a12,b12,c12,d12,e12,f012) {
+		return function(g12) {
+			return f13(a12,b12,c12,d12,e12,f012,g12);
+		};
+	};
+	var f15 = function(a13,b13,c13,d13,e13) {
+		return function(f013) {
+			return f14(a13,b13,c13,d13,e13,f013);
+		};
+	};
+	var f16 = function(a14,b14,c14,d14) {
+		return function(e14) {
+			return f15(a14,b14,c14,d14,e14);
+		};
+	};
+	var f17 = function(a15,b15,c15) {
+		return function(d15) {
+			return f16(a15,b15,c15,d15);
+		};
+	};
+	return thx__$Validation_Validation_$Impl_$.ap(v19,thx__$Validation_Validation_$Impl_$.ap(v18,thx__$Validation_Validation_$Impl_$.ap(v17,thx__$Validation_Validation_$Impl_$.ap(v16,thx__$Validation_Validation_$Impl_$.ap(v15,thx__$Validation_Validation_$Impl_$.ap(v14,thx__$Validation_Validation_$Impl_$.ap(v13,thx__$Validation_Validation_$Impl_$.ap(v12,thx__$Validation_Validation_$Impl_$.ap(v11,thx__$Validation_Validation_$Impl_$.ap(v10,thx__$Validation_Validation_$Impl_$.ap(v9,thx__$Validation_Validation_$Impl_$.ap(v8,thx__$Validation_Validation_$Impl_$.ap(v7,thx__$Validation_Validation_$Impl_$.ap(v6,thx__$Validation_Validation_$Impl_$.ap(v5,thx__$Validation_Validation_$Impl_$.ap(v4,thx__$Validation_Validation_$Impl_$.ap(v3,thx__$Validation_Validation_$Impl_$.ap(v2,thx__$Validation_Validation_$Impl_$.map(v1,thx_Functions2.curry(function(a16,b16) {
+		return function(c16) {
+			return f17(a16,b16,c16);
+		};
+	})),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s);
+};
+thx__$Validation_Validation_$Impl_$.val20 = function(f,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,s) {
+	var f1 = f;
+	var f2 = function(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q,r,s1) {
+		return function(t) {
+			return f1(a,b,c,d,e,f0,g,h,i,j,k,l,m,n,o,p,q,r,s1,t);
+		};
+	};
+	var f3 = function(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1,o1,p1,q1,r1) {
+		return function(s2) {
+			return f2(a1,b1,c1,d1,e1,f01,g1,h1,i1,j1,k1,l1,m1,n1,o1,p1,q1,r1,s2);
+		};
+	};
+	var f4 = function(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2,n2,o2,p2,q2) {
+		return function(r2) {
+			return f3(a2,b2,c2,d2,e2,f02,g2,h2,i2,j2,k2,l2,m2,n2,o2,p2,q2,r2);
+		};
+	};
+	var f5 = function(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3,m3,n3,o3,p3) {
+		return function(q3) {
+			return f4(a3,b3,c3,d3,e3,f03,g3,h3,i3,j3,k3,l3,m3,n3,o3,p3,q3);
+		};
+	};
+	var f6 = function(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4,l4,m4,n4,o4) {
+		return function(p4) {
+			return f5(a4,b4,c4,d4,e4,f04,g4,h4,i4,j4,k4,l4,m4,n4,o4,p4);
+		};
+	};
+	var f7 = function(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5,k5,l5,m5,n5) {
+		return function(o5) {
+			return f6(a5,b5,c5,d5,e5,f05,g5,h5,i5,j5,k5,l5,m5,n5,o5);
+		};
+	};
+	var f8 = function(a6,b6,c6,d6,e6,f06,g6,h6,i6,j6,k6,l6,m6) {
+		return function(n6) {
+			return f7(a6,b6,c6,d6,e6,f06,g6,h6,i6,j6,k6,l6,m6,n6);
+		};
+	};
+	var f9 = function(a7,b7,c7,d7,e7,f07,g7,h7,i7,j7,k7,l7) {
+		return function(m7) {
+			return f8(a7,b7,c7,d7,e7,f07,g7,h7,i7,j7,k7,l7,m7);
+		};
+	};
+	var f10 = function(a8,b8,c8,d8,e8,f08,g8,h8,i8,j8,k8) {
+		return function(l8) {
+			return f9(a8,b8,c8,d8,e8,f08,g8,h8,i8,j8,k8,l8);
+		};
+	};
+	var f11 = function(a9,b9,c9,d9,e9,f09,g9,h9,i9,j9) {
+		return function(k9) {
+			return f10(a9,b9,c9,d9,e9,f09,g9,h9,i9,j9,k9);
+		};
+	};
+	var f12 = function(a10,b10,c10,d10,e10,f010,g10,h10,i10) {
+		return function(j10) {
+			return f11(a10,b10,c10,d10,e10,f010,g10,h10,i10,j10);
+		};
+	};
+	var f13 = function(a11,b11,c11,d11,e11,f011,g11,h11) {
+		return function(i11) {
+			return f12(a11,b11,c11,d11,e11,f011,g11,h11,i11);
+		};
+	};
+	var f14 = function(a12,b12,c12,d12,e12,f012,g12) {
+		return function(h12) {
+			return f13(a12,b12,c12,d12,e12,f012,g12,h12);
+		};
+	};
+	var f15 = function(a13,b13,c13,d13,e13,f013) {
+		return function(g13) {
+			return f14(a13,b13,c13,d13,e13,f013,g13);
+		};
+	};
+	var f16 = function(a14,b14,c14,d14,e14) {
+		return function(f014) {
+			return f15(a14,b14,c14,d14,e14,f014);
+		};
+	};
+	var f17 = function(a15,b15,c15,d15) {
+		return function(e15) {
+			return f16(a15,b15,c15,d15,e15);
+		};
+	};
+	var f18 = function(a16,b16,c16) {
+		return function(d16) {
+			return f17(a16,b16,c16,d16);
+		};
+	};
+	return thx__$Validation_Validation_$Impl_$.ap(v20,thx__$Validation_Validation_$Impl_$.ap(v19,thx__$Validation_Validation_$Impl_$.ap(v18,thx__$Validation_Validation_$Impl_$.ap(v17,thx__$Validation_Validation_$Impl_$.ap(v16,thx__$Validation_Validation_$Impl_$.ap(v15,thx__$Validation_Validation_$Impl_$.ap(v14,thx__$Validation_Validation_$Impl_$.ap(v13,thx__$Validation_Validation_$Impl_$.ap(v12,thx__$Validation_Validation_$Impl_$.ap(v11,thx__$Validation_Validation_$Impl_$.ap(v10,thx__$Validation_Validation_$Impl_$.ap(v9,thx__$Validation_Validation_$Impl_$.ap(v8,thx__$Validation_Validation_$Impl_$.ap(v7,thx__$Validation_Validation_$Impl_$.ap(v6,thx__$Validation_Validation_$Impl_$.ap(v5,thx__$Validation_Validation_$Impl_$.ap(v4,thx__$Validation_Validation_$Impl_$.ap(v3,thx__$Validation_Validation_$Impl_$.ap(v2,thx__$Validation_Validation_$Impl_$.map(v1,thx_Functions2.curry(function(a17,b17) {
+		return function(c17) {
+			return f18(a17,b17,c17);
+		};
+	})),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s),s);
 };
 var thx_ValidationExtensions = function() { };
 $hxClasses["thx.ValidationExtensions"] = thx_ValidationExtensions;
@@ -13520,7 +15685,7 @@ thx_promise_Futures.log = function(future,prefix) {
 		prefix = "";
 	}
 	return future.then(function(r) {
-		console.log("" + prefix + " VALUE: " + Std.string(r));
+		haxe_Log.trace("" + prefix + " VALUE: " + Std.string(r),{ fileName : "Future.hx", lineNumber : 171, className : "thx.promise.Futures", methodName : "log"});
 	});
 };
 var thx_promise_FutureTuple6 = function() { };
@@ -14199,9 +16364,9 @@ thx_promise_Promises.log = function(promise,prefix) {
 		prefix = "";
 	}
 	return thx_promise__$Promise_Promise_$Impl_$.either(promise,function(r) {
-		console.log("" + prefix + " SUCCESS: " + Std.string(r));
+		haxe_Log.trace("" + prefix + " SUCCESS: " + Std.string(r),{ fileName : "Promise.hx", lineNumber : 363, className : "thx.promise.Promises", methodName : "log"});
 	},function(e) {
-		console.log("" + prefix + " ERROR: " + e.toString());
+		haxe_Log.trace("" + prefix + " ERROR: " + e.toString(),{ fileName : "Promise.hx", lineNumber : 364, className : "thx.promise.Promises", methodName : "log"});
 	});
 };
 var thx_promise_PromiseTuple6 = function() { };
@@ -14408,6 +16573,1659 @@ thx_promise_Timer.immediateValue = function(value) {
 			f(a1);
 		});
 	});
+};
+var thx_stream_Message = $hxClasses["thx.stream.Message"] = { __ename__ : ["thx","stream","Message"], __constructs__ : ["Next","Error","Done"] };
+thx_stream_Message.Next = function(value) { var $x = ["Next",0,value]; $x.__enum__ = thx_stream_Message; return $x; };
+thx_stream_Message.Error = function(err) { var $x = ["Error",1,err]; $x.__enum__ = thx_stream_Message; return $x; };
+thx_stream_Message.Done = ["Done",2];
+thx_stream_Message.Done.__enum__ = thx_stream_Message;
+thx_stream_Message.__empty_constructs__ = [thx_stream_Message.Done];
+var thx_stream_Process = function(handler,init) {
+	this.handler = thx_stream_Subjects.wrapHandler(handler);
+	this.init = init;
+};
+$hxClasses["thx.stream.Process"] = thx_stream_Process;
+thx_stream_Process.__name__ = ["thx","stream","Process"];
+thx_stream_Process.nextAsMessageHandler = function(handler) {
+	return function(m) {
+		if(m[1] == 0) {
+			var v = m[2];
+			handler(v);
+		}
+	};
+};
+thx_stream_Process.failureAsMessageHandler = function(handler) {
+	return function(m) {
+		if(m[1] == 1) {
+			var err = m[2];
+			handler(err);
+		}
+	};
+};
+thx_stream_Process.doneAsMessageHandler = function(handler) {
+	return function(m) {
+		if(m[1] == 2) {
+			handler();
+		}
+	};
+};
+thx_stream_Process.alwaysAsMessageHandler = function(handler) {
+	return function(m) {
+		switch(m[1]) {
+		case 1:case 2:
+			handler();
+			break;
+		default:
+		}
+	};
+};
+thx_stream_Process.prototype = {
+	handler: null
+	,init: null
+	,message: function(handler) {
+		var fa = this.handler;
+		var fb = handler;
+		return new thx_stream_Process(function(v) {
+			fa(v);
+			fb(v);
+		},this.init);
+	}
+	,next: function(handler) {
+		var fa = this.handler;
+		var fb = thx_stream_Process.nextAsMessageHandler(handler);
+		return new thx_stream_Process(function(v) {
+			fa(v);
+			fb(v);
+		},this.init);
+	}
+	,failure: function(handler) {
+		var fa = this.handler;
+		var fb = thx_stream_Process.failureAsMessageHandler(handler);
+		return new thx_stream_Process(function(v) {
+			fa(v);
+			fb(v);
+		},this.init);
+	}
+	,done: function(handler) {
+		var fa = this.handler;
+		var fb = thx_stream_Process.doneAsMessageHandler(handler);
+		return new thx_stream_Process(function(v) {
+			fa(v);
+			fb(v);
+		},this.init);
+	}
+	,always: function(handler) {
+		var fa = this.handler;
+		var fb = thx_stream_Process.alwaysAsMessageHandler(handler);
+		return new thx_stream_Process(function(v) {
+			fa(v);
+			fb(v);
+		},this.init);
+	}
+	,run: function() {
+		this.init(this.handler);
+	}
+	,__class__: thx_stream_Process
+};
+var thx_stream_Property = function(initial,equals) {
+	this.equals = null == equals ? thx_Functions.equality : equals;
+	this.subjects = [];
+	this.set(initial);
+};
+$hxClasses["thx.stream.Property"] = thx_stream_Property;
+thx_stream_Property.__name__ = ["thx","stream","Property"];
+thx_stream_Property.prototype = {
+	value: null
+	,equals: null
+	,subjects: null
+	,modify: function(f) {
+		var newValue = f(this.value);
+		if(this.equals(this.value,newValue)) {
+			return;
+		}
+		this.value = newValue;
+		this.emit(thx_stream_Message.Next(newValue));
+	}
+	,get: function() {
+		return this.value;
+	}
+	,set: function(value) {
+		this.modify(function(_) {
+			return value;
+		});
+	}
+	,error: function(err) {
+		this.emit(thx_stream_Message.Error(err));
+	}
+	,emit: function(value) {
+		var _g = 0;
+		var _g1 = this.subjects;
+		while(_g < _g1.length) {
+			var o = _g1[_g];
+			++_g;
+			o.message(value);
+		}
+	}
+	,stream: function() {
+		var _gthis = this;
+		return thx_stream_Stream.cancellable(function(o,addCancel) {
+			_gthis.subjects.push(o);
+			addCancel(function() {
+				HxOverrides.remove(_gthis.subjects,o);
+			});
+			o.message(thx_stream_Message.Next(_gthis.value));
+		});
+	}
+	,__class__: thx_stream_Property
+};
+var thx_stream__$Reducer_Reducer_$Impl_$ = {};
+$hxClasses["thx.stream._Reducer.Reducer_Impl_"] = thx_stream__$Reducer_Reducer_$Impl_$;
+thx_stream__$Reducer_Reducer_$Impl_$.__name__ = ["thx","stream","_Reducer","Reducer_Impl_"];
+thx_stream__$Reducer_Reducer_$Impl_$.compose = function(this1,other) {
+	return function(state,action) {
+		var tmp = this1(state,action);
+		return other(tmp,action);
+	};
+};
+var thx_stream__$Reducer_Middleware_$Impl_$ = {};
+$hxClasses["thx.stream._Reducer.Middleware_Impl_"] = thx_stream__$Reducer_Middleware_$Impl_$;
+thx_stream__$Reducer_Middleware_$Impl_$.__name__ = ["thx","stream","_Reducer","Middleware_Impl_"];
+thx_stream__$Reducer_Middleware_$Impl_$.compose = function(this1,other) {
+	return function(state,action,f) {
+		this1(state,action,f);
+		other(state,action,f);
+	};
+};
+thx_stream__$Reducer_Middleware_$Impl_$.onlyAction = function(f) {
+	return function(_,action,dispatch) {
+		f(action,dispatch);
+		return;
+	};
+};
+thx_stream__$Reducer_Middleware_$Impl_$.onlyState = function(f) {
+	return function(state,_,dispatch) {
+		f(state,dispatch);
+		return;
+	};
+};
+thx_stream__$Reducer_Middleware_$Impl_$.sideEffect = function(f) {
+	return function(state,action,_) {
+		f(state,action);
+	};
+};
+thx_stream__$Reducer_Middleware_$Impl_$.sideEffectState = function(f) {
+	return function(state,_,_1) {
+		f(state);
+	};
+};
+thx_stream__$Reducer_Middleware_$Impl_$.sideEffectAction = function(f) {
+	return function(_,action,_1) {
+		f(action);
+	};
+};
+thx_stream__$Reducer_Middleware_$Impl_$.empty = function() {
+	return function(_,_1,f) {
+	};
+};
+var thx_stream_Store = function(property,reducer,middleware) {
+	this.property = property;
+	this.reducer = reducer;
+	this.middleware = middleware;
+};
+$hxClasses["thx.stream.Store"] = thx_stream_Store;
+thx_stream_Store.__name__ = ["thx","stream","Store"];
+thx_stream_Store.withReducer = function(reducer,initial,equality) {
+	var property = new thx_stream_Property(initial,equality);
+	return new thx_stream_Store(property,reducer,thx_stream__$Reducer_Middleware_$Impl_$.empty());
+};
+thx_stream_Store.withMiddleware = function(reducer,middleware,initial,equality) {
+	var property = new thx_stream_Property(initial,equality);
+	return new thx_stream_Store(property,reducer,middleware);
+};
+thx_stream_Store.prototype = {
+	property: null
+	,reducer: null
+	,middleware: null
+	,dispatch: function(action,pos) {
+		var _gthis = this;
+		try {
+			var newValue = this.reducer(this.get(),action);
+			this.property.set(newValue);
+			this.middleware(this.property.get(),action,function(a) {
+				_gthis.dispatch(a,pos);
+			});
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			if (e instanceof js__$Boot_HaxeError) e = e.val;
+			this.property.error(thx_Error.fromDynamic(e,pos));
+		}
+		return this;
+	}
+	,dispatcher: function(pos) {
+		var f = $bind(this,this.dispatch);
+		var a2 = pos;
+		return function(a1) {
+			return f(a1,a2);
+		};
+	}
+	,stream: function() {
+		return this.property.stream();
+	}
+	,get: function() {
+		return this.property.get();
+	}
+	,__class__: thx_stream_Store
+};
+var thx_stream_Stream = function(init) {
+	this.init = function(handler) {
+		var tryCancel = false;
+		var cancel = null;
+		cancel = init(function(msg) {
+			handler(msg);
+			switch(msg[1]) {
+			case 1:case 2:
+				if(null != cancel) {
+					cancel();
+				} else {
+					tryCancel = true;
+				}
+				break;
+			default:
+			}
+		});
+		if(tryCancel) {
+			cancel();
+		}
+		return cancel;
+	};
+};
+$hxClasses["thx.stream.Stream"] = thx_stream_Stream;
+thx_stream_Stream.__name__ = ["thx","stream","Stream"];
+thx_stream_Stream.value = function(value) {
+	return thx_stream_Stream.create(function(o) {
+		o.message(thx_stream_Message.Next(value));
+		o.message(thx_stream_Message.Done);
+	});
+};
+thx_stream_Stream.empty = function() {
+	return thx_stream_Stream.create(function(o) {
+		o.message(thx_stream_Message.Done);
+	});
+};
+thx_stream_Stream.error = function(err) {
+	return thx_stream_Stream.create(function(o) {
+		o.message(thx_stream_Message.Error(err));
+	});
+};
+thx_stream_Stream.fail = function(msg,pos) {
+	return thx_stream_Stream.error(new thx_Error(msg,null,pos));
+};
+thx_stream_Stream.values = function(values) {
+	return thx_stream_Stream.create(function(o) {
+		var _e = o;
+		var tmp = function(v) {
+			return _e.message(thx_stream_Message.Next(v));
+		};
+		thx_Arrays.each(values,tmp);
+		o.message(thx_stream_Message.Done);
+	});
+};
+thx_stream_Stream.iterator = function(values) {
+	return thx_stream_Stream.create(function(o) {
+		var v = values;
+		while(v.hasNext()) {
+			var v1 = v.next();
+			o.message(thx_stream_Message.Next(v1));
+		}
+		o.message(thx_stream_Message.Done);
+	});
+};
+thx_stream_Stream.create = function(init) {
+	return thx_stream_Stream.cancellable(function(o,_) {
+		init(o);
+		return function() {
+		};
+	});
+};
+thx_stream_Stream.cancellable = function(init) {
+	return new thx_stream_Stream(function(handler) {
+		var o = new thx_stream_SubjectF(handler);
+		var cancel = thx_Functions.noop;
+		var addCancel = function(newcancel) {
+			var fa = cancel;
+			var fb = newcancel;
+			cancel = function() {
+				fa();
+				fb();
+			};
+		};
+		try {
+			init(o,addCancel);
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			if (e instanceof js__$Boot_HaxeError) e = e.val;
+			o.message(thx_stream_Message.Error(thx_Error.fromDynamic(e,{ fileName : "Stream.hx", lineNumber : 58, className : "thx.stream.Stream", methodName : "cancellable"})));
+		}
+		return cancel;
+	});
+};
+thx_stream_Stream.repeat = function(ms) {
+	return thx_stream_Stream.repeatValue(ms,thx_Unit.unit);
+};
+thx_stream_Stream.repeatValue = function(ms,value) {
+	return thx_stream_Stream.poll(ms,function() {
+		return value;
+	});
+};
+thx_stream_Stream.poll = function(ms,f) {
+	return thx_stream_Stream.cancellable(function(o,addCancel) {
+		addCancel(thx_Timer.repeat(function() {
+			var tmp = thx_stream_Message.Next(f());
+			o.message(tmp);
+		},ms));
+	});
+};
+thx_stream_Stream.delay = function(ms) {
+	return thx_stream_Stream.cancellable(function(o,addCancel) {
+		addCancel(thx_Timer.delay(function() {
+			o.message(thx_stream_Message.Done);
+		},ms));
+	});
+};
+thx_stream_Stream.delayValue = function(ms,value) {
+	return thx_stream_Stream.cancellable(function(o,addCancel) {
+		addCancel(thx_Timer.delay(function() {
+			o.message(thx_stream_Message.Next(value));
+			o.message(thx_stream_Message.Done);
+		},ms));
+	});
+};
+thx_stream_Stream.frame = function() {
+	return thx_stream_Stream.cancellable(function(o,addCancel) {
+		var _e = o;
+		addCancel(thx_Timer.frame(function(v) {
+			return _e.message(thx_stream_Message.Next(v));
+		}));
+	});
+};
+thx_stream_Stream.prototype = {
+	init: null
+	,message: function(handler) {
+		return new thx_stream_Process(handler,this.init);
+	}
+	,next: function(handler) {
+		return new thx_stream_Process(thx_stream_Process.nextAsMessageHandler(handler),this.init);
+	}
+	,failure: function(handler) {
+		return new thx_stream_Process(thx_stream_Process.failureAsMessageHandler(handler),this.init);
+	}
+	,done: function(handler) {
+		return new thx_stream_Process(thx_stream_Process.doneAsMessageHandler(handler),this.init);
+	}
+	,always: function(handler) {
+		return new thx_stream_Process(thx_stream_Process.alwaysAsMessageHandler(handler),this.init);
+	}
+	,log: function(prefix,pos) {
+		if(null == prefix) {
+			prefix = "";
+		} else {
+			prefix += ": ";
+		}
+		return this.map(function(v) {
+			haxe_Log.trace("" + prefix + Std.string(v),pos);
+			return v;
+		});
+	}
+	,logMessage: function(prefix,pos) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			if(null == prefix) {
+				prefix = "";
+			} else {
+				prefix += ": ";
+			}
+			_gthis.message(function(msg) {
+				haxe_Log.trace("" + prefix + Std.string(msg),pos);
+				o.message(msg);
+			}).run();
+		});
+	}
+	,filter: function(predicate) {
+		return this.filterFuture(function(v) {
+			return thx_promise_Future.value(predicate(v));
+		});
+	}
+	,filterFuture: function(predicate) {
+		return this.filterPromise(function(v) {
+			return thx_promise__$Promise_Promise_$Impl_$.create(function(resolve,_) {
+				predicate(v).then(resolve);
+			});
+		});
+	}
+	,filterPromise: function(predicate) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					var tmp = thx_promise__$Promise_Promise_$Impl_$.success(predicate(v),function(b) {
+						if(b) {
+							o.message(thx_stream_Message.Next(v));
+						}
+					});
+					var _e = o;
+					thx_promise__$Promise_Promise_$Impl_$.failure(tmp,function(err) {
+						return _e.message(thx_stream_Message.Error(err));
+					});
+					break;
+				case 1:
+					var err1 = msg[2];
+					o.message(thx_stream_Message.Error(err1));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,filterMap: function(predicate) {
+		return this.filterMapFuture(function(v) {
+			return thx_promise_Future.value(predicate(v));
+		});
+	}
+	,filterMapFuture: function(predicate) {
+		return this.filterMapPromise(function(v) {
+			return thx_promise__$Promise_Promise_$Impl_$.create(function(resolve,_) {
+				predicate(v).then(resolve);
+			});
+		});
+	}
+	,filterMapPromise: function(predicate) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					var tmp = thx_promise__$Promise_Promise_$Impl_$.success(predicate(v),function(b) {
+						if(b[1] == 0) {
+							var v1 = b[2];
+							o.message(thx_stream_Message.Next(v1));
+						}
+					});
+					var _e = o;
+					thx_promise__$Promise_Promise_$Impl_$.failure(tmp,function(err) {
+						return _e.message(thx_stream_Message.Error(err));
+					});
+					break;
+				case 1:
+					var err1 = msg[2];
+					o.message(thx_stream_Message.Error(err1));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,first: function() {
+		return this.take(1);
+	}
+	,sampledBy: function(other) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			var left = haxe_ds_Option.None;
+			var leftDone = false;
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var l = msg[2];
+					left = haxe_ds_Option.Some(l);
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					leftDone = true;
+					break;
+				}
+			}).run();
+			other.message(function(msg1) {
+				switch(msg1[1]) {
+				case 0:
+					switch(left[1]) {
+					case 0:
+						var r = msg1[2];
+						var l1 = left[2];
+						var this1 = { _0 : l1, _1 : r};
+						o.message(thx_stream_Message.Next(this1));
+						left = haxe_ds_Option.None;
+						break;
+					case 1:
+						if(leftDone) {
+							o.message(thx_stream_Message.Done);
+						}
+						break;
+					default:
+					}
+					break;
+				case 1:
+					var err1 = msg1[2];
+					o.message(thx_stream_Message.Error(err1));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,samplerOf: function(other) {
+		return other.sampledBy(this);
+	}
+	,skip: function(qt) {
+		var _gthis = this;
+		if(qt < 0) {
+			qt = 0;
+		}
+		return thx_stream_Stream.create(function(o) {
+			var counter = 0;
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					counter += 1;
+					if(counter - 1 >= qt) {
+						o.message(thx_stream_Message.Next(v));
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,skipFirst: function() {
+		return this.skip(1);
+	}
+	,skipFromEnd: function(qt) {
+		var _gthis = this;
+		if(qt < 0) {
+			qt = 0;
+		}
+		return thx_stream_Stream.create(function(o) {
+			var buffer = [];
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					buffer.push(v);
+					if(buffer.length == qt + 1) {
+						var tmp = thx_stream_Message.Next(buffer.shift());
+						o.message(tmp);
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,skipLast: function() {
+		return this.skipFromEnd(1);
+	}
+	,skipUntil: function(predicate) {
+		var flag = false;
+		return this.filter(function(v) {
+			if(flag) {
+				return true;
+			}
+			if(predicate(v)) {
+				return false;
+			}
+			flag = true;
+			return flag;
+		});
+	}
+	,take: function(qt) {
+		var _gthis = this;
+		if(qt < 0) {
+			qt = 0;
+		}
+		return thx_stream_Stream.create(function(o) {
+			var counter = 0;
+			if(qt == counter) {
+				o.message(thx_stream_Message.Done);
+				return;
+			}
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					o.message(thx_stream_Message.Next(v));
+					if((counter += 1) == qt) {
+						o.message(thx_stream_Message.Done);
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,takeAt: function(index) {
+		var _gthis = this;
+		if(index < 0) {
+			index = 0;
+		}
+		return thx_stream_Stream.create(function(o) {
+			var counter = 0;
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					counter += 1;
+					if(counter - 1 == index) {
+						o.message(thx_stream_Message.Next(v));
+						o.message(thx_stream_Message.Done);
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,takeUntil: function(predicate) {
+		var flag = true;
+		return this.filter(function(v) {
+			if(flag && predicate(v)) {
+				return true;
+			}
+			flag = false;
+			return flag;
+		});
+	}
+	,comp: function(compare) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			var curmin = haxe_ds_Option.None;
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					switch(curmin[1]) {
+					case 0:
+						var value = msg[2];
+						var min = curmin[2];
+						if(compare(value,min)) {
+							curmin = haxe_ds_Option.Some(value);
+							o.message(thx_stream_Message.Next(value));
+						}
+						break;
+					case 1:
+						var value1 = msg[2];
+						curmin = haxe_ds_Option.Some(value1);
+						o.message(thx_stream_Message.Next(value1));
+						break;
+					default:
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,distinct: function(equality) {
+		if(null == equality) {
+			equality = thx_Functions.equality;
+		}
+		return this.comp(function(a,b) {
+			return !equality(a,b);
+		});
+	}
+	,unique: function(set) {
+		return this.filter(function(v) {
+			if(set.exists(v)) {
+				return false;
+			} else {
+				thx__$Set_Set_$Impl_$.add(set,v);
+				return true;
+			}
+		});
+	}
+	,last: function() {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			var last = haxe_ds_Option.None;
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					last = haxe_ds_Option.Some(v);
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					switch(last[1]) {
+					case 0:
+						var v1 = last[2];
+						o.message(thx_stream_Message.Next(v1));
+						o.message(thx_stream_Message.Done);
+						break;
+					case 1:
+						o.message(thx_stream_Message.Done);
+						break;
+					}
+					break;
+				}
+			}).run();
+		});
+	}
+	,slidingWindow: function(minSize,maxSize) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			var acc = [];
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					acc.push(v);
+					if(acc.length == maxSize + 1) {
+						acc.shift();
+					}
+					if(acc.length >= minSize) {
+						var tmp = thx_stream_Message.Next(acc.slice());
+						o.message(tmp);
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,window: function(size) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			var acc = [];
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					acc.push(v);
+					if(acc.length == size) {
+						o.message(thx_stream_Message.Next(acc));
+						acc = [];
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,flatMap: function(handler) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					var _e = o;
+					var tmp = function(v1) {
+						return _e.message(thx_stream_Message.Next(v1));
+					};
+					var _e1 = o;
+					var tmp1 = function(err) {
+						return _e1.message(thx_stream_Message.Error(err));
+					};
+					handler(v).next(tmp).failure(tmp1).run();
+					break;
+				case 1:
+					var err1 = msg[2];
+					o.message(thx_stream_Message.Error(err1));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,map: function(handler) {
+		return this.flatMap(function(v) {
+			return thx_stream_Stream.value(handler(v));
+		});
+	}
+	,effect: function(handler) {
+		return this.map(function(v) {
+			handler(v);
+			return v;
+		});
+	}
+	,reduce: function(handler,acc) {
+		return this.map(function(v) {
+			acc = handler(acc,v);
+			return acc;
+		});
+	}
+	,scan: function(acc,handler) {
+		return this.reduce(handler,acc);
+	}
+	,fold: function(handler) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			var acc = haxe_ds_Option.None;
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					switch(acc[1]) {
+					case 0:
+						var b = msg[2];
+						var a = acc[2];
+						var x = handler(a,b);
+						acc = haxe_ds_Option.Some(x);
+						o.message(thx_stream_Message.Next(x));
+						break;
+					case 1:
+						var value = msg[2];
+						acc = haxe_ds_Option.Some(value);
+						o.message(thx_stream_Message.Next(value));
+						break;
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,collect: function() {
+		return this.reduce(function(acc,v) {
+			return acc.concat([v]);
+		},[]);
+	}
+	,collectAll: function() {
+		return this.collect().last();
+	}
+	,concat: function(other) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					o.message(thx_stream_Message.Next(v));
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					other.message($bind(o,o.message)).run();
+					break;
+				}
+			}).run();
+		});
+	}
+	,merge: function(other) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			_gthis.message($bind(o,o.message)).run();
+			other.message($bind(o,o.message)).run();
+		});
+	}
+	,appendTo: function(other) {
+		return other.concat(this);
+	}
+	,pair: function(other) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			var left = haxe_ds_Option.None;
+			var right = haxe_ds_Option.None;
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					if(right[1] == 0) {
+						var a = msg[2];
+						var b = right[2];
+						left = haxe_ds_Option.Some(a);
+						var this1 = { _0 : a, _1 : b};
+						o.message(thx_stream_Message.Next(this1));
+					} else {
+						var a1 = msg[2];
+						left = haxe_ds_Option.Some(a1);
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+			other.message(function(msg1) {
+				switch(msg1[1]) {
+				case 0:
+					if(left[1] == 0) {
+						var b1 = msg1[2];
+						var a2 = left[2];
+						right = haxe_ds_Option.Some(b1);
+						var this2 = { _0 : a2, _1 : b1};
+						o.message(thx_stream_Message.Next(this2));
+					} else {
+						var b2 = msg1[2];
+						right = haxe_ds_Option.Some(b2);
+					}
+					break;
+				case 1:
+					var err1 = msg1[2];
+					o.message(thx_stream_Message.Error(err1));
+					break;
+				case 2:
+					o.message(thx_stream_Message.Done);
+					break;
+				}
+			}).run();
+		});
+	}
+	,alternate: function(other) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			var left = [];
+			var ldone = false;
+			var right = [];
+			var rdone = false;
+			var pickLeft = true;
+			var emit = function() {
+				var emitted = false;
+				while(true) {
+					emitted = false;
+					if(pickLeft && left.length > 0) {
+						pickLeft = false;
+						emitted = true;
+						var emit1 = thx_stream_Message.Next(left.shift());
+						o.message(emit1);
+					}
+					if(!pickLeft && right.length > 0 && !pickLeft) {
+						pickLeft = true;
+						emitted = true;
+						var emit2 = thx_stream_Message.Next(right.shift());
+						o.message(emit2);
+					}
+					if(!emitted) {
+						break;
+					}
+				}
+			};
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var l = msg[2];
+					left.push(l);
+					emit();
+					if(rdone && right.length == 0) {
+						o.message(thx_stream_Message.Done);
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					if(rdone) {
+						o.message(thx_stream_Message.Done);
+					} else {
+						ldone = true;
+					}
+					break;
+				}
+			}).run();
+			other.message(function(msg1) {
+				switch(msg1[1]) {
+				case 0:
+					var r = msg1[2];
+					right.push(r);
+					emit();
+					if(ldone && left.length == 0 && pickLeft) {
+						o.message(thx_stream_Message.Done);
+					}
+					break;
+				case 1:
+					var err1 = msg1[2];
+					o.message(thx_stream_Message.Error(err1));
+					break;
+				case 2:
+					if(ldone) {
+						o.message(thx_stream_Message.Done);
+					} else {
+						rdone = true;
+					}
+					break;
+				}
+			}).run();
+		});
+	}
+	,zip: function(other) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			var left = [];
+			var ldone = false;
+			var right = [];
+			var rdone = false;
+			var emit = function() {
+				while(left.length > 0 && right.length > 0) {
+					var this1 = { _0 : left.shift(), _1 : right.shift()};
+					o.message(thx_stream_Message.Next(this1));
+				}
+			};
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var l = msg[2];
+					left.push(l);
+					emit();
+					if(rdone && right.length == 0) {
+						o.message(thx_stream_Message.Done);
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					if(rdone) {
+						o.message(thx_stream_Message.Done);
+					} else {
+						ldone = true;
+					}
+					break;
+				}
+			}).run();
+			other.message(function(msg1) {
+				switch(msg1[1]) {
+				case 0:
+					var r = msg1[2];
+					right.push(r);
+					emit();
+					if(ldone && left.length == 0) {
+						o.message(thx_stream_Message.Done);
+					}
+					break;
+				case 1:
+					var err1 = msg1[2];
+					o.message(thx_stream_Message.Error(err1));
+					break;
+				case 2:
+					if(ldone) {
+						o.message(thx_stream_Message.Done);
+					} else {
+						rdone = true;
+					}
+					break;
+				}
+			}).run();
+		});
+	}
+	,delayed: function(ms) {
+		return thx_stream_Stream.delay(ms).concat(this);
+	}
+	,spaced: function(ms) {
+		var _gthis = this;
+		return thx_stream_Stream.create(function(o) {
+			var start = performance.now();
+			var buffer = [];
+			var scheduled = false;
+			var isDone = false;
+			var emit = null;
+			emit = function() {
+				var now = performance.now();
+				var span = now - start;
+				start = now;
+				scheduled = false;
+				if(span >= ms) {
+					var emit1 = thx_stream_Message.Next(buffer.shift());
+					o.message(emit1);
+					if(isDone && buffer.length == 0) {
+						o.message(thx_stream_Message.Done);
+					}
+				}
+				if(buffer.length > 0) {
+					scheduled = true;
+					thx_Timer.delay(emit,ms);
+				}
+			};
+			var emit2 = emit;
+			_gthis.message(function(msg) {
+				switch(msg[1]) {
+				case 0:
+					var v = msg[2];
+					buffer.push(v);
+					if(!scheduled) {
+						emit2();
+					}
+					break;
+				case 1:
+					var err = msg[2];
+					o.message(thx_stream_Message.Error(err));
+					break;
+				case 2:
+					if(buffer.length == 0) {
+						o.message(thx_stream_Message.Done);
+					} else {
+						isDone = true;
+					}
+					break;
+				}
+			}).run();
+		});
+	}
+	,debounce: function(ms) {
+		return thx_stream_TupleStreamExtensions.left(this.sampledBy(thx_stream_Stream.repeat(ms)));
+	}
+	,__class__: thx_stream_Stream
+};
+var thx_stream_StreamExtensions = function() { };
+$hxClasses["thx.stream.StreamExtensions"] = thx_stream_StreamExtensions;
+thx_stream_StreamExtensions.__name__ = ["thx","stream","StreamExtensions"];
+thx_stream_StreamExtensions.count = function(stream) {
+	return thx_stream_TupleStreamExtensions.left(thx_stream_StreamExtensions.withIndex(stream,1));
+};
+thx_stream_StreamExtensions.flatten = function(stream) {
+	return stream.flatMap(function(v) {
+		return v;
+	});
+};
+thx_stream_StreamExtensions.toOption = function(stream) {
+	return stream.map(function(v) {
+		if(null == v) {
+			return haxe_ds_Option.None;
+		} else {
+			return haxe_ds_Option.Some(v);
+		}
+	});
+};
+thx_stream_StreamExtensions.toNil = function(stream) {
+	return stream.map(function(_) {
+		return thx_Nil.nil;
+	});
+};
+thx_stream_StreamExtensions.toTrue = function(stream) {
+	return stream.map(function(_) {
+		return true;
+	});
+};
+thx_stream_StreamExtensions.toFalse = function(stream) {
+	return stream.map(function(_) {
+		return false;
+	});
+};
+thx_stream_StreamExtensions.toValue = function(stream,value) {
+	return stream.map(function(_) {
+		return value;
+	});
+};
+thx_stream_StreamExtensions.withIndex = function(stream,start) {
+	if(start == null) {
+		start = 0;
+	}
+	return stream.map(function(v) {
+		start += 1;
+		var this1 = { _0 : start - 1, _1 : v};
+		return this1;
+	});
+};
+thx_stream_StreamExtensions.withTimestamp = function(stream,start) {
+	if(start == null) {
+		start = 0;
+	}
+	return stream.map(function(v) {
+		var this1 = { _0 : performance.now(), _1 : v};
+		return this1;
+	});
+};
+thx_stream_StreamExtensions.nil = function(stream) {
+	return stream.map(function(_) {
+		return thx_Nil.nil;
+	});
+};
+thx_stream_StreamExtensions.notNull = function(stream) {
+	return stream.filter(function(v) {
+		return v != null;
+	});
+};
+thx_stream_StreamExtensions.mapTo = function(stream,$const) {
+	return stream.map(function(_) {
+		return $const;
+	});
+};
+thx_stream_StreamExtensions.startWith = function(stream,$const) {
+	return thx_stream_Stream.value($const).concat(stream);
+};
+var thx_stream_UnitStreamExtensions = function() { };
+$hxClasses["thx.stream.UnitStreamExtensions"] = thx_stream_UnitStreamExtensions;
+thx_stream_UnitStreamExtensions.__name__ = ["thx","stream","UnitStreamExtensions"];
+thx_stream_UnitStreamExtensions.withIndex = function(stream,start) {
+	if(start == null) {
+		start = 0;
+	}
+	return stream.map(function(_) {
+		start += 1;
+		return start - 1;
+	});
+};
+var thx_stream_NilStreamExtensions = function() { };
+$hxClasses["thx.stream.NilStreamExtensions"] = thx_stream_NilStreamExtensions;
+thx_stream_NilStreamExtensions.__name__ = ["thx","stream","NilStreamExtensions"];
+thx_stream_NilStreamExtensions.withIndex = function(stream,start) {
+	if(start == null) {
+		start = 0;
+	}
+	return stream.map(function(_) {
+		start += 1;
+		return start - 1;
+	});
+};
+var thx_stream_StringStreamExtensions = function() { };
+$hxClasses["thx.stream.StringStreamExtensions"] = thx_stream_StringStreamExtensions;
+thx_stream_StringStreamExtensions.__name__ = ["thx","stream","StringStreamExtensions"];
+thx_stream_StringStreamExtensions.uniqueString = function(stream) {
+	return stream.unique(thx__$Set_Set_$Impl_$.createString());
+};
+thx_stream_StringStreamExtensions.notEmpty = function(stream) {
+	return stream.filter(function(v) {
+		if(v != null) {
+			return v != "";
+		} else {
+			return false;
+		}
+	});
+};
+thx_stream_StringStreamExtensions.match = function(stream,pattern) {
+	return stream.filter(function(s) {
+		return pattern.match(s);
+	});
+};
+thx_stream_StringStreamExtensions.toBool = function(stream) {
+	return stream.map(function(s) {
+		if(s != null) {
+			return s != "";
+		} else {
+			return false;
+		}
+	});
+};
+thx_stream_StringStreamExtensions.truthy = function(stream) {
+	return stream.filter(function(s) {
+		if(s != null) {
+			return s != "";
+		} else {
+			return false;
+		}
+	});
+};
+thx_stream_StringStreamExtensions.falsy = function(stream) {
+	return stream.filter(function(s) {
+		if(s != null) {
+			return s == "";
+		} else {
+			return true;
+		}
+	});
+};
+thx_stream_StringStreamExtensions.join = function(stream,sep) {
+	return stream.reduce(function(acc,v) {
+		return acc + sep + v;
+	},"");
+};
+var thx_stream_FloatStreamExtensions = function() { };
+$hxClasses["thx.stream.FloatStreamExtensions"] = thx_stream_FloatStreamExtensions;
+thx_stream_FloatStreamExtensions.__name__ = ["thx","stream","FloatStreamExtensions"];
+thx_stream_FloatStreamExtensions.min = function(stream) {
+	return stream.comp(function(a,b) {
+		return a < b;
+	});
+};
+thx_stream_FloatStreamExtensions.max = function(stream) {
+	return stream.comp(function(a,b) {
+		return a > b;
+	});
+};
+thx_stream_FloatStreamExtensions.sum = function(stream) {
+	return stream.fold(function(a,b) {
+		return a + b;
+	});
+};
+thx_stream_FloatStreamExtensions.average = function(stream) {
+	return thx_stream_Stream.create(function(o) {
+		var total = 0.0;
+		var count = 0;
+		stream.message(function(msg) {
+			switch(msg[1]) {
+			case 0:
+				var value = msg[2];
+				total += value;
+				count += 1;
+				o.message(thx_stream_Message.Next(total / count));
+				break;
+			case 1:
+				var err = msg[2];
+				o.message(thx_stream_Message.Error(err));
+				break;
+			case 2:
+				o.message(thx_stream_Message.Done);
+				break;
+			}
+		}).run();
+	});
+};
+thx_stream_FloatStreamExtensions.greaterThan = function(stream,x) {
+	return stream.filter(function(v) {
+		return v > x;
+	});
+};
+thx_stream_FloatStreamExtensions.greaterThanOrEqualTo = function(stream,x) {
+	return stream.filter(function(v) {
+		return v >= x;
+	});
+};
+thx_stream_FloatStreamExtensions.inRange = function(stream,min,max) {
+	return stream.filter(function(v) {
+		if(v <= max) {
+			return v >= min;
+		} else {
+			return false;
+		}
+	});
+};
+thx_stream_FloatStreamExtensions.insideRange = function(stream,min,max) {
+	return stream.filter(function(v) {
+		if(v < max) {
+			return v > min;
+		} else {
+			return false;
+		}
+	});
+};
+thx_stream_FloatStreamExtensions.lessThan = function(stream,x) {
+	return stream.filter(function(v) {
+		return v < x;
+	});
+};
+thx_stream_FloatStreamExtensions.lessThanOrEqualTo = function(stream,x) {
+	return stream.filter(function(v) {
+		return v <= x;
+	});
+};
+var thx_stream_IntStreamExtensions = function() { };
+$hxClasses["thx.stream.IntStreamExtensions"] = thx_stream_IntStreamExtensions;
+thx_stream_IntStreamExtensions.__name__ = ["thx","stream","IntStreamExtensions"];
+thx_stream_IntStreamExtensions.uniqueInt = function(stream) {
+	return stream.unique(thx__$Set_Set_$Impl_$.createInt());
+};
+thx_stream_IntStreamExtensions.min = function(stream) {
+	return stream.comp(function(a,b) {
+		return a < b;
+	});
+};
+thx_stream_IntStreamExtensions.max = function(stream) {
+	return stream.comp(function(a,b) {
+		return a > b;
+	});
+};
+thx_stream_IntStreamExtensions.sum = function(stream) {
+	return stream.fold(function(a,b) {
+		return a + b;
+	});
+};
+thx_stream_IntStreamExtensions.average = function(stream) {
+	return thx_stream_FloatStreamExtensions.average(stream);
+};
+thx_stream_IntStreamExtensions.greaterThan = function(stream,x) {
+	return stream.filter(function(v) {
+		return v > x;
+	});
+};
+thx_stream_IntStreamExtensions.greaterThanOrEqualTo = function(stream,x) {
+	return stream.filter(function(v) {
+		return v >= x;
+	});
+};
+thx_stream_IntStreamExtensions.inRange = function(stream,min,max) {
+	return stream.filter(function(v) {
+		if(v <= max) {
+			return v >= min;
+		} else {
+			return false;
+		}
+	});
+};
+thx_stream_IntStreamExtensions.insideRange = function(stream,min,max) {
+	return stream.filter(function(v) {
+		if(v < max) {
+			return v > min;
+		} else {
+			return false;
+		}
+	});
+};
+thx_stream_IntStreamExtensions.lessThan = function(stream,x) {
+	return stream.filter(function(v) {
+		return v < x;
+	});
+};
+thx_stream_IntStreamExtensions.lessThanOrEqualTo = function(stream,x) {
+	return stream.filter(function(v) {
+		return v <= x;
+	});
+};
+thx_stream_IntStreamExtensions.toBool = function(stream) {
+	return stream.map(function(i) {
+		return i != 0;
+	});
+};
+var thx_stream_BoolStreamExtensions = function() { };
+$hxClasses["thx.stream.BoolStreamExtensions"] = thx_stream_BoolStreamExtensions;
+thx_stream_BoolStreamExtensions.__name__ = ["thx","stream","BoolStreamExtensions"];
+thx_stream_BoolStreamExtensions.keepTrue = function(stream) {
+	return stream.filter(function(v) {
+		return v;
+	});
+};
+thx_stream_BoolStreamExtensions.negate = function(stream) {
+	return stream.map(function(v) {
+		return !v;
+	});
+};
+var thx_stream_OptionStreamExtensions = function() { };
+$hxClasses["thx.stream.OptionStreamExtensions"] = thx_stream_OptionStreamExtensions;
+thx_stream_OptionStreamExtensions.__name__ = ["thx","stream","OptionStreamExtensions"];
+thx_stream_OptionStreamExtensions.filterOption = function(stream) {
+	return stream.filterMap(function(v) {
+		return v;
+	});
+};
+thx_stream_OptionStreamExtensions.toBool = function(stream) {
+	return stream.map(function(opt) {
+		return thx_Options.toBool(opt);
+	});
+};
+thx_stream_OptionStreamExtensions.toValue = function(stream) {
+	return stream.map(function(opt) {
+		return thx_Options.get(opt);
+	});
+};
+var thx_stream_TupleStreamExtensions = function() { };
+$hxClasses["thx.stream.TupleStreamExtensions"] = thx_stream_TupleStreamExtensions;
+thx_stream_TupleStreamExtensions.__name__ = ["thx","stream","TupleStreamExtensions"];
+thx_stream_TupleStreamExtensions.left = function(stream) {
+	return stream.map(function(t) {
+		return t._0;
+	});
+};
+thx_stream_TupleStreamExtensions.right = function(stream) {
+	return stream.map(function(t) {
+		return t._1;
+	});
+};
+var thx_stream_ArrayStreamExtensions = function() { };
+$hxClasses["thx.stream.ArrayStreamExtensions"] = thx_stream_ArrayStreamExtensions;
+thx_stream_ArrayStreamExtensions.__name__ = ["thx","stream","ArrayStreamExtensions"];
+thx_stream_ArrayStreamExtensions.toStream = function(a) {
+	return thx_stream_Stream.values(a);
+};
+thx_stream_ArrayStreamExtensions.flatten = function(stream) {
+	return stream.flatMap(function(v) {
+		return thx_stream_Stream.values(v);
+	});
+};
+var thx_stream_PromiseArrayStreamExtensions = function() { };
+$hxClasses["thx.stream.PromiseArrayStreamExtensions"] = thx_stream_PromiseArrayStreamExtensions;
+thx_stream_PromiseArrayStreamExtensions.__name__ = ["thx","stream","PromiseArrayStreamExtensions"];
+thx_stream_PromiseArrayStreamExtensions.toStream = function(p) {
+	return thx_stream_ArrayStreamExtensions.flatten(thx_stream_PromiseStreamExtensions.toStream(p));
+};
+var thx_stream_PromiseStreamExtensions = function() { };
+$hxClasses["thx.stream.PromiseStreamExtensions"] = thx_stream_PromiseStreamExtensions;
+thx_stream_PromiseStreamExtensions.__name__ = ["thx","stream","PromiseStreamExtensions"];
+thx_stream_PromiseStreamExtensions.toStream = function(pr) {
+	return thx_stream_Stream.create(function(o) {
+		var tmp = thx_promise__$Promise_Promise_$Impl_$.success(pr,function(v) {
+			o.message(thx_stream_Message.Next(v));
+			o.message(thx_stream_Message.Done);
+		});
+		var _e = o;
+		thx_promise__$Promise_Promise_$Impl_$.failure(tmp,function(err) {
+			return _e.message(thx_stream_Message.Error(err));
+		});
+	});
+};
+thx_stream_PromiseStreamExtensions.flatten = function(stream) {
+	return stream.flatMap(function(p) {
+		return thx_stream_PromiseStreamExtensions.toStream(p);
+	});
+};
+var thx_stream_EitherStreamExtensions = function() { };
+$hxClasses["thx.stream.EitherStreamExtensions"] = thx_stream_EitherStreamExtensions;
+thx_stream_EitherStreamExtensions.__name__ = ["thx","stream","EitherStreamExtensions"];
+thx_stream_EitherStreamExtensions.left = function(stream) {
+	return stream.filterMap(function(e) {
+		switch(e[1]) {
+		case 0:
+			var v = e[2];
+			return haxe_ds_Option.Some(v);
+		case 1:
+			return haxe_ds_Option.None;
+		}
+	});
+};
+thx_stream_EitherStreamExtensions.right = function(stream) {
+	return stream.filterMap(function(e) {
+		switch(e[1]) {
+		case 0:
+			return haxe_ds_Option.None;
+		case 1:
+			var v = e[2];
+			return haxe_ds_Option.Some(v);
+		}
+	});
+};
+var thx_stream_Subject = function() { };
+$hxClasses["thx.stream.Subject"] = thx_stream_Subject;
+thx_stream_Subject.__name__ = ["thx","stream","Subject"];
+thx_stream_Subject.prototype = {
+	message: null
+	,__class__: thx_stream_Subject
+};
+var thx_stream_SubjectF = function(handler) {
+	this.handler = handler;
+};
+$hxClasses["thx.stream.SubjectF"] = thx_stream_SubjectF;
+thx_stream_SubjectF.__name__ = ["thx","stream","SubjectF"];
+thx_stream_SubjectF.__interfaces__ = [thx_stream_Subject];
+thx_stream_SubjectF.prototype = {
+	handler: null
+	,message: function(msg) {
+		this.handler(msg);
+		return this;
+	}
+	,__class__: thx_stream_SubjectF
+};
+var thx_stream_Subjects = function() { };
+$hxClasses["thx.stream.Subjects"] = thx_stream_Subjects;
+thx_stream_Subjects.__name__ = ["thx","stream","Subjects"];
+thx_stream_Subjects.next = function(subject,v) {
+	return subject.message(thx_stream_Message.Next(v));
+};
+thx_stream_Subjects.error = function(subject,err) {
+	return subject.message(thx_stream_Message.Error(err));
+};
+thx_stream_Subjects.done = function(subject) {
+	return subject.message(thx_stream_Message.Done);
+};
+thx_stream_Subjects.wrapHandler = function(handler) {
+	var terminated = false;
+	return function(msg) {
+		if(terminated) {
+			return;
+		}
+		handler(msg);
+		switch(msg[1]) {
+		case 1:case 2:
+			terminated = true;
+			break;
+		default:
+		}
+	};
 };
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
@@ -14845,6 +18663,11 @@ dots_Keys.OPEN_BRACKET = 219;
 dots_Keys.BACK_SLASH = 220;
 dots_Keys.CLOSE_BRAKET = 221;
 dots_Keys.SINGLE_QUOTE = 222;
+dots_Query.doc = document;
+fancy_search_util_ClassNameConfigs.prefix = "fs-suggestion";
+fancy_search_util_ClassNameConfigs.containerPrefix = fancy_search_util_ClassNameConfigs.prefix + "-container";
+fancy_search_util_ClassNameConfigs.defaultClasses = { container : fancy_search_util_ClassNameConfigs.containerPrefix, containerClosed : fancy_search_util_ClassNameConfigs.containerPrefix + "-closed", containerOpen : fancy_search_util_ClassNameConfigs.containerPrefix + "-open", containerTooShort : fancy_search_util_ClassNameConfigs.containerPrefix + "-too-short", containerNoResults : fancy_search_util_ClassNameConfigs.containerPrefix + "-empty", containerLoading : fancy_search_util_ClassNameConfigs.containerPrefix + "-loading", containerFailed : fancy_search_util_ClassNameConfigs.containerPrefix + "-failed", list : fancy_search_util_ClassNameConfigs.prefix + "-list", label : fancy_search_util_ClassNameConfigs.prefix + "-label", item : fancy_search_util_ClassNameConfigs.prefix + "-item", itemHighlighted : fancy_search_util_ClassNameConfigs.prefix + "-item-highlighted"};
+fancy_search_util_KeyboardConfigs.defaultKeys = { highlightUp : [38,104], highlightDown : [40,98,9], choose : [13], close : [27]};
 haxe__$Int32_Int32_$Impl_$._mul = Math.imul != null ? Math.imul : function(a,b) {
 	return a * (b & 65535) + (a * (b >>> 16) << 16 | 0) | 0;
 };

@@ -28,12 +28,10 @@ class TestSearch {
 
   static var simpleConfig: Configuration<String, String> = {
     filterer: StringDefaults.filterStringsSync(suggestions),
-      renderView: StringDefaults.renderStringElement,
       choose: function (inputOpt, suggOpt) {
         return suggOpt; // new input
       },
       equals: function (a, b) return a == b,
-      clearButton: None,
       hideMenuCondition: thx.fp.Functions.const(None),
       alwaysHighlight: false
   };

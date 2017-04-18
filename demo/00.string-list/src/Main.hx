@@ -5,6 +5,8 @@ using thx.Options;
 using thx.Strings;
 import fancy.search.util.StringDefaults;
 import fancy.search.util.Configuration;
+import fancy.search.util.ClassNameConfig;
+import fancy.search.util.KeyboardConfig;
 
 class Main {
   static function main() {
@@ -15,12 +17,10 @@ class Main {
           "Lima Bean", "Mango", "Melon", "Orange", "Peach", "Pear", "Pepper",
           "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
       ]),
-      renderView: StringDefaults.renderStringElement,
-      choose: function (inputOpt, suggOpt) {
-        return suggOpt; // new input
+      choose: function (suggOpt, inputOpt) {
+        return suggOpt.orElse(inputOpt); // new input
       },
       equals: function (a, b) return a == b,
-      clearButton: None,
       hideMenuCondition: thx.fp.Functions.const(None),
       alwaysHighlight: false
     };
@@ -29,7 +29,14 @@ class Main {
     var input = dots.Query.find(".fancy-container input");
     var search = new fancy.Search2(config);
 
-    var renderer = fancy.search.renderer.Dom.fromInput(input, container, search, function (str) return str.isEmpty() ? None : Some(str), function (input) return input.getOrElse(""));
+    var renderer = fancy.search.renderer.Dom.fromInput(input, container, search, {
+      classes: ClassNameConfigs.defaultClasses,
+      keys: KeyboardConfigs.defaultKeys,
+      parseInput: function (str) return str.isEmpty() ? None : Some(str),
+      renderInput: function (input) return input.getOrElse(""),
+      clearButton: None,
+      renderSuggestion: StringDefaults.renderStringElement
+    });
 
     renderer.next(function (dom) {
       // remove all children except the first (input)

@@ -11,7 +11,7 @@ enum Action<TSugg, TValue> {
   PopulateSuggestions(suggestions: Option<Nel<SuggestionItem<TSugg>>>, highlight: Option<TSugg>);
   FailSuggestions;
   ChangeHighlight(change: HighlightChangeType<TSugg>);
-  Choose(suggestion: Option<TSugg>);
+  Choose(suggestion: Option<TSugg>, val: Option<TValue>);
 }
 
 enum HighlightChangeType<T> {

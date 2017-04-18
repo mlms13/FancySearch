@@ -18,7 +18,7 @@ class Reducer {
       // if we were told about a value change, update our input text
       input: switch action {
         case ChangeValue(val): val;
-        case Choose(suggOpt): state.config.choose(state.input, suggOpt);
+        case Choose(suggOpt, val): state.config.choose(suggOpt, val);
         case _: state.input;
       },
 
@@ -65,12 +65,13 @@ class Reducer {
         // ignore requests to populate suggestions if the menu isn't open
         case [Closed(_), PopulateSuggestions(_)]: state.menu;
 
-        // ignore value changes when the menu is closed
-        case [Closed(_), ChangeValue(_)]: state.menu;
 
         // any other time the value changes, switch the menu to a loading state
         // the middleware will handle firing the next action
         case [Open(_, highlight), ChangeValue(_)]: Open(Loading, highlight);
+
+        // open a closed menu when the value changes
+        case [Closed(_), ChangeValue(_)]: Open(Loading, None);
 
         // mostly input cares about this, but we close the menu
         case [_, Choose(_)]: Closed(Inactive);
