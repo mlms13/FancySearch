@@ -10,15 +10,15 @@
 -js demo/00.string-list/www/bundle.js
 
 --next
+-cp demo/01.search-objects/src
+-main Main
+-js demo/01.search-objects/www/bundle.js
+
+--next
 -lib utest
 -main test.TestAll
 -js bin/test.min.js
 -cmd node bin/test.min.js
-
-# --next
-# -cp demo/01.search-objects/src
-# -main Main
-# -js demo/01.search-objects/www/bundle.js
 
 # --next
 # -cp demo/02.custom-render/src

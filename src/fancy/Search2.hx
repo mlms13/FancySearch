@@ -20,7 +20,7 @@ class Search2<TSugg, TValue> {
     var middleware = Middleware.empty() + loadSuggestions(config);
 
     store = new thx.stream.Store(new Property(state), fancy.search.Reducer.reduce, middleware);
-    stream = store.stream().map.fn(_.input);
+    stream = store.stream().map.fn(_.input).distinct();
   }
 
   static function loadSuggestions<TSugg, TValue>(config: Configuration<TSugg, TValue>): Middleware<State<TSugg, TValue>, Action<TSugg, TValue>> {

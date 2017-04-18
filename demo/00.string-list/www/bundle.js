@@ -2164,7 +2164,7 @@ var fancy_Search2 = function(config) {
 	this.store = new thx_stream_Store(new thx_stream_Property(state),fancy_search_Reducer.reduce,middleware);
 	this.stream = this.store.stream().map(function(_) {
 		return _.input;
-	});
+	}).distinct();
 };
 $hxClasses["fancy.Search2"] = fancy_Search2;
 fancy_Search2.__name__ = ["fancy","Search2"];
@@ -2320,7 +2320,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 				break;
 			case 1:
 				var highlighted = action[3];
-				tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.NoResults,highlighted);
+				tmp1 = fancy_search_MenuState.Open(fancy_search_DropdownState.NoResults,haxe_ds_Option.None);
 				break;
 			}
 			break;

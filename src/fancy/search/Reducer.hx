@@ -31,7 +31,7 @@ class Reducer {
         case [Open(_), OpenMenu] | [Closed(FailedCondition(_)), OpenMenu]: state.menu;
 
         // if the menu is open and results have loaded, show them
-        case [Open(_), PopulateSuggestions(None, highlighted)]: Open(NoResults, highlighted);
+        case [Open(_), PopulateSuggestions(None, highlighted)]: Open(NoResults, None);
         case [Open(_), PopulateSuggestions(Some(suggestions), highlight)]: showSuggestions(state.config, suggestions, highlight);
 
         // if the menu is open and results have failed, show the failure state
