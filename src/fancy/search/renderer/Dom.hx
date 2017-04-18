@@ -31,10 +31,11 @@ class Dom {
   static var keys = {
     highlightUp: [dots.Keys.UP_ARROW],
     highlightDown: [dots.Keys.DOWN_ARROW],
+    choose: [dots.Keys.ENTER]
   };
 
   // render the item; apply special treatment if it matches the highlighted element
-  static function renderMenuItem<T>(config: Configuration<T>, dispatch: Action<T> -> Void, highlighted: Option<T>, sugg: SuggestionItem<T>): Element {
+  static function renderMenuItem<T, TI>(config: Configuration<T, TI>, dispatch: Action<T, TI> -> Void, highlighted: Option<T>, sugg: SuggestionItem<T>): Element {
     return switch sugg {
       case Suggestion(s):
         var highlightClass = highlighted.cata("",  function (h: T) {
@@ -44,16 +45,17 @@ class Dom {
         });
         var li = create("li", [ "class" => classes.item + " " + highlightClass, ], [ config.renderView(s) ]);
         li.on("mouseover", function () dispatch(ChangeHighlight(Specific(s))));
+        li.on("mouseup", function () dispatch(Choose(Some(s))));
         li;
       case Label(renderer):
         create("li", ["class" => classes.label], [ renderer() ]);
     };
   }
 
-  static function renderMenu<T>(dispatch: Action<T> -> Void, state: State<T>): Element {
+  static function renderMenu<T, TInput>(dispatch: Action<T, TInput> -> Void, state: State<T, TInput>): Element {
     return switch state.menu {
-      case Closed: create("div", ["class" => classes.container + " " + classes.containerClosed]);
-      case InputTooShort: create("div", ["class" => classes.container + " " + classes.containerTooShort]);
+      case Closed(Inactive): create("div", ["class" => classes.container + " " + classes.containerClosed]);
+      case Closed(FailedCondition(reason)): create("div", ["class" => classes.container + " " + classes.containerTooShort], reason); // TODO
       case Open(Loading, _): create("div", ["class" => classes.container + " " + classes.containerLoading], "LOADING"); // TODO
       case Open(NoResults, _): create("div", ["class" => classes.container + " " + classes.containerNoResults], "NO RESULTS"); // TODO
       case Open(Failed, _): create("div", ["class" => classes.container + " " + classes.containerFailed], "FAILED"); // TODO
@@ -67,12 +69,17 @@ class Dom {
     };
   }
 
-  public static function fromInput<T>(input: InputElement, container: Element, search: fancy.Search2<T>): thx.stream.Stream<Element> {
+  public static function fromInput<T, TInput>(input: InputElement, container: Element, search: fancy.Search2<T, TInput>, parse: String -> Option<TInput>): thx.stream.Stream<Element> {
     var menu = search.store.stream().map(renderMenu.bind(function (act) search.store.dispatch(act)));
+
+    var highlighted = switch search.store.get().menu {
+      case Open(_, highlight): highlight;
+      case _: None;
+    };
 
     input.on("focus", function (_) search.store.dispatch(OpenMenu));
     input.on("blur", function (_) search.store.dispatch(CloseMenu));
-    input.on("input", function (_) search.store.dispatch(ChangeValue(input.value)));
+    input.on("input", function (_) search.store.dispatch(ChangeValue(parse(input.value))));
     input.on("keydown", function (e: js.html.KeyboardEvent) {
       e.stopPropagation();
       var code = e.which != null ? e.which : e.keyCode;
@@ -81,12 +88,14 @@ class Dom {
         search.store.dispatch(ChangeHighlight(Move(Up)));
       } else if (keys.highlightDown.contains(code)) {
         search.store.dispatch(ChangeHighlight(Move(Down)));
+      } else if (keys.choose.contains(code)) {
+        search.store.dispatch(Choose(highlighted));
       }
 
     });
 
     // initially kick things off by setting the input value
-    search.store.dispatch(ChangeValue(input.value));
+    search.store.dispatch(ChangeValue(parse(input.value)));
 
     return menu;
   }

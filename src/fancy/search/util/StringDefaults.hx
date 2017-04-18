@@ -23,7 +23,7 @@ class StringDefaults {
    *  @param suggestions - The complete list of strings to be filtered
    *  @return Filterer<String>
    */
-  public static function filterStringsSync(suggestions: Array<String>): Filterer<String> {
+  public static function filterStringsSync(suggestions: Array<String>): Filterer<String, String> {
     return function (search: Option<String>): thx.promise.Promise<Array<SuggestionItem<String>>> {
       var filtered = search.cataf(
         function () return suggestions.map(Suggestion),

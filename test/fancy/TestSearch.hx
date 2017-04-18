@@ -26,18 +26,22 @@ class TestSearch {
   // technically unsafe, but you can see with your eyes that it's fine...
   static var suggestionsNel = Nel.fromArray(suggestions.map(Suggestion)).get();
 
-  static var simpleConfig: Configuration<String> = {
+  static var simpleConfig: Configuration<String, String> = {
     filterer: StringDefaults.filterStringsSync(suggestions),
-    renderView: StringDefaults.renderStringElement,
-    equals: function (a, b) return a == b,
-    clearButton: None,
-    minLength: 0,
-    alwaysHighlight: false
+      renderView: StringDefaults.renderStringElement,
+      choose: function (inputOpt, suggOpt) {
+        return suggOpt; // new input
+      },
+      select: function (input) trace(input),
+      equals: function (a, b) return a == b,
+      clearButton: None,
+      hideMenuCondition: thx.fp.Functions.const(None),
+      alwaysHighlight: false
   };
 
   public function new() {}
 
-  inline static function collectMenuState<T>(store: Store<State<T>, Action<T>>, howMany: Int): Stream<Array<MenuState<T>>> {
+  inline static function collectMenuState<T, TInput>(store: Store<State<T, TInput>, Action<T, TInput>>, howMany: Int): Stream<Array<MenuState<T>>> {
     return store.stream().map.fn(_.menu).take(howMany).collectAll();
   }
 
@@ -50,7 +54,7 @@ class TestSearch {
       .next(function (val) {
         Assert.same(simpleConfig, val.config);
         Assert.same(None, val.input);
-        Assert.same(Closed, val.menu);
+        Assert.same(Closed(Inactive), val.menu);
       })
       .always(Assert.createAsync())
       .run();
@@ -64,8 +68,9 @@ class TestSearch {
   public function testFocusInput() {
     var search = new Search2(simpleConfig);
     collectMenuState(search.store, 3)
+      // .log()
       .next(function (val) {
-        Assert.same([Closed, Open(Loading, None), Open(Results(suggestionsNel), None)], val);
+        Assert.same([Closed(Inactive), Open(Loading, None), Open(Results(suggestionsNel), None)], val);
       })
       .always(Assert.createAsync())
       .run();
@@ -79,7 +84,7 @@ class TestSearch {
     collectMenuState(search.store, 5)
       .next(function (val) {
         var expected = [
-          Closed,
+          Closed(Inactive),
           Open(Loading, None),
           Open(Results(suggestionsNel), None),
           Open(Loading, None), // back to loading when value changes
@@ -92,7 +97,7 @@ class TestSearch {
       .run();
 
     search.store.dispatch(OpenMenu);
-    search.store.dispatch(ChangeValue("z"));
+    search.store.dispatch(ChangeValue(Some("z")));
   }
 
   // delayed results should behave the same as above, but...
@@ -110,7 +115,7 @@ class TestSearch {
     // behaves the same as above...
     collectMenuState(searchA.store, 3)
       .next(function (v) {
-        var expected = [Closed, Open(Loading, None), Open(Results(suggestionsNel), None)];
+        var expected = [Closed(Inactive), Open(Loading, None), Open(Results(suggestionsNel), None)];
         Assert.same(expected, v);
       })
       .always(Assert.createAsync())
@@ -122,10 +127,10 @@ class TestSearch {
     collectMenuState(searchB.store, 4)
       .next(function (v) {
         var expected = [
-          Closed,
+          Closed(Inactive),
           Open(Loading, None),
-          Closed, // closed when we tell it to close
-          Closed // and still closed when we finish loading results
+          Closed(Inactive), // closed when we tell it to close
+          Closed(Inactive) // and still closed when we finish loading results
         ];
 
         Assert.same(expected, v);
@@ -146,7 +151,7 @@ class TestSearch {
 
     collectMenuState(search.store, 3)
       .next(function (v) {
-        Assert.same([Closed, Open(Loading, None), Open(Failed, None)], v);
+        Assert.same([Closed(Inactive), Open(Loading, None), Open(Failed, None)], v);
       })
       .always(Assert.createAsync())
       .run();
@@ -167,7 +172,7 @@ class TestSearch {
 
     collectMenuState(search.store, 3)
       .next(function (v) {
-        Assert.same([Closed, Open(Loading, None), Open(Results(suggestionsNel), Some("Apple"))], v);
+        Assert.same([Closed(Inactive), Open(Loading, None), Open(Results(suggestionsNel), Some("Apple"))], v);
       })
       .always(Assert.createAsync())
       .run();
@@ -181,7 +186,7 @@ class TestSearch {
     collectMenuState(search.store, 4)
       .next(function (v) {
         var expected = [
-          Closed,
+          Closed(Inactive),
           Open(Loading, None),
           Open(Results(suggestionsNel), None),
           Open(Results(suggestionsNel), Some("Corn"))
@@ -203,7 +208,7 @@ class TestSearch {
       .next(function (v) {
         var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
         var expected = [
-          Closed,
+          Closed(Inactive),
           Open(Loading, None),
           Open(Results(suggestionsNel), None),
           Open(Results(suggestionsNel), Some("Fava Beans")),
@@ -217,7 +222,7 @@ class TestSearch {
 
     search.store.dispatch(OpenMenu);
     search.store.dispatch(ChangeHighlight(Specific("Fava Beans")));
-    search.store.dispatch(ChangeValue("bean"));
+    search.store.dispatch(ChangeValue(Some("bean")));
   }
 
   // ...but, if input changes made your highlight no longer part of the results
@@ -227,7 +232,7 @@ class TestSearch {
     collectMenuState(search.store, 6)
       .next(function (v) {
         var expected = [
-          Closed,
+          Closed(Inactive),
           Open(Loading, None),
           Open(Results(suggestionsNel), None),
           Open(Results(suggestionsNel), Some("Fava Beans")),
@@ -241,7 +246,7 @@ class TestSearch {
 
     search.store.dispatch(OpenMenu);
     search.store.dispatch(ChangeHighlight(Specific("Fava Beans")));
-    search.store.dispatch(ChangeValue("z"));
+    search.store.dispatch(ChangeValue(Some("z")));
   }
 
   // ...unless `alwaysHighlight` is true, in which case the first is highlighted
@@ -252,7 +257,7 @@ class TestSearch {
     collectMenuState(search.store, 6)
       .next(function (v) {
         var expected = [
-          Closed,
+          Closed(Inactive),
           Open(Loading, None),
           Open(Results(suggestionsNel), Some("Apple")),
           Open(Results(suggestionsNel), Some("Fava Beans")),
@@ -266,7 +271,7 @@ class TestSearch {
 
     search.store.dispatch(OpenMenu);
     search.store.dispatch(ChangeHighlight(Specific("Fava Beans")));
-    search.store.dispatch(ChangeValue("z"));
+    search.store.dispatch(ChangeValue(Some("z")));
   }
 
   // in `alwaysHighlight` mode, ignore unhighlight
@@ -278,7 +283,7 @@ class TestSearch {
     collectMenuState(search.store, 5)
       .next(function (v) {
         var expected = [
-          Closed,
+          Closed(Inactive),
           Open(Loading, None),
           Open(Results(suggestionsNel), Some("Apple")),
           Open(Results(suggestionsNel), Some("Black Bean")),
@@ -302,7 +307,7 @@ class TestSearch {
       .next(function (v) {
         var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
         var expected = [
-          Closed,
+          Closed(Inactive),
           Open(Loading, None),
           Open(Results(suggestionsNel), None),
           Open(Loading, None),
@@ -319,7 +324,7 @@ class TestSearch {
       .run();
 
     search.store.dispatch(OpenMenu);
-    search.store.dispatch(ChangeValue("bean"));
+    search.store.dispatch(ChangeValue(Some("bean")));
     search.store.dispatch(ChangeHighlight(Move(Down)));
     search.store.dispatch(ChangeHighlight(Move(Down)));
     search.store.dispatch(ChangeHighlight(Move(Down)));

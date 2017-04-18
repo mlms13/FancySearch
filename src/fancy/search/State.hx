@@ -4,16 +4,20 @@ import haxe.ds.Option;
 
 import fancy.search.util.Configuration;
 
-typedef State<T> = {
-  config: Configuration<T>,
-  input: Option<String>,
-  menu: MenuState<T>
+typedef State<TSugg, TInput> = {
+  config: Configuration<TSugg, TInput>,
+  input: Option<TInput>,
+  menu: MenuState<TSugg>
 };
 
 enum MenuState<T> {
-  Closed;
-  InputTooShort; // it's up to the renderer to decide if this appears closed
+  Closed(reason: ClosedReason);
   Open(dropdown: DropdownState<T>, highlighted: Option<T>);
+}
+
+enum ClosedReason {
+  Inactive;
+  FailedCondition(reason: String);
 }
 
 enum DropdownState<T> {

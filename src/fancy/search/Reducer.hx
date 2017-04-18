@@ -10,24 +10,24 @@ import fancy.search.State;
 import fancy.search.util.Configuration;
 
 class Reducer {
-  public static function reduce<T>(state: State<T>, action: Action<T>): State<T> {
+  public static function reduce<T, TInput>(state: State<T, TInput>, action: Action<T, TInput>): State<T, TInput> {
     return {
       // config remains unchanged, as it's always unaffected by actions
       config: state.config,
 
       // if we were told about a value change, update our input text
       input: switch action {
-        case ChangeValue(val): thx.Strings.isEmpty(val) ? None : Some(val);
+        case ChangeValue(val): val;
         case _: state.input;
       },
 
       // most of that actions affect the menu state
       menu: switch [state.menu, action] {
         // if the menu is closed and we're told to open it, try
-        case [Closed, OpenMenu]: openMenu(state.config, state.input.getOrElse(""));
+        case [Closed(Inactive), OpenMenu]: openMenu(state.config, state.input);
 
         // if the menu is already open or unopenable, ignore requests to open
-        case [Open(_), OpenMenu] | [InputTooShort, OpenMenu]: state.menu;
+        case [Open(_), OpenMenu] | [Closed(FailedCondition(_)), OpenMenu]: state.menu;
 
         // if the menu is open and results have loaded, show them
         case [Open(_), PopulateSuggestions(None, highlighted)]: Open(NoResults, highlighted);
@@ -37,10 +37,10 @@ class Reducer {
         case [Open(_, highlighted), FailSuggestions]: Open(Failed, highlighted);
 
         // but if the menu is not open when results fail, leave it as is
-        case [Closed, FailSuggestions] | [InputTooShort, FailSuggestions]: state.menu;
+        case [Closed(_), FailSuggestions]: state.menu;
 
         // if we're told to close the menu, just do it
-        case [_, CloseMenu]: Closed;
+        case [_, CloseMenu]: Closed(Inactive);
 
         // only unhighlight when not in `alwaysHighlight` mode
         case [Open(Results(list), h), ChangeHighlight(Unhighlight)]:
@@ -56,18 +56,16 @@ class Reducer {
 
         // if the menu is closed, loading, or has no results,
         // and we receive an instruction to change hightlight... ignore it
-        case [Closed, ChangeHighlight(_)] |
-             [InputTooShort, ChangeHighlight(_)] |
+        case [Closed(_), ChangeHighlight(_)] |
              [Open(Loading, _), ChangeHighlight(_)] |
              [Open(NoResults, _), ChangeHighlight(_)] |
              [Open(Failed, _), ChangeHighlight(_)]: state.menu;
 
         // ignore requests to populate suggestions if the menu isn't open
-        case [Closed, PopulateSuggestions(_)] |
-             [InputTooShort, PopulateSuggestions(_)]: state.menu;
+        case [Closed(_), PopulateSuggestions(_)]: state.menu;
 
         // ignore value changes when the menu is closed
-        case [Closed, ChangeValue(_)] | [InputTooShort, ChangeValue(_)]: state.menu;
+        case [Closed(_), ChangeValue(_)]: state.menu;
 
         // any other time the value changes, switch the menu to a loading state
         // the middleware will handle firing the next action
@@ -80,8 +78,11 @@ class Reducer {
   }
 
   // show the correct menu state, given a request to open it
-  static function openMenu<T>(config: Configuration<T>, inputValue: String): MenuState<T> {
-    return inputValue.length < config.minLength ? InputTooShort : Open(Loading, None);
+  static function openMenu<T, TInput>(config: Configuration<T, TInput>, inputValue: Option<TInput>): MenuState<T> {
+    return switch config.hideMenuCondition(inputValue) {
+      case None: Open(Loading, None);
+      case Some(reason): Closed(FailedCondition(reason));
+    };
   }
 
   static function firstT<T>(suggs: thx.ReadonlyArray<SuggestionItem<T>>): Option<T> {
@@ -102,7 +103,7 @@ class Reducer {
     });
   }
 
-  static function showSuggestions<T>(config: Configuration<T>, suggestions: Nel<SuggestionItem<T>>, highlight: Option<T>): MenuState<T> {
+  static function showSuggestions<T, TInput>(config: Configuration<T, TInput>, suggestions: Nel<SuggestionItem<T>>, highlight: Option<T>): MenuState<T> {
     var suggArray = suggestions.toArray();
     // if PopulateSuggestions told us to highlight a specific T, make sure that
     // T exists in the list, then highlight it. Otherwise, if config tells us to
@@ -119,7 +120,7 @@ class Reducer {
     return Open(Results(suggestions), h);
   }
 
-  static function moveHighlight<T>(config: Configuration<T>, suggestions: Nel<SuggestionItem<T>>, highlighted: Option<T>, dir: Direction): MenuState<T> {
+  static function moveHighlight<T, TInput>(config: Configuration<T, TInput>, suggestions: Nel<SuggestionItem<T>>, highlighted: Option<T>, dir: Direction): MenuState<T> {
     // make sure we only move through suggestion Ts, not labels
     // wrap around when we Up from the first or Down from the last
     var ts = suggestions.toArray().filterMap(function (item) {

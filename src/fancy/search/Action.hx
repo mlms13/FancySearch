@@ -4,14 +4,14 @@ import haxe.ds.Option;
 import thx.Nel;
 import fancy.search.util.Configuration;
 
-enum Action<T> {
-  ChangeValue(newValue: String);
+enum Action<TSugg, TInput> {
+  ChangeValue(newValue: Option<TInput>);
   OpenMenu;
   CloseMenu;
-  PopulateSuggestions(suggestions: Option<Nel<SuggestionItem<T>>>, highlight: Option<T>);
+  PopulateSuggestions(suggestions: Option<Nel<SuggestionItem<TSugg>>>, highlight: Option<TSugg>);
   FailSuggestions;
-  ChangeHighlight(change: HighlightChangeType<T>);
-  Choose(suggestion: T);
+  ChangeHighlight(change: HighlightChangeType<TSugg>);
+  Choose(suggestion: Option<TSugg>);
 }
 
 enum HighlightChangeType<T> {

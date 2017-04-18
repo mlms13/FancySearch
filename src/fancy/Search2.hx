@@ -11,32 +11,32 @@ import fancy.search.State;
 import fancy.search.Action;
 import fancy.search.util.Configuration;
 
-class Search2<T> {
-  public var store(default, null): Store<State<T>, Action<T>>;
+class Search2<TSugg, TInput> {
+  public var store(default, null): Store<State<TSugg, TInput>, Action<TSugg, TInput>>;
 
-  public function new(config: Configuration<T>) {
-    var state = { config: config, input: None, menu: Closed };
+  public function new(config: Configuration<TSugg, TInput>) {
+    var state = { config: config, input: None, menu: Closed(Inactive) };
     var middleware = Middleware.empty() + loadSuggestions(config);
 
     store = new thx.stream.Store(new Property(state), fancy.search.Reducer.reduce, middleware);
   }
 
-  static function loadSuggestions<T>(config: Configuration<T>): Middleware<State<T>, Action<T>> {
+  static function loadSuggestions<TSugg, TInput>(config: Configuration<TSugg, TInput>): Middleware<State<TSugg, TInput>, Action<TSugg, TInput>> {
     // TODO: inside here, we're going to have to make sure we only update the state
     // when the currently-applicable promise returns
     return function (state, action, dispatch) {
-      var inputLength = thx.Options.cata(state.input, 0, fn(_.length));
-
-      if (inputLength >= state.config.minLength) {
-        switch [state.menu, action] {
-          // reducer runs first, so input value is already updated by the time we get here,
-          // so we can ignore ChangeValue's content. also menu will definitely be Open
-          case [Open(_, h), OpenMenu] | [Open(_, h), ChangeValue(_)]:
-            config.filterer(state.input)
-              .success.fn(dispatch(PopulateSuggestions(thx.Nel.fromArray(_), h)))
-              .failure(function (_) dispatch(FailSuggestions));
-          case _: // do nothing
-        }
+      switch state.config.hideMenuCondition(state.input) {
+        case None:
+          switch [state.menu, action] {
+            // reducer runs first, so input value is already updated by the time we get here,
+            // so we can ignore ChangeValue's content. also menu will definitely be Open
+            case [Open(_, h), OpenMenu] | [Open(_, h), ChangeValue(_)]:
+              config.filterer(state.input)
+                .success.fn(dispatch(PopulateSuggestions(thx.Nel.fromArray(_), h)))
+                .failure(function (_) dispatch(FailSuggestions));
+            case _: // do nothing
+          }
+        case _: // more do nothing
       }
     };
   }
