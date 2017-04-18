@@ -1,5 +1,3 @@
-import fancy.Search;
-
 import haxe.ds.Option;
 import dots.Dom.create;
 using thx.Options;
