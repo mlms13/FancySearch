@@ -4,14 +4,13 @@ import haxe.ds.Option;
 import js.html.Element;
 import thx.Lazy;
 
-typedef Configuration<TSugg, TInput> = {
-  filterer: Filterer<TSugg, TInput>,
-  choose: Option<TInput> -> Option<TSugg> -> Option<TInput>,
-  select: Option<TInput> -> Void,
+typedef Configuration<TSugg, TValue> = {
+  filterer: Filterer<TSugg, TValue>,
+  choose: Option<TValue> -> Option<TSugg> -> Option<TValue>,
   renderView: TSugg -> js.html.Element,
   equals: TSugg -> TSugg -> Bool,
   clearButton: Option<Lazy<Element>>,
-  hideMenuCondition: Option<TInput> -> Option<String>, // TODO: add documentation
+  hideMenuCondition: Option<TValue> -> Option<String>, // TODO: add documentation
   alwaysHighlight: Bool
 };
 
@@ -20,4 +19,4 @@ enum SuggestionItem<T> {
   Label(label: Lazy<Element>); // TODO: `Element` could be another type parameter
 }
 
-typedef Filterer<TSugg, TInput> = Option<TInput> -> thx.promise.Promise<Array<SuggestionItem<TSugg>>>;
+typedef Filterer<TSugg, TValue> = Option<TValue> -> thx.promise.Promise<Array<SuggestionItem<TSugg>>>;

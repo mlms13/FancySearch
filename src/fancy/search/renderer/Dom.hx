@@ -45,14 +45,14 @@ class Dom {
         });
         var li = create("li", [ "class" => classes.item + " " + highlightClass, ], [ config.renderView(s) ]);
         li.on("mouseover", function () dispatch(ChangeHighlight(Specific(s))));
-        li.on("mouseup", function () dispatch(Choose(Some(s))));
+        li.on("mouseup", function () {trace("mouseup"); dispatch(Choose(Some(s))); });
         li;
       case Label(renderer):
         create("li", ["class" => classes.label], [ renderer() ]);
     };
   }
 
-  static function renderMenu<T, TInput>(dispatch: Action<T, TInput> -> Void, state: State<T, TInput>): Element {
+  static function renderMenu<T, TValue>(dispatch: Action<T, TValue> -> Void, state: State<T, TValue>): Element {
     return switch state.menu {
       case Closed(Inactive): create("div", ["class" => classes.container + " " + classes.containerClosed]);
       case Closed(FailedCondition(reason)): create("div", ["class" => classes.container + " " + classes.containerTooShort], reason); // TODO
@@ -69,13 +69,13 @@ class Dom {
     };
   }
 
-  public static function fromInput<T, TInput>(input: InputElement, container: Element, search: fancy.Search2<T, TInput>, parse: String -> Option<TInput>): thx.stream.Stream<Element> {
+  public static function fromInput<T, TValue>(input: InputElement, container: Element, search: fancy.Search2<T, TValue>, parse: String -> Option<TValue>, render: Option<TValue> -> String): thx.stream.Stream<Element> {
     var menu = search.store.stream().map(renderMenu.bind(function (act) search.store.dispatch(act)));
 
-    var highlighted = switch search.store.get().menu {
-      case Open(_, highlight): highlight;
-      case _: None;
-    };
+
+    search.store.stream().next(function (state: State<T, TValue>) {
+      input.value = render(state.input);
+    }).run();
 
     input.on("focus", function (_) search.store.dispatch(OpenMenu));
     input.on("blur", function (_) search.store.dispatch(CloseMenu));
@@ -83,6 +83,10 @@ class Dom {
     input.on("keydown", function (e: js.html.KeyboardEvent) {
       e.stopPropagation();
       var code = e.which != null ? e.which : e.keyCode;
+      var highlighted = switch search.store.get().menu {
+        case Open(_, highlight): highlight;
+        case _: None;
+      };
 
       if (keys.highlightUp.contains(code)) {
         search.store.dispatch(ChangeHighlight(Move(Up)));

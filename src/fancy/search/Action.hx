@@ -4,8 +4,8 @@ import haxe.ds.Option;
 import thx.Nel;
 import fancy.search.util.Configuration;
 
-enum Action<TSugg, TInput> {
-  ChangeValue(newValue: Option<TInput>);
+enum Action<TSugg, TValue> {
+  ChangeValue(newValue: Option<TValue>);
   OpenMenu;
   CloseMenu;
   PopulateSuggestions(suggestions: Option<Nel<SuggestionItem<TSugg>>>, highlight: Option<TSugg>);

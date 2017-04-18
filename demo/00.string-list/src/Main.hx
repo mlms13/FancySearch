@@ -1,6 +1,7 @@
 
 import haxe.ds.Option;
 import js.html.Element;
+using thx.Options;
 using thx.Strings;
 import fancy.search.util.StringDefaults;
 import fancy.search.util.Configuration;
@@ -18,7 +19,6 @@ class Main {
       choose: function (inputOpt, suggOpt) {
         return suggOpt; // new input
       },
-      select: function (input) trace(input),
       equals: function (a, b) return a == b,
       clearButton: None,
       hideMenuCondition: thx.fp.Functions.const(None),
@@ -29,7 +29,7 @@ class Main {
     var input = dots.Query.find(".fancy-container input");
     var search = new fancy.Search2(config);
 
-    var renderer = fancy.search.renderer.Dom.fromInput(input, container, search, function (str) return str.isEmpty() ? None : Some(str));
+    var renderer = fancy.search.renderer.Dom.fromInput(input, container, search, function (str) return str.isEmpty() ? None : Some(str), function (input) return input.getOrElse(""));
 
     renderer.next(function (dom) {
       // remove all children except the first (input)

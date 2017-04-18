@@ -4,9 +4,9 @@ import haxe.ds.Option;
 
 import fancy.search.util.Configuration;
 
-typedef State<TSugg, TInput> = {
-  config: Configuration<TSugg, TInput>,
-  input: Option<TInput>,
+typedef State<TSugg, TValue> = {
+  config: Configuration<TSugg, TValue>,
+  input: Option<TValue>,
   menu: MenuState<TSugg>
 };
 

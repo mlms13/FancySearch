@@ -705,22 +705,22 @@ Main.__name__ = ["Main"];
 Main.main = function() {
 	var config = { filterer : fancy_search_util_StringDefaults.filterStringsSync(["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"]), renderView : fancy_search_util_StringDefaults.renderStringElement, choose : function(inputOpt,suggOpt) {
 		return suggOpt;
-	}, select : function(input) {
-		haxe_Log.trace(input,{ fileName : "Main.hx", lineNumber : 21, className : "Main", methodName : "main"});
 	}, equals : function(a,b) {
 		return a == b;
 	}, clearButton : haxe_ds_Option.None, hideMenuCondition : function(a1) {
 		return haxe_ds_Option.None;
 	}, alwaysHighlight : false};
 	var container = dots_Query.find(".fancy-container");
-	var input1 = dots_Query.find(".fancy-container input");
+	var input = dots_Query.find(".fancy-container input");
 	var search = new fancy_Search2(config);
-	var renderer = fancy_search_renderer_Dom.fromInput(input1,container,search,function(str) {
+	var renderer = fancy_search_renderer_Dom.fromInput(input,container,search,function(str) {
 		if(thx_Strings.isEmpty(str)) {
 			return haxe_ds_Option.None;
 		} else {
 			return haxe_ds_Option.Some(str);
 		}
+	},function(input1) {
+		return thx_Options.getOrElse(input1,"");
 	});
 	renderer.next(function(dom) {
 		while(container.children.length > 1) container.removeChild(container.lastChild);
@@ -2225,10 +2225,16 @@ fancy_search_Reducer.__name__ = ["fancy","search","Reducer"];
 fancy_search_Reducer.reduce = function(state,action) {
 	var state1 = state.config;
 	var tmp;
-	if(action[1] == 0) {
+	switch(action[1]) {
+	case 0:
 		var val = action[2];
 		tmp = val;
-	} else {
+		break;
+	case 6:
+		var suggOpt = action[2];
+		tmp = state.config.choose(state.input,suggOpt);
+		break;
+	default:
 		tmp = state.input;
 	}
 	var _g = state.menu;
@@ -2257,7 +2263,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 				tmp1 = state.menu;
 				break;
 			case 6:
-				tmp1 = state.menu;
+				tmp1 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			}
 			break;
@@ -2282,7 +2288,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 				tmp1 = state.menu;
 				break;
 			case 6:
-				tmp1 = state.menu;
+				tmp1 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			}
 			break;
@@ -2359,7 +2365,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 			}
 			break;
 		case 6:
-			tmp1 = state.menu;
+			tmp1 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 			break;
 		}
 		break;
@@ -2574,6 +2580,7 @@ fancy_search_renderer_Dom.renderMenuItem = function(config,dispatch,highlighted,
 			f();
 		});
 		var f1 = function() {
+			haxe_Log.trace("mouseup",{ fileName : "Dom.hx", lineNumber : 48, className : "fancy.search.renderer.Dom", methodName : "renderMenuItem"});
 			dispatch(fancy_search_Action.Choose(haxe_ds_Option.Some(s)));
 		};
 		li.addEventListener("mouseup",function(e1) {
@@ -2947,7 +2954,7 @@ fancy_search_renderer_Dom.renderMenu = function(dispatch,state) {
 		break;
 	}
 };
-fancy_search_renderer_Dom.fromInput = function(input,container,search,parse) {
+fancy_search_renderer_Dom.fromInput = function(input,container,search,parse,render) {
 	var a1 = function(act) {
 		search.store.dispatch(act,{ fileName : "Dom.hx", lineNumber : 73, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	};
@@ -2955,14 +2962,9 @@ fancy_search_renderer_Dom.fromInput = function(input,container,search,parse) {
 		return fancy_search_renderer_Dom.renderMenu(a1,a2);
 	};
 	var menu1 = search.store.stream().map(menu);
-	var highlighted;
-	var _g = search.store.get().menu;
-	if(_g[1] == 1) {
-		var highlight = _g[3];
-		highlighted = highlight;
-	} else {
-		highlighted = haxe_ds_Option.None;
-	}
+	search.store.stream().next(function(state) {
+		input.value = render(state.input);
+	}).run();
 	input.addEventListener("focus",function(_) {
 		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "Dom.hx", lineNumber : 80, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	});
@@ -2975,15 +2977,23 @@ fancy_search_renderer_Dom.fromInput = function(input,container,search,parse) {
 	input.addEventListener("keydown",function(e) {
 		e.stopPropagation();
 		var code = e.which != null ? e.which : e.keyCode;
+		var highlighted;
+		var _g = search.store.get().menu;
+		if(_g[1] == 1) {
+			var highlight = _g[3];
+			highlighted = highlight;
+		} else {
+			highlighted = haxe_ds_Option.None;
+		}
 		if(thx_Arrays.contains(fancy_search_renderer_Dom.keys.highlightUp,code)) {
-			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Up)),{ fileName : "Dom.hx", lineNumber : 88, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Up)),{ fileName : "Dom.hx", lineNumber : 92, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 		} else if(thx_Arrays.contains(fancy_search_renderer_Dom.keys.highlightDown,code)) {
-			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Down)),{ fileName : "Dom.hx", lineNumber : 90, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Down)),{ fileName : "Dom.hx", lineNumber : 94, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 		} else if(thx_Arrays.contains(fancy_search_renderer_Dom.keys.choose,code)) {
-			search.store.dispatch(fancy_search_Action.Choose(highlighted),{ fileName : "Dom.hx", lineNumber : 92, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+			search.store.dispatch(fancy_search_Action.Choose(highlighted),{ fileName : "Dom.hx", lineNumber : 96, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 		}
 	});
-	search.store.dispatch(fancy_search_Action.ChangeValue(parse(input.value)),{ fileName : "Dom.hx", lineNumber : 98, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
+	search.store.dispatch(fancy_search_Action.ChangeValue(parse(input.value)),{ fileName : "Dom.hx", lineNumber : 102, className : "fancy.search.renderer.Dom", methodName : "fromInput"});
 	return menu1;
 };
 var fancy_search_util_SuggestionItem = $hxClasses["fancy.search.util.SuggestionItem"] = { __ename__ : ["fancy","search","util","SuggestionItem"], __constructs__ : ["Suggestion","Label"] };

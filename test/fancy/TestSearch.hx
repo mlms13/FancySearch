@@ -32,7 +32,6 @@ class TestSearch {
       choose: function (inputOpt, suggOpt) {
         return suggOpt; // new input
       },
-      select: function (input) trace(input),
       equals: function (a, b) return a == b,
       clearButton: None,
       hideMenuCondition: thx.fp.Functions.const(None),
@@ -41,7 +40,7 @@ class TestSearch {
 
   public function new() {}
 
-  inline static function collectMenuState<T, TInput>(store: Store<State<T, TInput>, Action<T, TInput>>, howMany: Int): Stream<Array<MenuState<T>>> {
+  inline static function collectMenuState<T, TValue>(store: Store<State<T, TValue>, Action<T, TValue>>, howMany: Int): Stream<Array<MenuState<T>>> {
     return store.stream().map.fn(_.menu).take(howMany).collectAll();
   }
 

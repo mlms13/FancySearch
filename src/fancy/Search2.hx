@@ -11,17 +11,17 @@ import fancy.search.State;
 import fancy.search.Action;
 import fancy.search.util.Configuration;
 
-class Search2<TSugg, TInput> {
-  public var store(default, null): Store<State<TSugg, TInput>, Action<TSugg, TInput>>;
+class Search2<TSugg, TValue> {
+  public var store(default, null): Store<State<TSugg, TValue>, Action<TSugg, TValue>>;
 
-  public function new(config: Configuration<TSugg, TInput>) {
+  public function new(config: Configuration<TSugg, TValue>) {
     var state = { config: config, input: None, menu: Closed(Inactive) };
     var middleware = Middleware.empty() + loadSuggestions(config);
 
     store = new thx.stream.Store(new Property(state), fancy.search.Reducer.reduce, middleware);
   }
 
-  static function loadSuggestions<TSugg, TInput>(config: Configuration<TSugg, TInput>): Middleware<State<TSugg, TInput>, Action<TSugg, TInput>> {
+  static function loadSuggestions<TSugg, TValue>(config: Configuration<TSugg, TValue>): Middleware<State<TSugg, TValue>, Action<TSugg, TValue>> {
     // TODO: inside here, we're going to have to make sure we only update the state
     // when the currently-applicable promise returns
     return function (state, action, dispatch) {

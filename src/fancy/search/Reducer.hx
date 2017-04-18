@@ -10,7 +10,7 @@ import fancy.search.State;
 import fancy.search.util.Configuration;
 
 class Reducer {
-  public static function reduce<T, TInput>(state: State<T, TInput>, action: Action<T, TInput>): State<T, TInput> {
+  public static function reduce<T, TValue>(state: State<T, TValue>, action: Action<T, TValue>): State<T, TValue> {
     return {
       // config remains unchanged, as it's always unaffected by actions
       config: state.config,
@@ -18,6 +18,7 @@ class Reducer {
       // if we were told about a value change, update our input text
       input: switch action {
         case ChangeValue(val): val;
+        case Choose(suggOpt): state.config.choose(state.input, suggOpt);
         case _: state.input;
       },
 
@@ -71,14 +72,14 @@ class Reducer {
         // the middleware will handle firing the next action
         case [Open(_, highlight), ChangeValue(_)]: Open(Loading, highlight);
 
-        // TODO: do we care about choosing a suggestion, or is that all middleware?
-        case [_, Choose(_)]: state.menu;
+        // mostly input cares about this, but we close the menu
+        case [_, Choose(_)]: Closed(Inactive);
       }
     };
   }
 
   // show the correct menu state, given a request to open it
-  static function openMenu<T, TInput>(config: Configuration<T, TInput>, inputValue: Option<TInput>): MenuState<T> {
+  static function openMenu<T, TValue>(config: Configuration<T, TValue>, inputValue: Option<TValue>): MenuState<T> {
     return switch config.hideMenuCondition(inputValue) {
       case None: Open(Loading, None);
       case Some(reason): Closed(FailedCondition(reason));
@@ -103,7 +104,7 @@ class Reducer {
     });
   }
 
-  static function showSuggestions<T, TInput>(config: Configuration<T, TInput>, suggestions: Nel<SuggestionItem<T>>, highlight: Option<T>): MenuState<T> {
+  static function showSuggestions<T, TValue>(config: Configuration<T, TValue>, suggestions: Nel<SuggestionItem<T>>, highlight: Option<T>): MenuState<T> {
     var suggArray = suggestions.toArray();
     // if PopulateSuggestions told us to highlight a specific T, make sure that
     // T exists in the list, then highlight it. Otherwise, if config tells us to
@@ -120,7 +121,7 @@ class Reducer {
     return Open(Results(suggestions), h);
   }
 
-  static function moveHighlight<T, TInput>(config: Configuration<T, TInput>, suggestions: Nel<SuggestionItem<T>>, highlighted: Option<T>, dir: Direction): MenuState<T> {
+  static function moveHighlight<T, TValue>(config: Configuration<T, TValue>, suggestions: Nel<SuggestionItem<T>>, highlighted: Option<T>, dir: Direction): MenuState<T> {
     // make sure we only move through suggestion Ts, not labels
     // wrap around when we Up from the first or Down from the last
     var ts = suggestions.toArray().filterMap(function (item) {
