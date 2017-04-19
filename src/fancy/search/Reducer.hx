@@ -18,7 +18,7 @@ class Reducer {
       // if we were told about a value change, update our input text
       input: switch action {
         case ChangeValue(val): val;
-        case Choose(suggOpt, val): state.config.choose(suggOpt, val);
+        // case Choose(suggOpt, val): state.config.choose(suggOpt, val);
         case _: state.input;
       },
 

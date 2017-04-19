@@ -30,9 +30,6 @@ class Main {
 
     var config: Configuration<Person, SearchPerson> = {
       filterer: makeFilterer(people),
-      choose: function (sugg: Option<Person>, val: Option<SearchPerson>) {
-        return sugg.map(Person).orElse(val);
-      },
       equals: function (a, b) return a.github == b.github,
       hideMenuCondition: thx.fp.Functions.const(None),
       alwaysHighlight: true

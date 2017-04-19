@@ -11,19 +11,24 @@ import fancy.search.State;
 import fancy.search.Action;
 import fancy.search.util.Configuration;
 
-class Search<TSugg, TValue> {
-  public var store(default, null): Store<State<TSugg, TValue>, Action<TSugg, TValue>>;
-  public var stream(default, null): thx.stream.Stream<Option<TValue>>;
+enum Value<TSugg, TInput> {
+  Suggestion(sugg: TSugg);
+  Raw(raw: Option<TInput>);
+}
 
-  public function new(config: Configuration<TSugg, TValue>) {
+class Search<TSugg, TInput> {
+  public var store(default, null): Store<State<TSugg, TInput>, Action<TSugg, TInput>>;
+  public var values(default, null): thx.stream.Stream<Value<TSugg, TInput>>;
+
+  public function new(config: Configuration<TSugg, TInput>) {
     var state = { config: config, input: None, menu: Closed(Inactive) };
     var middleware = Middleware.empty() + loadSuggestions(config);
 
     store = new thx.stream.Store(new Property(state), fancy.search.Reducer.reduce, middleware);
-    stream = store.stream().map.fn(_.input).distinct();
+    // TODO: values
   }
 
-  static function loadSuggestions<TSugg, TValue>(config: Configuration<TSugg, TValue>): Middleware<State<TSugg, TValue>, Action<TSugg, TValue>> {
+  static function loadSuggestions<TSugg, TInput>(config: Configuration<TSugg, TInput>): Middleware<State<TSugg, TInput>, Action<TSugg, TInput>> {
     // TODO: inside here, we're going to have to make sure we only update the state
     // when the currently-applicable promise returns
     return function (state, action, dispatch) {

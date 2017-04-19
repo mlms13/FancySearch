@@ -17,9 +17,6 @@ class Main {
           "Lima Bean", "Mango", "Melon", "Orange", "Peach", "Pear", "Pepper",
           "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
       ]),
-      choose: function (suggOpt, inputOpt) {
-        return suggOpt.orElse(inputOpt); // new input
-      },
       equals: function (a, b) return a == b,
       hideMenuCondition: thx.fp.Functions.const(None),
       alwaysHighlight: false

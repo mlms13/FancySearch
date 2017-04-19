@@ -9,23 +9,24 @@ using thx.Arrays;
 import thx.Lazy;
 using thx.Options;
 
+import fancy.Search;
 import fancy.search.Action;
 import fancy.search.util.Configuration;
 import fancy.search.util.ClassNameConfig;
 import fancy.search.util.KeyboardConfig;
 
-typedef RenderConfig<TSugg, TValue> = {
+typedef RenderConfig<TSugg, TInput> = {
   classes: ClassNameConfig,
   keys: KeyboardConfig,
-  parseInput: String -> Option<TValue>,
-  renderInput: Option<TValue> -> String,
+  parseInput: String -> Option<TInput>,
+  renderInput: Option<TInput> -> String,
   clearButton: Option<Lazy<Element>>, // TODO...
   renderSuggestion: TSugg -> Element
 };
 
 class Dom {
   // render the item; apply special treatment if it matches the highlighted element
-  static function renderMenuItem<T, TI>(config: Configuration<T, TI>, renderCfg: RenderConfig<T, TI>, dispatch: Action<T, TI> -> Void, highlighted: Option<T>, sugg: SuggestionItem<T>): Element {
+  static function renderMenuItem<T, TInput>(config: Configuration<T, TInput>, renderCfg: RenderConfig<T, TInput>, dispatch: Action<T, TInput> -> Void, highlighted: Option<T>, sugg: SuggestionItem<T>): Element {
     return switch sugg {
       case Suggestion(s):
         var highlightClass = highlighted.cata("",  function (h: T) {
@@ -42,7 +43,7 @@ class Dom {
     };
   }
 
-  static function renderMenu<T, TValue>(cfg: RenderConfig<T, TValue>, dispatch: Action<T, TValue> -> Void, state: State<T, TValue>): Element {
+  static function renderMenu<T, TInput>(cfg: RenderConfig<T, TInput>, dispatch: Action<T, TInput> -> Void, state: State<T, TInput>): Element {
     return switch state.menu {
       case Closed(Inactive): create("div", ["class" => cfg.classes.container + " " + cfg.classes.containerClosed]);
       case Closed(FailedCondition(reason)): create("div", ["class" => cfg.classes.container + " " + cfg.classes.containerTooShort], reason); // TODO
@@ -59,16 +60,19 @@ class Dom {
     };
   }
 
-  public static function fromInput<T, TValue>(input: InputElement, container: Element, search: fancy.Search<T, TValue>, cfg: RenderConfig<T, TValue>): thx.stream.Stream<Element> {
+  public static function fromInput<T, TInput>(input: InputElement, container: Element, search: Search<T, TInput>, cfg: RenderConfig<T, TInput>): thx.stream.Stream<Element> {
     var menu = search.store.stream().map(renderMenu.bind(cfg, function (act) search.store.dispatch(act)));
 
     // cache this value so that we can dispatch it as the first chosen value
     // if the choose function doesn't like this value, the input will be cleared
     var initVal = input.value;
 
-    search.stream.next(function (inputVal: Option<TValue>) {
-      input.value = cfg.renderInput(inputVal);
-    }).run();
+    // search.values.next(function (selected: Value) {
+    //   switch selected {
+    //     case Suggestion();
+    //   };
+    //   input.value = cfg.renderInput(inputVal);
+    // }).run();
 
     input.on("focus", function (_) search.store.dispatch(OpenMenu));
     input.on("blur", function (_) search.store.dispatch(CloseMenu));
