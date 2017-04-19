@@ -38,8 +38,12 @@ class TestSearch {
 
   public function new() {}
 
-  inline static function collectMenuState<T, TValue>(store: Store<State<T, TValue>, Action<T, TValue>>, howMany: Int): Stream<Array<MenuState<T>>> {
-    return store.stream().map.fn(_.menu).take(howMany).collectAll();
+  inline static function assertMenuStates<T, TValue>(store: Store<State<T, TValue>, Action<T, TValue>>, expect: Array<MenuState<T>>) {
+    return store.stream().map.fn(_.menu) // map the stream into just the menu part of state
+      .take(expect.length).collectAll() // collect just the ones we care about
+      .next(function (v) Assert.same(expect, v))
+      .always(Assert.createAsync())
+      .run();
   }
 
   // kick it off with an easy one
@@ -64,37 +68,22 @@ class TestSearch {
   // make sure the middleware loads suggestions when appropriate
   public function testFocusInput() {
     var search = new Search2(simpleConfig);
-    collectMenuState(search.store, 3)
-      // .log()
-      .next(function (val) {
-        Assert.same([Closed(Inactive), Open(Loading, None), Open(Results(suggestionsNel), None)], val);
-      })
-      .always(Assert.createAsync())
-      .run();
-
+    assertMenuStates(search.store, [Closed(Inactive), Open(Loading, None), Open(Results(suggestionsNel), None)]);
     search.store.dispatch(OpenMenu);
   }
 
   // changing the input value should filter results
   public function testFilterResults() {
     var search = new Search2(simpleConfig);
-    collectMenuState(search.store, 5)
-      .next(function (val) {
-        var expected = [
-          Closed(Inactive),
-          Open(Loading, None),
-          Open(Results(suggestionsNel), None),
-          Open(Loading, None), // back to loading when value changes
-          Open(Results(Nel.pure(Suggestion("Zucchini"))), None)
-        ];
+    assertMenuStates(search.store, [
+      Closed(Inactive),
+      Open(Loading, None),
+      Open(Results(suggestionsNel), None),
+      Open(Loading, None), // back to loading when value changes
+      Open(Results(Nel.pure(Suggestion("Zucchini"))), None)
+    ]);
 
-        Assert.same(expected, val);
-      })
-      .always(Assert.createAsync())
-      .run();
-
-    search.store.dispatch(OpenMenu);
-    search.store.dispatch(ChangeValue(Some("z")));
+    search.store.dispatch(OpenMenu).dispatch(ChangeValue(Some("z")));
   }
 
   // delayed results should behave the same as above, but...
@@ -110,33 +99,18 @@ class TestSearch {
     var searchB = new Search2(config);
 
     // behaves the same as above...
-    collectMenuState(searchA.store, 3)
-      .next(function (v) {
-        var expected = [Closed(Inactive), Open(Loading, None), Open(Results(suggestionsNel), None)];
-        Assert.same(expected, v);
-      })
-      .always(Assert.createAsync())
-      .run();
-
+    assertMenuStates(searchA.store, [Closed(Inactive), Open(Loading, None), Open(Results(suggestionsNel), None)]);
     searchA.store.dispatch(OpenMenu);
 
     // stays closed
-    collectMenuState(searchB.store, 4)
-      .next(function (v) {
-        var expected = [
-          Closed(Inactive),
-          Open(Loading, None),
-          Closed(Inactive), // closed when we tell it to close
-          Closed(Inactive) // and still closed when we finish loading results
-        ];
+    assertMenuStates(searchB.store, [
+      Closed(Inactive),
+      Open(Loading, None),
+      Closed(Inactive), // closed when we tell it to close
+      Closed(Inactive) // and still closed when we finish loading results
+    ]);
 
-        Assert.same(expected, v);
-      })
-      .always(Assert.createAsync())
-      .run();
-
-    searchB.store.dispatch(OpenMenu);
-    searchB.store.dispatch(CloseMenu);
+    searchB.store.dispatch(OpenMenu).dispatch(CloseMenu);
   }
 
   // when the filterer fails, the state should reflect that
@@ -145,13 +119,7 @@ class TestSearch {
     config.filterer = function (_) return Promise.fail("failed");
 
     var search = new Search2(config);
-
-    collectMenuState(search.store, 3)
-      .next(function (v) {
-        Assert.same([Closed(Inactive), Open(Loading, None), Open(Failed, None)], v);
-      })
-      .always(Assert.createAsync())
-      .run();
+    assertMenuStates(search.store, [Closed(Inactive), Open(Loading, None), Open(Failed, None)]);
     search.store.dispatch(OpenMenu);
   }
 
@@ -166,13 +134,13 @@ class TestSearch {
     config.alwaysHighlight = true;
 
     var search = new Search2(config);
+    assertMenuStates(search.store, [
+      Closed(Inactive),
+      Open(Loading, None),
+      Open(Results(suggestionsNel),
+      Some("Apple"))
+    ]);
 
-    collectMenuState(search.store, 3)
-      .next(function (v) {
-        Assert.same([Closed(Inactive), Open(Loading, None), Open(Results(suggestionsNel), Some("Apple"))], v);
-      })
-      .always(Assert.createAsync())
-      .run();
     search.store.dispatch(OpenMenu);
   }
 
@@ -180,95 +148,71 @@ class TestSearch {
   public function testHighlightSpecific() {
     var search = new Search2(simpleConfig);
 
-    collectMenuState(search.store, 4)
-      .next(function (v) {
-        var expected = [
-          Closed(Inactive),
-          Open(Loading, None),
-          Open(Results(suggestionsNel), None),
-          Open(Results(suggestionsNel), Some("Corn"))
-        ];
-        Assert.same(expected, v);
-      })
-      .always(Assert.createAsync())
-      .run();
+    assertMenuStates(search.store, [
+      Closed(Inactive),
+      Open(Loading, None),
+      Open(Results(suggestionsNel), None),
+      Open(Results(suggestionsNel), Some("Corn"))
+    ]);
 
-    search.store.dispatch(OpenMenu);
-    search.store.dispatch(ChangeHighlight(Specific("Corn")));
+    search.store.dispatch(OpenMenu).dispatch(ChangeHighlight(Specific("Corn")));
   }
 
   // subsequent changes should preserve your highlight if the field
   // you highlighted is still in the list after changes
   public function testSearchAfterHighlight() {
     var search = new Search2(simpleConfig);
-    collectMenuState(search.store, 6)
-      .next(function (v) {
-        var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
-        var expected = [
-          Closed(Inactive),
-          Open(Loading, None),
-          Open(Results(suggestionsNel), None),
-          Open(Results(suggestionsNel), Some("Fava Beans")),
-          Open(Loading, Some("Fava Beans")),
-          Open(Results(results), Some("Fava Beans"))
-        ];
-        Assert.same(expected, v);
-      })
-      .always(Assert.createAsync())
-      .run();
+    var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
+    assertMenuStates(search.store, [
+      Closed(Inactive),
+      Open(Loading, None),
+      Open(Results(suggestionsNel), None),
+      Open(Results(suggestionsNel), Some("Fava Beans")),
+      Open(Loading, Some("Fava Beans")),
+      Open(Results(results), Some("Fava Beans"))
+    ]);
 
-    search.store.dispatch(OpenMenu);
-    search.store.dispatch(ChangeHighlight(Specific("Fava Beans")));
-    search.store.dispatch(ChangeValue(Some("bean")));
+    search.store.dispatch(OpenMenu)
+      .dispatch(ChangeHighlight(Specific("Fava Beans")))
+      .dispatch(ChangeValue(Some("bean")));
   }
 
   // ...but, if input changes made your highlight no longer part of the results
   // highlight `None`
   public function testHighlightNotMatching() {
     var search = new Search2(simpleConfig);
-    collectMenuState(search.store, 6)
-      .next(function (v) {
-        var expected = [
-          Closed(Inactive),
-          Open(Loading, None),
-          Open(Results(suggestionsNel), None),
-          Open(Results(suggestionsNel), Some("Fava Beans")),
-          Open(Loading, Some("Fava Beans")),
-          Open(Results(Nel.pure(Suggestion("Zucchini"))), None)
-        ];
-        Assert.same(expected, v);
-      })
-      .always(Assert.createAsync())
-      .run();
+    assertMenuStates(search.store, [
+      Closed(Inactive),
+      Open(Loading, None),
+      Open(Results(suggestionsNel), None),
+      Open(Results(suggestionsNel), Some("Fava Beans")),
+      Open(Loading, Some("Fava Beans")),
+      Open(Results(Nel.pure(Suggestion("Zucchini"))), None)
+    ]);
 
-    search.store.dispatch(OpenMenu);
-    search.store.dispatch(ChangeHighlight(Specific("Fava Beans")));
-    search.store.dispatch(ChangeValue(Some("z")));
+    search.store.dispatch(OpenMenu)
+      .dispatch(ChangeHighlight(Specific("Fava Beans")))
+      .dispatch(ChangeValue(Some("z")));
   }
 
   // ...unless `alwaysHighlight` is true, in which case the first is highlighted
   public function testAlwaysHighlightNotMatching() {
     var config = thx.Objects.clone(simpleConfig);
     config.alwaysHighlight = true;
-    var search = new Search2(config);
-    collectMenuState(search.store, 6)
-      .next(function (v) {
-        var expected = [
-          Closed(Inactive),
-          Open(Loading, None),
-          Open(Results(suggestionsNel), Some("Apple")),
-          Open(Results(suggestionsNel), Some("Fava Beans")),
-          Open(Loading, Some("Fava Beans")),
-          Open(Results(Nel.pure(Suggestion("Zucchini"))), Some("Zucchini"))
-        ];
-        Assert.same(expected, v);
-      })
-      .always(Assert.createAsync())
-      .run();
 
-    search.store.dispatch(OpenMenu);
-    search.store.dispatch(ChangeHighlight(Specific("Fava Beans")));
-    search.store.dispatch(ChangeValue(Some("z")));
+    var search = new Search2(config);
+    assertMenuStates(search.store, [
+      Closed(Inactive),
+      Open(Loading, None),
+      Open(Results(suggestionsNel), Some("Apple")),
+      Open(Results(suggestionsNel), Some("Fava Beans")),
+      Open(Loading, Some("Fava Beans")),
+      Open(Results(Nel.pure(Suggestion("Zucchini"))), Some("Zucchini"))
+    ]);
+
+    search.store.dispatch(OpenMenu)
+      .dispatch(ChangeHighlight(Specific("Fava Beans")))
+      .dispatch(ChangeValue(Some("z")));
   }
 
   // in `alwaysHighlight` mode, ignore unhighlight
@@ -277,55 +221,43 @@ class TestSearch {
     config.alwaysHighlight = true;
     var search = new Search2(config);
 
-    collectMenuState(search.store, 5)
-      .next(function (v) {
-        var expected = [
-          Closed(Inactive),
-          Open(Loading, None),
-          Open(Results(suggestionsNel), Some("Apple")),
-          Open(Results(suggestionsNel), Some("Black Bean")),
-          Open(Results(suggestionsNel), Some("Black Bean"))
-        ];
+    assertMenuStates(search.store, [
+      Closed(Inactive),
+      Open(Loading, None),
+      Open(Results(suggestionsNel), Some("Apple")),
+      Open(Results(suggestionsNel), Some("Black Bean")),
+      Open(Results(suggestionsNel), Some("Black Bean"))
+    ]);
 
-        Assert.same(expected, v);
-      })
-      .always(Assert.createAsync())
-      .run();
-
-    search.store.dispatch(OpenMenu);
-    search.store.dispatch(ChangeHighlight(Specific("Black Bean")));
-    search.store.dispatch(ChangeHighlight(Unhighlight));
+    search.store.dispatch(OpenMenu)
+      .dispatch(ChangeHighlight(Specific("Black Bean")))
+      .dispatch(ChangeHighlight(Unhighlight));
   }
 
   // test moving the highlight up and down
   public function testMoveHighlight() {
     var search = new Search2(simpleConfig);
-    collectMenuState(search.store, 10)
-      .next(function (v) {
-        var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
-        var expected = [
-          Closed(Inactive),
-          Open(Loading, None),
-          Open(Results(suggestionsNel), None),
-          Open(Loading, None),
-          Open(Results(results), None),
-          Open(Results(results), Some("Black Bean")),
-          Open(Results(results), Some("Fava Beans")),
-          Open(Results(results), Some("Lima Bean")),
-          Open(Results(results), Some("Black Bean")),
-          Open(Results(results), Some("Lima Bean"))
-        ];
-        Assert.same(expected, v);
-      })
-      .always(Assert.createAsync())
-      .run();
+    var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
 
-    search.store.dispatch(OpenMenu);
-    search.store.dispatch(ChangeValue(Some("bean")));
-    search.store.dispatch(ChangeHighlight(Move(Down)));
-    search.store.dispatch(ChangeHighlight(Move(Down)));
-    search.store.dispatch(ChangeHighlight(Move(Down)));
-    search.store.dispatch(ChangeHighlight(Move(Down)));
-    search.store.dispatch(ChangeHighlight(Move(Up)));
+    assertMenuStates(search.store, [
+      Closed(Inactive),
+      Open(Loading, None),
+      Open(Results(suggestionsNel), None),
+      Open(Loading, None),
+      Open(Results(results), None),
+      Open(Results(results), Some("Black Bean")),
+      Open(Results(results), Some("Fava Beans")),
+      Open(Results(results), Some("Lima Bean")),
+      Open(Results(results), Some("Black Bean")),
+      Open(Results(results), Some("Lima Bean"))
+    ]);
+
+    search.store.dispatch(OpenMenu)
+      .dispatch(ChangeValue(Some("bean")))
+      .dispatch(ChangeHighlight(Move(Down)))
+      .dispatch(ChangeHighlight(Move(Down)))
+      .dispatch(ChangeHighlight(Move(Down)))
+      .dispatch(ChangeHighlight(Move(Down)))
+      .dispatch(ChangeHighlight(Move(Up)));
   }
 }
