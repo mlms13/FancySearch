@@ -15,35 +15,30 @@ import fancy.search.util.Configuration;
 import fancy.search.util.ClassNameConfig;
 import fancy.search.util.KeyboardConfig;
 
-typedef RenderConfig<TSugg, TInput> = {
+typedef RenderConfig<Sug, Filter> = {
   classes: ClassNameConfig,
   keys: KeyboardConfig,
-  parseInput: String -> Option<TInput>,
-  renderInput: Option<TInput> -> String,
+  parseInput: String -> Option<Filter>,
+  renderInput: Option<Filter> -> String,
   clearButton: Option<Lazy<Element>>, // TODO...
-  renderSuggestion: TSugg -> Element
+  renderSuggestion: Sug -> Element
 };
 
 class Dom {
   // render the item; apply special treatment if it matches the highlighted element
-  static function renderMenuItem<T, TInput>(config: Configuration<T, TInput>, renderCfg: RenderConfig<T, TInput>, dispatch: Action<T, TInput> -> Void, highlighted: Option<T>, sugg: SuggestionItem<T>): Element {
-    return switch sugg {
-      case Suggestion(s):
-        var highlightClass = highlighted.cata("",  function (h: T) {
-          // if a highlight exists and it matches the stringified version of this suggestion
-          // return the highglight class
-          return config.equals(s, h) ? renderCfg.classes.itemHighlighted : "";
-        });
-        var li = create("li", [ "class" => renderCfg.classes.item + " " + highlightClass, ], [ renderCfg.renderSuggestion(s) ]);
-        li.on("mouseover", function () dispatch(ChangeHighlight(Specific(s))));
-        li.on("mouseup", function () {dispatch(Choose(Some(s), None)); });
-        li;
-      case Label(renderer):
-        create("li", ["class" => renderCfg.classes.label], [ renderer() ]);
-    };
+  static function renderMenuItem<Sug, Filter, Value>(config: Configuration<Sug, Filter, Value>, renderCfg: RenderConfig<Sug, Filter>, dispatch: Action<Sug, Filter, Value> -> Void, highlighted: Option<Sug>, sugg: Sug): Element {
+    var highlightClass = highlighted.cata("",  function (h) {
+      // if a highlight exists and it matches the stringified version of this suggestion
+      // return the highglight class
+      return config.sugEq(sugg, h) ? renderCfg.classes.itemHighlighted : "";
+    });
+    var li = create("li", [ "class" => renderCfg.classes.item + " " + highlightClass, ], [ renderCfg.renderSuggestion(sugg) ]);
+    li.on("mouseover", function () dispatch(ChangeHighlight(Specific(sugg))));
+    li.on("mouseup", function () {dispatch(ChooseCurrent); });
+    return li;
   }
 
-  static function renderMenu<T, TInput>(cfg: RenderConfig<T, TInput>, dispatch: Action<T, TInput> -> Void, state: State<T, TInput>): Element {
+  static function renderMenu<Sug, Filter, A>(cfg: RenderConfig<Sug, Filter>, dispatch: Action<Sug, Filter, A> -> Void, state: State<Sug, Filter, A>): Element {
     return switch state.menu {
       case Closed(Inactive): create("div", ["class" => cfg.classes.container + " " + cfg.classes.containerClosed]);
       case Closed(FailedCondition(reason)): create("div", ["class" => cfg.classes.container + " " + cfg.classes.containerTooShort], reason); // TODO
@@ -60,7 +55,7 @@ class Dom {
     };
   }
 
-  public static function fromInput<T, TInput>(input: InputElement, container: Element, search: Search<T, TInput>, cfg: RenderConfig<T, TInput>): thx.stream.Stream<Element> {
+  public static function fromInput<Sug, Filter, Val>(input: InputElement, container: Element, search: Search<Sug, Filter, Val>, cfg: RenderConfig<Sug, Filter>): thx.stream.Stream<Element> {
     var menu = search.store.stream().map(renderMenu.bind(cfg, function (act) search.store.dispatch(act)));
 
     // cache this value so that we can dispatch it as the first chosen value
@@ -76,29 +71,27 @@ class Dom {
 
     input.on("focus", function (_) search.store.dispatch(OpenMenu));
     input.on("blur", function (_) search.store.dispatch(CloseMenu));
-    input.on("input", function (_) search.store.dispatch(ChangeValue(cfg.parseInput(input.value))));
+    input.on("input", function (_) {
+      switch cfg.parseInput(input.value) {
+        case Some(v): search.store.dispatch(SetFilter(v));
+        case None: // ignore input that can't be parsed to `Filter`
+      }
+    });
     input.on("keydown", function (e: js.html.KeyboardEvent) {
       e.stopPropagation();
       var code = e.which != null ? e.which : e.keyCode;
-      var highlighted = switch search.store.get().menu {
-        case Open(_, highlight): highlight;
-        case _: None;
-      };
 
       if (cfg.keys.highlightUp.contains(code)) {
         search.store.dispatch(ChangeHighlight(Move(Up)));
       } else if (cfg.keys.highlightDown.contains(code)) {
         search.store.dispatch(ChangeHighlight(Move(Down)));
       } else if (cfg.keys.choose.contains(code)) {
-        search.store.dispatch(switch highlighted {
-          case None: Choose(None, cfg.parseInput(input.value));
-          case _: Choose(highlighted, None);
-        });
+        search.store.dispatch(ChooseCurrent);
       }
     });
 
     // initially kick things off by setting the input value
-    search.store.dispatch(Choose(None, cfg.parseInput(initVal)));
+    // search.store.dispatch();
     return menu;
   }
 }

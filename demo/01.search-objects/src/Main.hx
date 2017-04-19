@@ -28,10 +28,12 @@ class Main {
       { firstName: "Andy", lastName: "White", github: "andywhite37" },
     ];
 
-    var config: Configuration<Person, SearchPerson> = {
+    var config: Configuration<Person, String, SearchPerson> = {
       filterer: makeFilterer(people),
-      equals: function (a, b) return a.github == b.github,
-      hideMenuCondition: thx.fp.Functions.const(None),
+      sugEq: function (a, b) return a.github == b.github,
+      initFilter: "",
+      initValue: Text(""),
+      allowMenu: thx.fp.Functions.const(Allow),
       alwaysHighlight: true
     };
 
@@ -42,8 +44,8 @@ class Main {
     var renderer = fancy.search.renderer.Dom.fromInput(input, container, search, {
       classes: ClassNameConfigs.defaultClasses,
       keys: KeyboardConfigs.defaultKeys,
-      parseInput: parseValue,
-      renderInput: renderValue,
+      parseInput: function (v) return v.isEmpty() ? None : Some(v),
+      renderInput: function (v) return v.getOrElse(""),
       renderSuggestion: function (p: Person): js.html.Element {
         return create("div", [
           create("div", p.firstName + " " + p.lastName),
@@ -64,31 +66,15 @@ class Main {
     }).run();
   }
 
-  static function renderValue(v: Option<SearchPerson>): String {
-    return switch v {
-      case None: "";
-      case Some(Text(t)): t;
-      case Some(Person(p)): personToString(p);
-    };
-  }
-
-  static function parseValue(v: String): Option<SearchPerson> {
-    return v.isEmpty() ? None : Some(Text(v)); // TODO? parse as a Person?
-  }
-
   static function personToString(p: Person): String {
     return p.firstName + " " + p.lastName + " " + p.github;
   }
 
-  static function makeFilterer(people: Array<Person>): Filterer<Person, SearchPerson> {
-    return function filterer(search: Option<SearchPerson>): Promise<Array<SuggestionItem<Person>>> {
-      return Promise.value(switch search {
-        case None: people.map(Suggestion);
-        case Some(Person(p)): [ Suggestion(p) ];
-        case Some(Text(t)): people.filter(function (p) {
-          return Strings.caseInsensitiveContains(personToString(p), t);
-        }).map(Suggestion);
-      });
+  static function makeFilterer(people: Array<Person>): Filterer<Person, String> {
+    return function filterer(search: String): Promise<Array<Person>> {
+      return Promise.value(search.isEmpty() ? people : people.filter(function (p) {
+        return personToString(p).caseInsensitiveContains(search);
+      }));
     }
   }
 }

@@ -23,18 +23,13 @@ class StringDefaults {
    *  @param suggestions - The complete list of strings to be filtered
    *  @return Filterer<String>
    */
-  public static function filterStringsSync(suggestions: Array<String>): Filterer<String, String> {
-    return function (search: Option<String>): Promise<Array<SuggestionItem<String>>> {
-      var filtered = search.cataf(
-        function () return suggestions.map(Suggestion),
-        function (val) {
-          return suggestions
-            .filter(Strings.caseInsensitiveContains.bind(_, val))
-            // TODO: could sort here, favoring matches near the beginning
-            .map(Suggestion);
-        }
-      );
-      return Promise.value(filtered);
+  public static function filterStringsSync(suggestions: Array<String>, limit: Int): Filterer<String, String> {
+    return function (search: String): Promise<Array<String>> {
+      var filtered = search.isEmpty() ?
+        suggestions :
+        // TODO: could sort here, favoring matches near the beginning
+        suggestions.filter(Strings.caseInsensitiveContains.bind(_, search));
+      return Promise.value(filtered.slice(0, limit));
     }
   }
 

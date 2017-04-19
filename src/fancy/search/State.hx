@@ -4,15 +4,16 @@ import haxe.ds.Option;
 
 import fancy.search.util.Configuration;
 
-typedef State<TSugg, TInput> = {
-  config: Configuration<TSugg, TInput>,
-  input: Option<TInput>,
-  menu: MenuState<TSugg>
+typedef State<Sug, Filter, Value> = {
+  config: Configuration<Sug, Filter, Value>,
+  filter: Filter,
+  value: Value,
+  menu: MenuState<Sug>
 };
 
-enum MenuState<TSugg> {
+enum MenuState<Sug> {
   Closed(reason: ClosedReason);
-  Open(dropdown: DropdownState<TSugg>, highlighted: Option<TSugg>);
+  Open(dropdown: DropdownState<Sug>, highlighted: Option<Sug>);
 }
 
 enum ClosedReason {
@@ -20,9 +21,9 @@ enum ClosedReason {
   FailedCondition(reason: String);
 }
 
-enum DropdownState<TSugg> {
+enum DropdownState<Sug> {
   Loading;
   NoResults;
   Failed;
-  Results(suggestions: thx.Nel<SuggestionItem<TSugg>>);
+  Results(suggestions: thx.Nel<Sug>);
 }

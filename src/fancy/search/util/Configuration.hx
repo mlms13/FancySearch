@@ -4,16 +4,20 @@ import haxe.ds.Option;
 import js.html.Element;
 import thx.Lazy;
 
-typedef Configuration<TSugg, TInput> = {
-  filterer: Filterer<TSugg, TInput>,
-  equals: TSugg -> TSugg -> Bool,
-  hideMenuCondition: Option<TInput> -> Option<String>, // TODO: add documentation
-  alwaysHighlight: Bool
+typedef Configuration<Sug, Filter, Value> = {
+  filterer: Filterer<Sug, Filter>,
+  sugEq: Sug -> Sug -> Bool,
+  // sugEq: Sug -> Sug -> Bool,
+  allowMenu: Filter -> AllowMenu,
+  alwaysHighlight: Bool,
+  initFilter: Filter,
+  initValue: Value,
+  // getValue: Option<Filter> -> Option<Sug> -> Value
 };
 
-enum SuggestionItem<T> {
-  Suggestion(value: T); // will be rendered as a thing you can select
-  Label(label: Lazy<Element>); // TODO: `Element` could be another type parameter
-}
+typedef Filterer<Sug, Filter> = Filter -> thx.promise.Promise<Array<Sug>>;
 
-typedef Filterer<TSugg, TInput> = Option<TInput> -> thx.promise.Promise<Array<SuggestionItem<TSugg>>>;
+enum AllowMenu {
+  Allow;
+  Disallow(reason: String);
+}

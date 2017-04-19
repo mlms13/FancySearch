@@ -10,22 +10,27 @@ import fancy.search.State;
 import fancy.search.util.Configuration;
 
 class Reducer {
-  public static function reduce<T, TValue>(state: State<T, TValue>, action: Action<T, TValue>): State<T, TValue> {
+  public static function reduce<Sug, Filter, Value>(state: State<Sug, Filter, Value>, action: Action<Sug, Filter, Value>): State<Sug, Filter, Value> {
     return {
       // config remains unchanged, as it's always unaffected by actions
       config: state.config,
 
       // if we were told about a value change, update our input text
-      input: switch action {
-        case ChangeValue(val): val;
-        // case Choose(suggOpt, val): state.config.choose(suggOpt, val);
-        case _: state.input;
+      filter: switch action {
+        case SetFilter(filter): filter;
+        case _: state.filter;
+      },
+
+      value: switch action {
+        case SetValue(v): v;
+        // case ChooseCurrent: // TODO
+        case _: state.value;
       },
 
       // most of that actions affect the menu state
       menu: switch [state.menu, action] {
         // if the menu is closed and we're told to open it, try
-        case [Closed(Inactive), OpenMenu]: openMenu(state.config, state.input);
+        case [Closed(Inactive), OpenMenu]: openMenu(state.config, state.filter);
 
         // if the menu is already open or unopenable, ignore requests to open
         case [Open(_), OpenMenu] | [Closed(FailedCondition(_)), OpenMenu]: state.menu;
@@ -66,82 +71,51 @@ class Reducer {
         case [Closed(_), PopulateSuggestions(_)]: state.menu;
 
 
-        // any other time the value changes, switch the menu to a loading state
+        // any other time the filter changes, switch the menu to a loading state
         // the middleware will handle firing the next action
-        case [Open(_, highlight), ChangeValue(_)]: Open(Loading, highlight);
+        case [Open(_, highlight), SetFilter(_)]: Open(Loading, highlight);
 
-        // open a closed menu when the value changes
-        case [Closed(_), ChangeValue(_)]: Open(Loading, None);
+        // open a closed menu when the filter changes
+        case [Closed(_), SetFilter(_)]: Open(Loading, None);
 
-        // mostly input cares about this, but we close the menu
-        case [_, Choose(_)]: Closed(Inactive);
+        // menu closes when a value is chosen
+        case [_, ChooseCurrent] | [_, SetValue(_)]: Closed(Inactive);
       }
     };
   }
 
   // show the correct menu state, given a request to open it
-  static function openMenu<T, TValue>(config: Configuration<T, TValue>, inputValue: Option<TValue>): MenuState<T> {
-    return switch config.hideMenuCondition(inputValue) {
-      case None: Open(Loading, None);
-      case Some(reason): Closed(FailedCondition(reason));
+  static function openMenu<Sug, Filter, Value>(config: Configuration<Sug, Filter, Value>, filter: Filter): MenuState<Sug> {
+    return switch config.allowMenu(filter) {
+      case Allow: Open(Loading, None);
+      case Disallow(reason): Closed(FailedCondition(reason));
     };
   }
 
-  static function firstT<T>(suggs: thx.ReadonlyArray<SuggestionItem<T>>): Option<T> {
-    return suggs.toArray().findMap(function (s) {
-      return switch s {
-        case Suggestion(v): Some(v);
-      case Label(_): None;
-      };
-    });
-  }
+  static function showSuggestions<Sug, A, B>(config: Configuration<Sug, A, B>, suggestions: Nel<Sug>, highlight: Option<Sug>): MenuState<Sug> {
+    // if PopulateSuggestions told us to highlight a specific Sug, make sure
+    // that Sug exists in the list, then highlight it. Otherwise, if config
+    // tells us to always highlight, pick the first
+    var h: Option<Sug> = highlight.flatMap(function (s) {
+      return suggestions.toArray().contains(s, config.sugEq) ? Some(s) : None;
+    })
+    .orElse(config.alwaysHighlight ? Some(suggestions.head()) : None);
 
-  static function hasT<T>(suggs: thx.ReadonlyArray<SuggestionItem<T>>, t: T, eq: T -> T -> Bool): Bool {
-    return suggs.contains(t, function (curr: SuggestionItem<T>, t: T) {
-      return switch curr {
-        case Label(_): false;
-        case Suggestion(v): eq(t, v);
-      };
-    });
-  }
-
-  static function showSuggestions<T, TValue>(config: Configuration<T, TValue>, suggestions: Nel<SuggestionItem<T>>, highlight: Option<T>): MenuState<T> {
-    var suggArray = suggestions.toArray();
-    // if PopulateSuggestions told us to highlight a specific T, make sure that
-    // T exists in the list, then highlight it. Otherwise, if config tells us to
-    // always highlight, pick the first
-    var h: Option<T> = highlight.flatMap(function (v) {
-      return hasT(suggArray, v, config.equals) ? Some(v) : None;
-    }).cataf(
-      function () {
-        // PopulateSuggestions didn't give us an element to highlight
-        return config.alwaysHighlight ? firstT(suggArray) : None;
-      },
-      Some
-    );
     return Open(Results(suggestions), h);
   }
 
-  static function moveHighlight<T, TValue>(config: Configuration<T, TValue>, suggestions: Nel<SuggestionItem<T>>, highlighted: Option<T>, dir: Direction): MenuState<T> {
-    // make sure we only move through suggestion Ts, not labels
-    // wrap around when we Up from the first or Down from the last
-    var ts = suggestions.toArray().filterMap(function (item) {
-      return switch item {
-        case Label(_): None;
-        case Suggestion(t): Some(t);
-      };
-    });
-
-    var indexOfHighlighted = highlighted.flatMap(function (h: T) {
-      var index = ts.findIndex(config.equals.bind(h));
+  static function moveHighlight<Sug, A, B>(config: Configuration<Sug, A, B>, suggestions: Nel<Sug>, highlighted: Option<Sug>, dir: Direction): MenuState<Sug> {
+    var suggArray = suggestions.toArray();
+    var indexOfHighlighted = highlighted.flatMap(function (h) {
+      var index = suggArray.findIndex(config.sugEq.bind(h));
       return index == -1 ? None : Some(index);
     });
 
-    var newHighlight: Option<T> = switch [dir, indexOfHighlighted] {
-      case [Up, None]: ts.lastOption();
-      case [Up, Some(i)]: i - 1 < 0 ? ts.lastOption() : ts.getOption(i - 1);
-      case [Down, None]: ts.firstOption();
-      case [Down, Some(i)]: i + 1 >= ts.length ? ts.firstOption() : ts.getOption(i + 1);
+    var newHighlight: Option<Sug> = switch [dir, indexOfHighlighted] {
+      case [Up, None]: suggArray.lastOption();
+      case [Up, Some(i)]: i - 1 < 0 ? suggArray.lastOption() : suggArray.getOption(i - 1);
+      case [Down, None]: suggArray.firstOption();
+      case [Down, Some(i)]: i + 1 >= suggArray.length ? suggArray.firstOption() : suggArray.getOption(i + 1);
     }
 
     return Open(Results(suggestions), newHighlight);

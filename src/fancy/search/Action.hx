@@ -2,16 +2,16 @@ package fancy.search;
 
 import haxe.ds.Option;
 import thx.Nel;
-import fancy.search.util.Configuration;
 
-enum Action<TSugg, TValue> {
-  ChangeValue(newValue: Option<TValue>);
+enum Action<Sug, Filter, Value> {
   OpenMenu;
   CloseMenu;
-  PopulateSuggestions(suggestions: Option<Nel<SuggestionItem<TSugg>>>, highlight: Option<TSugg>);
+  SetFilter(filter: Filter);
+  PopulateSuggestions(suggestions: Option<Nel<Sug>>, highlight: Option<Sug>);
   FailSuggestions;
-  ChangeHighlight(change: HighlightChangeType<TSugg>);
-  Choose(suggestion: Option<TSugg>, val: Option<TValue>);
+  ChangeHighlight(change: HighlightChangeType<Sug>);
+  ChooseCurrent; // given the current Filter/Highlight, try to set a value
+  SetValue(val: Value);
 }
 
 enum HighlightChangeType<T> {

@@ -10,15 +10,17 @@ import fancy.search.util.KeyboardConfig;
 
 class Main {
   static function main() {
-    var config: Configuration<String, String> = {
+    var config: Configuration<String, String, String> = {
       filterer: StringDefaults.filterStringsSync([
         "Apple", "Banana", "Barley", "Black Bean", "Carrot", "Corn",
           "Cucumber", "Dates", "Eggplant", "Fava Beans", "Kale", "Lettuce", "Lime",
           "Lima Bean", "Mango", "Melon", "Orange", "Peach", "Pear", "Pepper",
           "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
-      ]),
-      equals: function (a, b) return a == b,
-      hideMenuCondition: thx.fp.Functions.const(None),
+      ], 10),
+      sugEq: function (a, b) return a == b,
+      initValue: "",
+      initFilter: "",
+      allowMenu: thx.fp.Functions.const(Allow),
       alwaysHighlight: false
     };
 
