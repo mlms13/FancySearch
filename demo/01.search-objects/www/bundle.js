@@ -717,7 +717,7 @@ Main.main = function() {
 	}, alwaysHighlight : true};
 	var container = dots_Query.find(".fancy-container");
 	var input = dots_Query.find(".fancy-container input");
-	var search = new fancy_Search2(config);
+	var search = new fancy_Search(config);
 	var renderer = fancy_search_renderer_Dom.fromInput(input,container,search,{ classes : fancy_search_util_ClassNameConfigs.defaultClasses, keys : fancy_search_util_KeyboardConfigs.defaultKeys, parseInput : Main.parseValue, renderInput : Main.renderValue, renderSuggestion : function(p) {
 		var doc = null;
 		if(null == doc) {
@@ -2315,17 +2315,17 @@ dots_Style.style = function(el) {
 	var $window = el.ownerDocument.defaultView;
 	return $window.getComputedStyle(el,null);
 };
-var fancy_Search2 = function(config) {
+var fancy_Search = function(config) {
 	var state = { config : config, input : haxe_ds_Option.None, menu : fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive)};
-	var middleware = thx_stream__$Reducer_Middleware_$Impl_$.compose(thx_stream__$Reducer_Middleware_$Impl_$.empty(),fancy_Search2.loadSuggestions(config));
+	var middleware = thx_stream__$Reducer_Middleware_$Impl_$.compose(thx_stream__$Reducer_Middleware_$Impl_$.empty(),fancy_Search.loadSuggestions(config));
 	this.store = new thx_stream_Store(new thx_stream_Property(state),fancy_search_Reducer.reduce,middleware);
 	this.stream = this.store.stream().map(function(_) {
 		return _.input;
 	}).distinct();
 };
-$hxClasses["fancy.Search2"] = fancy_Search2;
-fancy_Search2.__name__ = ["fancy","Search2"];
-fancy_Search2.loadSuggestions = function(config) {
+$hxClasses["fancy.Search"] = fancy_Search;
+fancy_Search.__name__ = ["fancy","Search"];
+fancy_Search.loadSuggestions = function(config) {
 	return function(state,action,dispatch) {
 		var _g = state.config.hideMenuCondition(state.input);
 		if(_g[1] == 1) {
@@ -2351,10 +2351,10 @@ fancy_Search2.loadSuggestions = function(config) {
 		}
 	};
 };
-fancy_Search2.prototype = {
+fancy_Search.prototype = {
 	store: null
 	,stream: null
-	,__class__: fancy_Search2
+	,__class__: fancy_Search
 };
 var fancy_search_Action = $hxClasses["fancy.search.Action"] = { __ename__ : ["fancy","search","Action"], __constructs__ : ["ChangeValue","OpenMenu","CloseMenu","PopulateSuggestions","FailSuggestions","ChangeHighlight","Choose"] };
 fancy_search_Action.ChangeValue = function(newValue) { var $x = ["ChangeValue",0,newValue]; $x.__enum__ = fancy_search_Action; return $x; };

@@ -9,7 +9,7 @@ import thx.stream.Stream;
 import thx.stream.Store;
 import utest.Assert;
 
-import fancy.Search2;
+import fancy.Search;
 import fancy.search.State;
 import fancy.search.Action;
 import fancy.search.util.Configuration;
@@ -48,7 +48,7 @@ class TestSearch {
 
   // kick it off with an easy one
   public function testInitialState() {
-    var search = new Search2(simpleConfig);
+    var search = new Search(simpleConfig);
 
     search.store.stream()
       .take(1)
@@ -67,14 +67,14 @@ class TestSearch {
 
   // make sure the middleware loads suggestions when appropriate
   public function testFocusInput() {
-    var search = new Search2(simpleConfig);
+    var search = new Search(simpleConfig);
     assertMenuStates(search.store, [Closed(Inactive), Open(Loading, None), Open(Results(suggestionsNel), None)]);
     search.store.dispatch(OpenMenu);
   }
 
   // changing the input value should filter results
   public function testFilterResults() {
-    var search = new Search2(simpleConfig);
+    var search = new Search(simpleConfig);
     assertMenuStates(search.store, [
       Closed(Inactive),
       Open(Loading, None),
@@ -95,8 +95,8 @@ class TestSearch {
         .flatMap(function (_) return StringDefaults.filterStringsSync(suggestions)(optString));
     };
 
-    var searchA = new Search2(config);
-    var searchB = new Search2(config);
+    var searchA = new Search(config);
+    var searchB = new Search(config);
 
     // behaves the same as above...
     assertMenuStates(searchA.store, [Closed(Inactive), Open(Loading, None), Open(Results(suggestionsNel), None)]);
@@ -118,7 +118,7 @@ class TestSearch {
     var config = thx.Objects.clone(simpleConfig);
     config.filterer = function (_) return Promise.fail("failed");
 
-    var search = new Search2(config);
+    var search = new Search(config);
     assertMenuStates(search.store, [Closed(Inactive), Open(Loading, None), Open(Failed, None)]);
     search.store.dispatch(OpenMenu);
   }
@@ -133,7 +133,7 @@ class TestSearch {
     var config = thx.Objects.clone(simpleConfig);
     config.alwaysHighlight = true;
 
-    var search = new Search2(config);
+    var search = new Search(config);
     assertMenuStates(search.store, [
       Closed(Inactive),
       Open(Loading, None),
@@ -146,7 +146,7 @@ class TestSearch {
 
   // allow changing the highlight to a specific value (mimicing mouse hover)
   public function testHighlightSpecific() {
-    var search = new Search2(simpleConfig);
+    var search = new Search(simpleConfig);
 
     assertMenuStates(search.store, [
       Closed(Inactive),
@@ -161,7 +161,7 @@ class TestSearch {
   // subsequent changes should preserve your highlight if the field
   // you highlighted is still in the list after changes
   public function testSearchAfterHighlight() {
-    var search = new Search2(simpleConfig);
+    var search = new Search(simpleConfig);
     var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
     assertMenuStates(search.store, [
       Closed(Inactive),
@@ -180,7 +180,7 @@ class TestSearch {
   // ...but, if input changes made your highlight no longer part of the results
   // highlight `None`
   public function testHighlightNotMatching() {
-    var search = new Search2(simpleConfig);
+    var search = new Search(simpleConfig);
     assertMenuStates(search.store, [
       Closed(Inactive),
       Open(Loading, None),
@@ -200,7 +200,7 @@ class TestSearch {
     var config = thx.Objects.clone(simpleConfig);
     config.alwaysHighlight = true;
 
-    var search = new Search2(config);
+    var search = new Search(config);
     assertMenuStates(search.store, [
       Closed(Inactive),
       Open(Loading, None),
@@ -219,7 +219,7 @@ class TestSearch {
   public function testAlwaysHighlightUnhighlight() {
     var config = thx.Objects.clone(simpleConfig);
     config.alwaysHighlight = true;
-    var search = new Search2(config);
+    var search = new Search(config);
 
     assertMenuStates(search.store, [
       Closed(Inactive),
@@ -236,7 +236,7 @@ class TestSearch {
 
   // test moving the highlight up and down
   public function testMoveHighlight() {
-    var search = new Search2(simpleConfig);
+    var search = new Search(simpleConfig);
     var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]).map(Suggestion);
 
     assertMenuStates(search.store, [

@@ -11,7 +11,7 @@ import fancy.search.State;
 import fancy.search.Action;
 import fancy.search.util.Configuration;
 
-class Search2<TSugg, TValue> {
+class Search<TSugg, TValue> {
   public var store(default, null): Store<State<TSugg, TValue>, Action<TSugg, TValue>>;
   public var stream(default, null): thx.stream.Stream<Option<TValue>>;
 

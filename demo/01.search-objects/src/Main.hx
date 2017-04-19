@@ -40,7 +40,7 @@ class Main {
 
     var container: js.html.Element = dots.Query.find(".fancy-container");
     var input = dots.Query.find(".fancy-container input");
-    var search = new fancy.Search2(config);
+    var search = new fancy.Search(config);
 
     var renderer = fancy.search.renderer.Dom.fromInput(input, container, search, {
       classes: ClassNameConfigs.defaultClasses,

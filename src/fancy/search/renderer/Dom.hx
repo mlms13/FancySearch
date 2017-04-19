@@ -59,7 +59,7 @@ class Dom {
     };
   }
 
-  public static function fromInput<T, TValue>(input: InputElement, container: Element, search: fancy.Search2<T, TValue>, cfg: RenderConfig<T, TValue>): thx.stream.Stream<Element> {
+  public static function fromInput<T, TValue>(input: InputElement, container: Element, search: fancy.Search<T, TValue>, cfg: RenderConfig<T, TValue>): thx.stream.Stream<Element> {
     var menu = search.store.stream().map(renderMenu.bind(cfg, function (act) search.store.dispatch(act)));
 
     // cache this value so that we can dispatch it as the first chosen value
