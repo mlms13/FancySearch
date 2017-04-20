@@ -21,7 +21,10 @@ class Main {
       initValue: "",
       initFilter: "",
       allowMenu: thx.fp.Functions.const(Allow),
-      alwaysHighlight: false
+      alwaysHighlight: false,
+      getValue: function (highlight: Option<String>, _, curr: String) {
+        return highlight.getOrElse(curr);
+      }
     };
 
     var container: Element = dots.Query.find(".fancy-container");

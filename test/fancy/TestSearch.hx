@@ -32,7 +32,10 @@ class TestSearch {
     allowMenu: thx.fp.Functions.const(Allow),
     initFilter: "",
     initValue: "",
-    alwaysHighlight: false
+    alwaysHighlight: false,
+    getValue: function (highlight: Option<String>, _, curr: String) {
+      return highlight.getOrElse(curr);
+    }
   };
 
   public function new() {}
@@ -280,7 +283,7 @@ class TestSearch {
       Closed(Inactive) // closed after choosing
     ]);
 
-    assertStates(search.values, ["Corn"]);
+    assertStates(search.values, ["", "Corn"]);
 
     search.store.dispatch(OpenMenu)
       .dispatch(ChangeHighlight(Specific("Corn")))

@@ -15,15 +15,17 @@ class Reducer {
       // config remains unchanged, as it's always unaffected by actions
       config: state.config,
 
-      // if we were told about a value change, update our input text
+      // if we were told about a filter change, update the filter
       filter: switch action {
         case SetFilter(filter): filter;
         case _: state.filter;
       },
 
+      // value changes when it's set directly, or when we're instructed
+      // to set the value based on the current state
       value: switch action {
         case SetValue(v): v;
-        // case ChooseCurrent: // TODO
+        case ChooseCurrent: state.config.getValue(getHighlight(state.menu), state.filter, state.value);
         case _: state.value;
       },
 
@@ -90,6 +92,13 @@ class Reducer {
       case Allow: Open(Loading, None);
       case Disallow(reason): Closed(FailedCondition(reason));
     };
+  }
+
+  static function getHighlight<Sug>(menu: MenuState<Sug>): Option<Sug> {
+    return switch menu {
+      case Open(_, h): h;
+      case Closed(_): None;
+    }
   }
 
   static function showSuggestions<Sug, A, B>(config: Configuration<Sug, A, B>, suggestions: Nel<Sug>, highlight: Option<Sug>): MenuState<Sug> {

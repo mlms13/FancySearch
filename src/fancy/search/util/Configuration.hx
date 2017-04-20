@@ -7,12 +7,15 @@ import thx.Lazy;
 typedef Configuration<Sug, Filter, Value> = {
   filterer: Filterer<Sug, Filter>,
   sugEq: Sug -> Sug -> Bool,
-  // sugEq: Sug -> Sug -> Bool,
   allowMenu: Filter -> AllowMenu,
   alwaysHighlight: Bool,
   initFilter: Filter,
   initValue: Value,
-  // getValue: Option<Filter> -> Option<Sug> -> Value
+
+  // called when the ChooseCurrent action is dispatched...
+  // given the current highlight, current filter, and current value,
+  // you tell us how to produce a new value
+  getValue: Option<Sug> -> Filter -> Value -> Value
 };
 
 typedef Filterer<Sug, Filter> = Filter -> thx.promise.Promise<Array<Sug>>;

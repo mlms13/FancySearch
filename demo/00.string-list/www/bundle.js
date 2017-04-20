@@ -707,7 +707,9 @@ Main.main = function() {
 		return a == b;
 	}, initValue : "", initFilter : "", allowMenu : function(a1) {
 		return fancy_search_util_AllowMenu.Allow;
-	}, alwaysHighlight : false};
+	}, alwaysHighlight : false, getValue : function(highlight,_,curr) {
+		return thx_Options.getOrElse(highlight,curr);
+	}};
 	var container = dots_Query.find(".fancy-container");
 	var input = dots_Query.find(".fancy-container input");
 	var search = new fancy_Search(config);
@@ -2236,64 +2238,71 @@ fancy_search_Reducer.reduce = function(state,action) {
 		tmp = state.filter;
 	}
 	var tmp1;
-	if(action[1] == 7) {
+	switch(action[1]) {
+	case 6:
+		var state2 = state.config;
+		var tmp2 = fancy_search_Reducer.getHighlight(state.menu);
+		tmp1 = state2.getValue(tmp2,state.filter,state.value);
+		break;
+	case 7:
 		var v = action[2];
 		tmp1 = v;
-	} else {
+		break;
+	default:
 		tmp1 = state.value;
 	}
 	var _g = state.menu;
-	var tmp2;
+	var tmp3;
 	switch(_g[1]) {
 	case 0:
 		switch(_g[2][1]) {
 		case 0:
 			switch(action[1]) {
 			case 0:
-				tmp2 = fancy_search_Reducer.openMenu(state.config,state.filter);
+				tmp3 = fancy_search_Reducer.openMenu(state.config,state.filter);
 				break;
 			case 1:
-				tmp2 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 2:
-				tmp2 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+				tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
 				break;
 			case 3:
-				tmp2 = state.menu;
+				tmp3 = state.menu;
 				break;
 			case 4:
-				tmp2 = state.menu;
+				tmp3 = state.menu;
 				break;
 			case 5:
-				tmp2 = state.menu;
+				tmp3 = state.menu;
 				break;
 			case 6:case 7:
-				tmp2 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			}
 			break;
 		case 1:
 			switch(action[1]) {
 			case 0:
-				tmp2 = state.menu;
+				tmp3 = state.menu;
 				break;
 			case 1:
-				tmp2 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 2:
-				tmp2 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+				tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
 				break;
 			case 3:
-				tmp2 = state.menu;
+				tmp3 = state.menu;
 				break;
 			case 4:
-				tmp2 = state.menu;
+				tmp3 = state.menu;
 				break;
 			case 5:
-				tmp2 = state.menu;
+				tmp3 = state.menu;
 				break;
 			case 6:case 7:
-				tmp2 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			}
 			break;
@@ -2302,80 +2311,80 @@ fancy_search_Reducer.reduce = function(state,action) {
 	case 1:
 		switch(action[1]) {
 		case 0:
-			tmp2 = state.menu;
+			tmp3 = state.menu;
 			break;
 		case 1:
-			tmp2 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+			tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 			break;
 		case 2:
 			var highlight = _g[3];
-			tmp2 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,highlight);
+			tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,highlight);
 			break;
 		case 3:
 			switch(action[2][1]) {
 			case 0:
 				var highlight1 = action[3];
 				var suggestions = action[2][2];
-				tmp2 = fancy_search_Reducer.showSuggestions(state.config,suggestions,highlight1);
+				tmp3 = fancy_search_Reducer.showSuggestions(state.config,suggestions,highlight1);
 				break;
 			case 1:
 				var highlighted = action[3];
-				tmp2 = fancy_search_MenuState.Open(fancy_search_DropdownState.NoResults,haxe_ds_Option.None);
+				tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.NoResults,haxe_ds_Option.None);
 				break;
 			}
 			break;
 		case 4:
 			var highlighted1 = _g[3];
-			tmp2 = fancy_search_MenuState.Open(fancy_search_DropdownState.Failed,highlighted1);
+			tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Failed,highlighted1);
 			break;
 		case 5:
 			switch(action[2][1]) {
 			case 0:
 				switch(_g[2][1]) {
 				case 0:case 1:case 2:
-					tmp2 = state.menu;
+					tmp3 = state.menu;
 					break;
 				case 3:
 					var h = _g[3];
 					var list = _g[2][2];
-					tmp2 = fancy_search_MenuState.Open(fancy_search_DropdownState.Results(list),state.config.alwaysHighlight ? h : haxe_ds_Option.None);
+					tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Results(list),state.config.alwaysHighlight ? h : haxe_ds_Option.None);
 					break;
 				}
 				break;
 			case 1:
 				switch(_g[2][1]) {
 				case 0:case 1:case 2:
-					tmp2 = state.menu;
+					tmp3 = state.menu;
 					break;
 				case 3:
 					var v1 = action[2][2];
 					var list1 = _g[2][2];
-					tmp2 = fancy_search_MenuState.Open(fancy_search_DropdownState.Results(list1),haxe_ds_Option.Some(v1));
+					tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Results(list1),haxe_ds_Option.Some(v1));
 					break;
 				}
 				break;
 			case 2:
 				switch(_g[2][1]) {
 				case 0:case 1:case 2:
-					tmp2 = state.menu;
+					tmp3 = state.menu;
 					break;
 				case 3:
 					var dir = action[2][2];
 					var highlighted2 = _g[3];
 					var list2 = _g[2][2];
-					tmp2 = fancy_search_Reducer.moveHighlight(state.config,list2,highlighted2,dir);
+					tmp3 = fancy_search_Reducer.moveHighlight(state.config,list2,highlighted2,dir);
 					break;
 				}
 				break;
 			}
 			break;
 		case 6:case 7:
-			tmp2 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
+			tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 			break;
 		}
 		break;
 	}
-	return { config : state1, filter : tmp, value : tmp1, menu : tmp2};
+	return { config : state1, filter : tmp, value : tmp1, menu : tmp3};
 };
 fancy_search_Reducer.openMenu = function(config,filter) {
 	var _g = config.allowMenu(filter);
@@ -2385,6 +2394,15 @@ fancy_search_Reducer.openMenu = function(config,filter) {
 	case 1:
 		var reason = _g[2];
 		return fancy_search_MenuState.Closed(fancy_search_ClosedReason.FailedCondition(reason));
+	}
+};
+fancy_search_Reducer.getHighlight = function(menu) {
+	switch(menu[1]) {
+	case 0:
+		return haxe_ds_Option.None;
+	case 1:
+		var h = menu[3];
+		return h;
 	}
 };
 fancy_search_Reducer.showSuggestions = function(config,suggestions,highlight) {

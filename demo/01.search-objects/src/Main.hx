@@ -9,10 +9,10 @@ import fancy.search.util.StringDefaults;
 import fancy.search.util.ClassNameConfig;
 import fancy.search.util.KeyboardConfig;
 
-enum SearchPerson {
-  Text(search: String);
-  Person(p: Person);
-}
+// enum SearchPerson {
+//   Text(search: String);
+//   Person(p: Person);
+// }
 
 typedef Person = {
   firstName: String,
@@ -28,13 +28,16 @@ class Main {
       { firstName: "Andy", lastName: "White", github: "andywhite37" },
     ];
 
-    var config: Configuration<Person, String, SearchPerson> = {
+    var config: Configuration<Person, String, Option<Person>> = {
       filterer: makeFilterer(people),
       sugEq: function (a, b) return a.github == b.github,
       initFilter: "",
-      initValue: Text(""),
+      initValue: None,
       allowMenu: thx.fp.Functions.const(Allow),
-      alwaysHighlight: true
+      alwaysHighlight: true,
+      getValue: function (highlight: Option<Person>, _, curr: Option<Person>) {
+        return highlight.orElse(curr);
+      }
     };
 
     var container: js.html.Element = dots.Query.find(".fancy-container");
@@ -63,6 +66,10 @@ class Main {
 
       // then append the new content after the input
       dots.Dom.append(container, [ dom ]);
+    }).run();
+
+    search.values.next(function (val: Option<Person>) {
+      input.value = val.cata("", personToString);
     }).run();
   }
 
