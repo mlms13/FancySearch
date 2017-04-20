@@ -7,7 +7,7 @@ using thx.Options;
 
 import fancy.search.Action;
 import fancy.search.State;
-import fancy.search.util.Configuration;
+import fancy.search.config.AppConfig;
 
 class Reducer {
   public static function reduce<Sug, Filter, Value>(state: State<Sug, Filter, Value>, action: Action<Sug, Filter, Value>): State<Sug, Filter, Value> {
@@ -87,7 +87,7 @@ class Reducer {
   }
 
   // show the correct menu state, given a request to open it
-  static function openMenu<Sug, Filter, Value>(config: Configuration<Sug, Filter, Value>, filter: Filter): MenuState<Sug> {
+  static function openMenu<Sug, Filter, Value>(config: AppConfig<Sug, Filter, Value>, filter: Filter): MenuState<Sug> {
     return switch config.allowMenu(filter) {
       case Allow: Open(Loading, None);
       case Disallow(reason): Closed(FailedCondition(reason));
@@ -101,7 +101,7 @@ class Reducer {
     }
   }
 
-  static function showSuggestions<Sug, A, B>(config: Configuration<Sug, A, B>, suggestions: Nel<Sug>, highlight: Option<Sug>): MenuState<Sug> {
+  static function showSuggestions<Sug, A, B>(config: AppConfig<Sug, A, B>, suggestions: Nel<Sug>, highlight: Option<Sug>): MenuState<Sug> {
     // if PopulateSuggestions told us to highlight a specific Sug, make sure
     // that Sug exists in the list, then highlight it. Otherwise, if config
     // tells us to always highlight, pick the first
@@ -113,7 +113,7 @@ class Reducer {
     return Open(Results(suggestions), h);
   }
 
-  static function moveHighlight<Sug, A, B>(config: Configuration<Sug, A, B>, suggestions: Nel<Sug>, highlighted: Option<Sug>, dir: Direction): MenuState<Sug> {
+  static function moveHighlight<Sug, A, B>(config: AppConfig<Sug, A, B>, suggestions: Nel<Sug>, highlighted: Option<Sug>, dir: Direction): MenuState<Sug> {
     var suggArray = suggestions.toArray();
     var indexOfHighlighted = highlighted.flatMap(function (h) {
       var index = suggArray.findIndex(config.sugEq.bind(h));

@@ -2,10 +2,10 @@ package fancy.search;
 
 import haxe.ds.Option;
 
-import fancy.search.util.Configuration;
+import fancy.search.config.AppConfig;
 
 typedef State<Sug, Filter, Value> = {
-  config: Configuration<Sug, Filter, Value>,
+  config: AppConfig<Sug, Filter, Value>,
   filter: Filter,
   value: Value,
   menu: MenuState<Sug>

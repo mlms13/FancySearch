@@ -1,10 +1,10 @@
-package fancy.search.util;
+package fancy.search.config;
 
 import haxe.ds.Option;
 import js.html.Element;
 import thx.Lazy;
 
-typedef Configuration<Sug, Filter, Value> = {
+typedef AppConfig<Sug, Filter, Value> = {
   filterer: Filterer<Sug, Filter>,
   sugEq: Sug -> Sug -> Bool,
   allowMenu: Filter -> AllowMenu,

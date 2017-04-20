@@ -1,23 +1,11 @@
-package fancy.search.util;
+package fancy.search.defaults;
 
-typedef ClassNameConfig = {
-  container: String,
-  containerClosed: String,
-  containerOpen: String,
-  containerTooShort: String,
-  containerNoResults: String,
-  containerLoading: String,
-  containerFailed: String,
-  list: String,
-  label: String,
-  item: String,
-  itemHighlighted: String
-};
+import fancy.search.config.RendererConfig;
 
-class ClassNameConfigs {
+class ClassNameDefaults {
   public static var prefix(default, never) = "fs-suggestion";
   public static var containerPrefix(default, never) = prefix + "-container";
-  public static var defaultClasses(default, never): ClassNameConfig = {
+  public static var defaults(default, never): ClassNameConfig = {
     container: containerPrefix,
     containerClosed: containerPrefix + "-closed",
     containerOpen: containerPrefix + "-open",

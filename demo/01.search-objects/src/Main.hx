@@ -4,15 +4,10 @@ using thx.Options;
 using thx.Strings;
 import thx.promise.Promise;
 
-import fancy.search.util.Configuration;
-import fancy.search.util.StringDefaults;
-import fancy.search.util.ClassNameConfig;
-import fancy.search.util.KeyboardConfig;
-
-// enum SearchPerson {
-//   Text(search: String);
-//   Person(p: Person);
-// }
+import fancy.search.config.AppConfig;
+import fancy.search.defaults.AllString;
+import fancy.search.defaults.ClassNameDefaults;
+import fancy.search.defaults.KeyboardDefaults;
 
 typedef Person = {
   firstName: String,
@@ -28,7 +23,7 @@ class Main {
       { firstName: "Andy", lastName: "White", github: "andywhite37" },
     ];
 
-    var config: Configuration<Person, String, Option<Person>> = {
+    var config: AppConfig<Person, String, Option<Person>> = {
       filterer: makeFilterer(people),
       sugEq: function (a, b) return a.github == b.github,
       initFilter: "",
@@ -44,11 +39,9 @@ class Main {
     var input = dots.Query.find(".fancy-container input");
     var search = new fancy.Search(config);
 
-    var renderer = fancy.search.renderer.Dom.fromInput(input, container, search, {
-      classes: ClassNameConfigs.defaultClasses,
-      keys: KeyboardConfigs.defaultKeys,
-      parseInput: function (v) return v.isEmpty() ? None : Some(v),
-      renderInput: function (v) return v.getOrElse(""),
+    var renderer = fancy.search.renderer.DomStringFilter.fromInput(input, container, search, {
+      classes: fancy.search.defaults.ClassNameDefaults.defaults,
+      keys: fancy.search.defaults.KeyboardDefaults.defaults,
       renderSuggestion: function (p: Person): js.html.Element {
         return create("div", [
           create("div", p.firstName + " " + p.lastName),

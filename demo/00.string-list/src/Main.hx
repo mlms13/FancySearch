@@ -3,41 +3,33 @@ import haxe.ds.Option;
 import js.html.Element;
 using thx.Options;
 using thx.Strings;
-import fancy.search.util.StringDefaults;
-import fancy.search.util.Configuration;
-import fancy.search.util.ClassNameConfig;
-import fancy.search.util.KeyboardConfig;
+
+import fancy.search.renderer.DomStringFilter;
+import fancy.search.config.AppConfig;
 
 class Main {
   static function main() {
-    var config: Configuration<String, String, String> = {
-      filterer: StringDefaults.filterStringsSync([
+    var config: AppConfig<String, String, String> = fancy.search.defaults.AllString.sync({
+      suggestions: [
         "Apple", "Banana", "Barley", "Black Bean", "Carrot", "Corn",
-          "Cucumber", "Dates", "Eggplant", "Fava Beans", "Kale", "Lettuce", "Lime",
-          "Lima Bean", "Mango", "Melon", "Orange", "Peach", "Pear", "Pepper",
-          "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
-      ], 10),
-      sugEq: function (a, b) return a == b,
-      initValue: "",
-      initFilter: "",
-      allowMenu: thx.fp.Functions.const(Allow),
-      alwaysHighlight: false,
-      getValue: function (highlight: Option<String>, _, curr: String) {
-        return highlight.getOrElse(curr);
-      }
-    };
+        "Cucumber", "Dates", "Eggplant", "Fava Beans", "Kale", "Lettuce", "Lime",
+        "Lima Bean", "Mango", "Melon", "Orange", "Peach", "Pear", "Pepper",
+        "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
+      ],
+      limit: 10,
+      alwaysHighlight: true,
+      onlySuggestions: true
+    });
 
     var container: Element = dots.Query.find(".fancy-container");
     var input = dots.Query.find(".fancy-container input");
     var search = new fancy.Search(config);
 
-    var renderer = fancy.search.renderer.Dom.fromInput(input, container, search, {
-      classes: ClassNameConfigs.defaultClasses,
-      keys: KeyboardConfigs.defaultKeys,
-      parseInput: function (str) return str.isEmpty() ? None : Some(str),
-      renderInput: function (input) return input.getOrElse(""),
+    var renderer = DomStringFilter.fromInput(input, container, search, {
+      classes: fancy.search.defaults.ClassNameDefaults.defaults,
+      keys: fancy.search.defaults.KeyboardDefaults.defaults,
       clearButton: None,
-      renderSuggestion: StringDefaults.renderStringElement
+      renderSuggestion: DomStringFilter.renderStringSuggestion
     });
 
     renderer.next(function (dom) {

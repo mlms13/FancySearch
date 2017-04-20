@@ -12,8 +12,8 @@ import utest.Assert;
 import fancy.Search;
 import fancy.search.State;
 import fancy.search.Action;
-import fancy.search.util.Configuration;
-import fancy.search.util.StringDefaults;
+import fancy.search.config.AppConfig;
+import fancy.search.defaults.AllString;
 
 class TestSearch {
   static var suggestions = [
@@ -26,17 +26,11 @@ class TestSearch {
   // technically unsafe, but you can see with your eyes that it's fine...
   static var suggestionsNel = Nel.fromArray(suggestions).get();
 
-  static var simpleConfig: Configuration<String, String, String> = {
-    filterer: StringDefaults.filterStringsSync(suggestions, 50),
-    sugEq: function (a, b) return a == b,
-    allowMenu: thx.fp.Functions.const(Allow),
-    initFilter: "",
-    initValue: "",
-    alwaysHighlight: false,
-    getValue: function (highlight: Option<String>, _, curr: String) {
-      return highlight.getOrElse(curr);
-    }
-  };
+  static var simpleConfig = AllString.sync({
+    suggestions: suggestions,
+    onlySuggestions: true,
+    alwaysHighlight: false
+  });
 
   public function new() {}
 
@@ -99,7 +93,7 @@ class TestSearch {
     var config = thx.Objects.clone(simpleConfig);
     config.filterer = function (str) {
       return Promise.nil.delay(20)
-        .flatMap(function (_) return StringDefaults.filterStringsSync(suggestions, 50)(str));
+        .flatMap(function (_) return AllString.filterStringsSync(suggestions, None)(str));
     };
 
     var searchA = new Search(config);

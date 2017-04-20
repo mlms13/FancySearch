@@ -9,13 +9,13 @@ import thx.stream.Reducer.Middleware;
 
 import fancy.search.State;
 import fancy.search.Action;
-import fancy.search.util.Configuration;
+import fancy.search.config.AppConfig;
 
 class Search<Sug, Filter, Value> {
   public var store(default, null): Store<State<Sug, Filter, Value>, Action<Sug, Filter, Value>>;
   public var values(default, null): thx.stream.Stream<Value>;
 
-  public function new(config: Configuration<Sug, Filter, Value>) {
+  public function new(config: AppConfig<Sug, Filter, Value>) {
     var state: State<Sug, Filter, Value> = {
       config: config,
       filter: config.initFilter,
@@ -28,7 +28,7 @@ class Search<Sug, Filter, Value> {
     values = store.stream().map.fn(_.value).distinct();
   }
 
-  static function loadSuggestions<Sug, Filter, Value>(config: Configuration<Sug, Filter, Value>): Middleware<State<Sug, Filter, Value>, Action<Sug, Filter, Value>> {
+  static function loadSuggestions<Sug, Filter, Value>(config: AppConfig<Sug, Filter, Value>): Middleware<State<Sug, Filter, Value>, Action<Sug, Filter, Value>> {
     // TODO: inside here, we're going to have to make sure we only update the state
     // when the currently-applicable promise returns
     return function (state, action, dispatch) {
