@@ -4,6 +4,7 @@ import haxe.ds.Option;
 import js.html.InputElement;
 import doom.html.Html.*;
 import doom.core.VNode;
+using thx.Arrays;
 using thx.Options;
 
 import fancy.Search;
@@ -20,12 +21,12 @@ typedef Props<Sug, Value> = {
 class DoomAutocomplete {
   public static function render<Sug, Value>(props: Props<Sug, Value>) {
     return div([
-      renderInput(props.dispatch, props.state.filter),
+      renderInput(props.cfg.keys, props.dispatch, props.state.filter),
       renderMenu(props.cfg, props.dispatch, props.state)
     ]);
   }
 
-  static function renderInput(dispatch, value: String) {
+  static function renderInput(keys: KeyboardConfig, dispatch, value: String) {
     return input([
       "class" => "fancify",
       "type" => "text",
@@ -39,6 +40,18 @@ class DoomAutocomplete {
       "input" => function (el, _) {
         var inpt: InputElement = cast el;
         dispatch(SetFilter(inpt.value));
+      },
+      "keydown" => function (_, e: js.html.KeyboardEvent) {
+        e.stopPropagation();
+        var code = e.which != null ? e.which : e.keyCode;
+
+        if (keys.highlightUp.contains(code)) {
+          e.preventDefault();
+          dispatch(ChangeHighlight(Move(Up)));
+        } else if (keys.highlightDown.contains(code)) {
+          e.preventDefault();
+          dispatch(ChangeHighlight(Move(Down)));
+        }
       }
     ]);
   }

@@ -3515,9 +3515,9 @@ fancy_search_defaults_KeyboardDefaults.__name__ = ["fancy","search","defaults","
 var fancy_search_renderer_DoomAutocomplete = function() { };
 fancy_search_renderer_DoomAutocomplete.__name__ = ["fancy","search","renderer","DoomAutocomplete"];
 fancy_search_renderer_DoomAutocomplete.render = function(props) {
-	return doom_core__$VNode_VNode_$Impl_$.el("div",null,doom_core__$VNodes_VNodes_$Impl_$.children([fancy_search_renderer_DoomAutocomplete.renderInput(props.dispatch,props.state.filter),fancy_search_renderer_DoomAutocomplete.renderMenu(props.cfg,props.dispatch,props.state)]));
+	return doom_core__$VNode_VNode_$Impl_$.el("div",null,doom_core__$VNodes_VNodes_$Impl_$.children([fancy_search_renderer_DoomAutocomplete.renderInput(props.cfg.keys,props.dispatch,props.state.filter),fancy_search_renderer_DoomAutocomplete.renderMenu(props.cfg,props.dispatch,props.state)]));
 };
-fancy_search_renderer_DoomAutocomplete.renderInput = function(dispatch,value) {
+fancy_search_renderer_DoomAutocomplete.renderInput = function(keys,dispatch,value) {
 	var _g = new haxe_ds_StringMap();
 	var value1 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString("fancify");
 	if(__map_reserved["class"] != null) {
@@ -3578,6 +3578,25 @@ fancy_search_renderer_DoomAutocomplete.renderInput = function(dispatch,value) {
 		_g.setReserved("input",value7);
 	} else {
 		_g.h["input"] = value7;
+	}
+	var f3 = function(_2,e3) {
+		e3.stopPropagation();
+		var code = e3.which != null ? e3.which : e3.keyCode;
+		if(thx_Arrays.contains(keys.highlightUp,code)) {
+			e3.preventDefault();
+			dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Up)));
+		} else if(thx_Arrays.contains(keys.highlightDown,code)) {
+			e3.preventDefault();
+			dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Down)));
+		}
+	};
+	var value8 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el5,e4) {
+		f3(el5,e4);
+	});
+	if(__map_reserved["keydown"] != null) {
+		_g.setReserved("keydown",value8);
+	} else {
+		_g.h["keydown"] = value8;
 	}
 	return doom_core__$VNode_VNode_$Impl_$.el("input",_g,null);
 };
