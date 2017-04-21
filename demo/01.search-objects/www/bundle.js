@@ -187,6 +187,7 @@ Lambda.has = function(it,elt) {
 var Main = function() { };
 Main.__name__ = ["Main"];
 Main.main = function() {
+<<<<<<< HEAD
 	var people = [{ firstName : "Michael", lastName : "Martin", github : "mlms13"},{ firstName : "Franco", lastName : "Ponticelli", github : "fponticelli"},{ firstName : "Andy", lastName : "White", github : "andywhite37"}];
 	var config = { filterer : Main.makeFilterer(people), sugEq : function(a,b) {
 		return a.github == b.github;
@@ -406,6 +407,23 @@ Reflect.deleteField = function(o,field) {
 	}
 	delete(o[field]);
 	return true;
+=======
+	var items = [{ value : "Apple", aliases : ["Fuji","Honeycrisp","Gala","Granny Smith"]},{ value : "Bean", aliases : ["Black","Pinto","Navy","Soy","Northern","Kidney"]},{ value : "Chickpea", aliases : ["Garbanzo Bean"]},{ value : "Corn", aliases : []},{ value : "Squash", aliases : ["Summer","Pumpkin","Zucchini","Acorn","Butternut"]},{ value : "Leaf Vegetable", aliases : ["Kale","Spinach","Romain","Iceberg","Lettuce"]}];
+	var options = { minLength : 0, suggestionOptions : { suggestions : items, limit : 4, alwaysSelected : true, suggestionToString : function(sugg) {
+		return sugg.value;
+	}, filterFn : function(search,sugg1) {
+		return thx_Arrays.reduce(sugg1.aliases,function(match,alias) {
+			var valFirst = sugg1.value.toLowerCase() + " " + alias.toLowerCase();
+			var valLast = alias.toLowerCase() + " " + sugg1.value.toLowerCase();
+			if(!(match || valFirst.indexOf(search) >= 0)) {
+				return valLast.indexOf(search) >= 0;
+			} else {
+				return true;
+			}
+		},false);
+	}}};
+	var search1 = fancy_Search.createFromSelector(".fancy-container input",options);
+>>>>>>> master
 };
 var Std = function() { };
 Std.__name__ = ["Std"];
@@ -964,6 +982,7 @@ dots_Dom.getValue = function(el) {
 	default:
 		return el.innerHTML;
 	}
+<<<<<<< HEAD
 };
 dots_Dom.getMultiValue = function(el) {
 	var _g = el.nodeName;
@@ -974,6 +993,21 @@ dots_Dom.getMultiValue = function(el) {
 			return haxe_ds_Either.Right([]);
 		} else {
 			return haxe_ds_Either.Left(input.value);
+=======
+	var _g11 = new haxe_ds_StringMap();
+	var value = this.settings.classes.clearButton;
+	if(__map_reserved["class"] != null) {
+		_g11.setReserved("class",value);
+	} else {
+		_g11.h["class"] = value;
+	}
+	var attrs = _g11;
+	if(null != attrs) {
+		var attr = attrs.keys();
+		while(attr.hasNext()) {
+			var attr1 = attr.next();
+			el1.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
+>>>>>>> master
 		}
 		break;
 	case "SELECT":
@@ -999,6 +1033,7 @@ dots_Dom.getMultiValue = function(el) {
 	default:
 		return haxe_ds_Either.Left(el.innerHTML);
 	}
+<<<<<<< HEAD
 };
 dots_Dom.getWindowHeight = function(win) {
 	if(null == win) {
@@ -1011,6 +1046,33 @@ dots_Dom.getWindowWidth = function(win) {
 		win = window;
 	}
 	return win.document.documentElement.clientWidth;
+=======
+	var textContent = "×";
+	if(null != textContent) {
+		el1.appendChild(doc.createTextNode(textContent));
+	}
+	this.clearBtn = el1;
+	var el2 = this.clearBtn;
+	el2.addEventListener("mousedown",this.settings.onClearButtonClick);
+	if(this.settings.clearBtn) {
+		dots_Dom.append(this.settings.container,this.clearBtn);
+	}
+	this.list = new fancy_search_Suggestions(this.settings.container,this.input,this.settings.classes,options.suggestionOptions);
+	var el3 = this.input;
+	el3.classList.add(this.settings.classes.input);
+	if(this.input.value.length < 1) {
+		var el4 = this.input;
+		el4.classList.add(this.settings.classes.inputEmpty);
+	}
+	var el5 = this.input;
+	el5.addEventListener("focus",$bind(this,this.onSearchFocus));
+	var el6 = this.input;
+	el6.addEventListener("blur",$bind(this,this.onSearchBlur));
+	var el7 = this.input;
+	el7.addEventListener("input",$bind(this,this.onSearchInput));
+	var el8 = this.input;
+	el8.addEventListener("keydown",$bind(this,this.onSearchKeydown));
+>>>>>>> master
 };
 dots_Dom.getWindowSize = function(win) {
 	if(null == win) {
@@ -1034,6 +1096,7 @@ dots_Dom.getWindowInnerSize = function(win) {
 	if(null == win) {
 		win = window;
 	}
+<<<<<<< HEAD
 	return { width : win.innerWidth, height : win.innerHeight};
 };
 dots_Dom.getDocumentHeight = function(doc) {
@@ -1051,9 +1114,58 @@ dots_Dom.getDocumentWidth = function(doc) {
 dots_Dom.getDocumentSize = function(doc) {
 	if(null == doc) {
 		doc = window.document;
+=======
+	,checkEmptyStatus: function() {
+		if(this.input.value.length > 0) {
+			var el = this.input;
+			el.classList.remove(this.settings.classes.inputEmpty);
+		} else {
+			var el1 = this.input;
+			el1.classList.add(this.settings.classes.inputEmpty);
+		}
+	}
+	,onSearchInput: function(e) {
+		var _gthis = this;
+		this.checkEmptyStatus();
+		this.filterUsingInputValue();
+		thx_Options.map(this.settings.populateSuggestions,function(fn) {
+			var el = _gthis.input;
+			el.classList.add(_gthis.settings.classes.inputLoading);
+			var value = _gthis.input.value;
+			return thx_promise__$Promise_Promise_$Impl_$.always(thx_promise__$Promise_Promise_$Impl_$.success(fn(value),function(result) {
+				if(value == _gthis.input.value) {
+					_gthis.list.setSuggestions(result);
+				}
+			}),function() {
+				var el1 = _gthis.input;
+				el1.classList.remove(_gthis.settings.classes.inputLoading);
+			});
+		});
+	}
+	,onSearchKeydown: function(e) {
+		e.stopPropagation();
+		var code = e.which != null ? e.which : e.keyCode;
+		if(thx_Arrays.contains(this.settings.keys.closeMenu,code)) {
+			this.list.close();
+		} else if(thx_Arrays.contains(this.settings.keys.selectionUp,code) && this.list.isOpen) {
+			e.preventDefault();
+			this.list.moveSelectionUp();
+		} else if(thx_Arrays.contains(this.settings.keys.selectionDown,code) && this.list.isOpen) {
+			e.preventDefault();
+			this.list.moveSelectionDown();
+		} else if(thx_Arrays.contains(this.settings.keys.selectionChoose,code) && !thx_Strings.isEmpty(this.list.selected)) {
+			this.list.chooseSelectedItem();
+		}
+	}
+	,onClearButtonClick: function(e) {
+		e.preventDefault();
+		this.input.value = "";
+		this.filterUsingInputValue();
+>>>>>>> master
 	}
 	return { width : doc.documentElement.scrollWidth, height : doc.documentElement.scrollHeight};
 };
+<<<<<<< HEAD
 dots_Dom.getScrollTop = function(doc) {
 	if(null == doc) {
 		doc = window.document;
@@ -1065,6 +1177,148 @@ dots_Dom.getScrollTop = function(doc) {
 	}
 };
 dots_Dom.getOffset = function(el,doc) {
+=======
+var fancy_search_FancySearchSettings = function(classes,clearBtn,container,keys,minLength,onClearButtonClick,populateSuggestions) {
+	this.classes = classes;
+	this.clearBtn = clearBtn;
+	this.container = container;
+	this.keys = keys;
+	this.minLength = minLength;
+	this.onClearButtonClick = onClearButtonClick;
+	this.populateSuggestions = populateSuggestions;
+};
+fancy_search_FancySearchSettings.__name__ = true;
+fancy_search_FancySearchSettings.classesFromOptions = function(opts) {
+	if(opts == null) {
+		opts = { };
+	}
+	return { input : opts.input != null ? opts.input : "fs-search-input", inputEmpty : opts.inputEmpty != null ? opts.inputEmpty : "fs-search-input-empty", inputLoading : opts.inputLoading != null ? opts.inputLoading : "fs-search-input-loading", clearButton : opts.clearButton != null ? opts.clearButton : "fs-clear-input-button", suggestionContainer : opts.suggestionContainer != null ? opts.suggestionContainer : "fs-suggestion-container", suggestionsOpen : opts.suggestionsOpen != null ? opts.suggestionsOpen : "fs-suggestion-container-open", suggestionsClosed : opts.suggestionsClosed != null ? opts.suggestionsClosed : "fs-suggestion-container-closed", suggestionsEmpty : opts.suggestionsEmpty != null ? opts.suggestionsEmpty : "fs-suggestion-container-empty", suggestionList : opts.suggestionList != null ? opts.suggestionList : "fs-suggestion-list", suggestionItem : opts.suggestionItem != null ? opts.suggestionItem : "fs-suggestion-item", suggestionItemSelected : opts.suggestionItemSelected != null ? opts.suggestionItemSelected : "fs-suggestion-item-selected", suggestionHighlight : opts.suggestionHighlight != null ? opts.suggestionHighlight : "fs-suggestion-highlight", suggestionHighlighted : opts.suggestionHighlighted != null ? opts.suggestionHighlighted : "fs-suggestion-highlighted"};
+};
+fancy_search_FancySearchSettings.keyboardShortcutsFromOptions = function(opts) {
+	if(opts == null) {
+		opts = { };
+	}
+	return { closeMenu : opts.closeMenu != null ? opts.closeMenu : [27], selectionUp : opts.selectionUp != null ? opts.selectionUp : [38], selectionDown : opts.selectionDown != null ? opts.selectionDown : [40,9], selectionChoose : opts.selectionChoose != null ? opts.selectionChoose : [13]};
+};
+fancy_search_FancySearchSettings.createFromOptions = function(input,clrBtnClick,opts) {
+	if(opts == null) {
+		opts = { };
+	}
+	var tmp = fancy_search_FancySearchSettings.classesFromOptions(opts.classes);
+	var tmp1 = opts.clearBtn != null ? opts.clearBtn : true;
+	var tmp2;
+	if(opts.container != null) {
+		tmp2 = opts.container;
+	} else {
+		var value = input.parentElement;
+		tmp2 = thx_Options.getOrThrow(null == value ? haxe_ds_Option.None : haxe_ds_Option.Some(value),null,{ fileName : "FancySearchSettings.hx", lineNumber : 90, className : "fancy.search.FancySearchSettings", methodName : "createFromOptions"});
+	}
+	var tmp3 = fancy_search_FancySearchSettings.keyboardShortcutsFromOptions(opts.keys);
+	var value1 = opts.populateSuggestions;
+	return new fancy_search_FancySearchSettings(tmp,tmp1,tmp2,tmp3,opts.minLength != null ? opts.minLength : 1,opts.onClearButtonClick != null ? opts.onClearButtonClick : clrBtnClick,null == value1 ? haxe_ds_Option.None : haxe_ds_Option.Some(value1));
+};
+fancy_search_FancySearchSettings.prototype = {
+	__class__: fancy_search_FancySearchSettings
+};
+var fancy_search_FancySuggestionSettings = function(alwaysSelected,limit,filterFn,onChoose,suggestions,literalPosition,literalPrefix,literalValue,showLiteral,sorter,suggToElement,suggToString) {
+	this.alwaysSelected = alwaysSelected;
+	this.limit = limit;
+	this.filterFn = filterFn;
+	this.onChooseSelection = onChoose;
+	this.suggestions = suggestions;
+	this.searchLiteralPosition = literalPosition;
+	this.searchLiteralPrefix = literalPrefix;
+	this.searchLiteralValue = literalValue;
+	this.showSearchLiteralItem = showLiteral;
+	this.sortSuggestionsFn = sorter;
+	this.suggestionToElement = suggToElement;
+	this.suggestionToString = suggToString;
+};
+fancy_search_FancySuggestionSettings.__name__ = true;
+fancy_search_FancySuggestionSettings.createFromOptions = function(filterFn,chooseFn,classes,opts) {
+	var toString = opts.suggestionToString != null ? opts.suggestionToString : function(t) {
+		return Std.string(t);
+	};
+	var tmp;
+	if(opts.filterFn != null) {
+		tmp = opts.filterFn;
+	} else {
+		var f = filterFn;
+		var a1 = toString;
+		tmp = function(a2,a3) {
+			return f(a1,a2,a3);
+		};
+	}
+	var tmp1;
+	if(opts.onChooseSelection != null) {
+		tmp1 = opts.onChooseSelection;
+	} else {
+		var f1 = chooseFn;
+		var a11 = toString;
+		tmp1 = function(a21,a31) {
+			f1(a11,a21,a31);
+		};
+	}
+	var value = opts.sortSuggestionsFn;
+	var tmp2 = opts.suggestionToElement != null ? opts.suggestionToElement : function(t1) {
+		var doc = null;
+		if(null == doc) {
+			doc = window.document;
+		}
+		var el = doc.createElement("span");
+		var _g1 = 0;
+		var _g2 = [];
+		while(_g1 < _g2.length) {
+			var o = _g2[_g1];
+			++_g1;
+			el.setAttribute(o.name,o.value);
+		}
+		var _g11 = new haxe_ds_StringMap();
+		var value1 = classes.suggestionHighlight;
+		if(__map_reserved["class"] != null) {
+			_g11.setReserved("class",value1);
+		} else {
+			_g11.h["class"] = value1;
+		}
+		var attrs = _g11;
+		if(null != attrs) {
+			var attr = attrs.keys();
+			while(attr.hasNext()) {
+				var attr1 = attr.next();
+				el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
+			}
+		}
+		var children = null;
+		if(null != children) {
+			var _g21 = 0;
+			while(_g21 < children.length) {
+				var child = children[_g21];
+				++_g21;
+				el.appendChild(child);
+			}
+		}
+		var textContent = toString(t1);
+		if(null != textContent) {
+			el.appendChild(doc.createTextNode(textContent));
+		}
+		return el;
+	};
+	return new fancy_search_FancySuggestionSettings(opts.alwaysSelected != null && opts.alwaysSelected,opts.limit != null ? opts.limit : 5,tmp,tmp1,opts.suggestions != null ? opts.suggestions : [],opts.searchLiteralPosition != null ? opts.searchLiteralPosition : fancy_search_util_LiteralPosition.First,opts.searchLiteralPrefix != null ? opts.searchLiteralPrefix : "Search for: ",opts.searchLiteralValue != null ? opts.searchLiteralValue : function(inpt) {
+		return inpt.value;
+	},opts.showSearchLiteralItem != null && opts.showSearchLiteralItem,null == value ? haxe_ds_Option.None : haxe_ds_Option.Some(value),tmp2,toString);
+};
+fancy_search_FancySuggestionSettings.prototype = {
+	__class__: fancy_search_FancySuggestionSettings
+};
+var fancy_search_Suggestions = function(parent,input,classes,options) {
+	this.searchInput = input;
+	this.classes = classes;
+	this.settings = fancy_search_FancySuggestionSettings.createFromOptions(fancy_search_Suggestions.defaultFilterer,fancy_search_Suggestions.defaultChooseSelection,classes,options);
+	this.isOpen = false;
+	var this1 = new thx_StringOrderedMap();
+	this.filtered = this1;
+	var doc = null;
+>>>>>>> master
 	if(null == doc) {
 		doc = window.document;
 	}
@@ -1075,7 +1329,28 @@ dots_Dom.getOffsetParent = function(el) {
 	if(null != el.offsetParent) {
 		return el.offsetParent;
 	} else {
+<<<<<<< HEAD
 		return el;
+=======
+		_g11.h["class"] = value;
+	}
+	var attrs = _g11;
+	if(null != attrs) {
+		var attr = attrs.keys();
+		while(attr.hasNext()) {
+			var attr1 = attr.next();
+			el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
+		}
+	}
+	var children = null;
+	if(null != children) {
+		var _g21 = 0;
+		while(_g21 < children.length) {
+			var child = children[_g21];
+			++_g21;
+			el.appendChild(child);
+		}
+>>>>>>> master
 	}
 };
 dots_Dom.getOuterHeight = function(el) {
@@ -1106,6 +1381,7 @@ dots_Dom.ready = function(fn,doc) {
 	} else {
 		doc.addEventListener("DOMContentLoaded",fn);
 	}
+<<<<<<< HEAD
 };
 var dots__$EventHandler_EventHandler_$Impl_$ = {};
 dots__$EventHandler_EventHandler_$Impl_$.__name__ = ["dots","_EventHandler","EventHandler_Impl_"];
@@ -1144,6 +1420,14 @@ dots__$EventHandler_EventHandler_$Impl_$.fromIntValueHandler = function(f) {
 		if(thx_Ints.canParse(s)) {
 			var f2 = thx_Ints.parse(s);
 			f(f2);
+=======
+	var attrs1 = _g23;
+	if(null != attrs1) {
+		var attr2 = attrs1.keys();
+		while(attr2.hasNext()) {
+			var attr3 = attr2.next();
+			el1.setAttribute(attr3,__map_reserved[attr3] != null ? attrs1.getReserved(attr3) : attrs1.h[attr3]);
+>>>>>>> master
 		}
 	};
 	return function(e) {
@@ -1165,6 +1449,7 @@ dots__$EventHandler_EventHandler_$Impl_$.fromFloatValueHandler = function(f) {
 		f1(value);
 	};
 };
+<<<<<<< HEAD
 dots__$EventHandler_EventHandler_$Impl_$.toCallback = function(this1) {
 	return this1;
 };
@@ -1190,6 +1475,18 @@ dots_Query.getElementIndex = function(el) {
 			break;
 		}
 		++index;
+=======
+fancy_search_Suggestions.__name__ = true;
+fancy_search_Suggestions.defaultChooseSelection = function(toString,input,selection) {
+	switch(selection[1]) {
+	case 0:
+		var value = selection[2];
+		input.value = toString(value);
+		break;
+	case 1:
+		input.value = input.value;
+		break;
+>>>>>>> master
 	}
 	return index;
 };
@@ -1245,6 +1542,7 @@ dots_SelectorParser.prototype = {
 		} else {
 			return "div";
 		}
+<<<<<<< HEAD
 	}
 	,gobbleAttributes: function() {
 		var attributes = new haxe_ds_StringMap();
@@ -1253,6 +1551,14 @@ dots_SelectorParser.prototype = {
 			if(attribute.key == "class" && (__map_reserved["class"] != null ? attributes.existsReserved("class") : attributes.h.hasOwnProperty("class"))) {
 				var previousClass = (__map_reserved["class"] != null ? attributes.getReserved("class") : attributes.h["class"]).toString();
 				attribute.value = "" + previousClass + " " + attribute.value.toString();
+=======
+		var attrs = _g11;
+		if(null != attrs) {
+			var attr = attrs.keys();
+			while(attr.hasNext()) {
+				var attr1 = attr.next();
+				el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
+>>>>>>> master
 			}
 			var key = attribute.key;
 			var value = attribute.value;
@@ -1278,6 +1584,7 @@ dots_SelectorParser.prototype = {
 			throw new thx_Error("unknown selector char \"" + unknown + "\" at pos " + this.index,null,{ fileName : "SelectorParser.hx", lineNumber : 79, className : "dots.SelectorParser", methodName : "gobbleAttribute"});
 		}
 	}
+<<<<<<< HEAD
 	,gobbleElementId: function() {
 		this.gobbleChar("#");
 		var id = this.gobbleIdentifier();
@@ -1298,6 +1605,34 @@ dots_SelectorParser.prototype = {
 				value = key;
 			} else {
 				value = null;
+=======
+	,createSuggestionItemString: function(label,key) {
+		var doc = null;
+		if(null == doc) {
+			doc = window.document;
+		}
+		var el = doc.createElement("span");
+		var _g1 = 0;
+		var _g2 = [];
+		while(_g1 < _g2.length) {
+			var o = _g2[_g1];
+			++_g1;
+			el.setAttribute(o.name,o.value);
+		}
+		var _g11 = new haxe_ds_StringMap();
+		var value = this.classes.suggestionHighlight;
+		if(__map_reserved["class"] != null) {
+			_g11.setReserved("class",value);
+		} else {
+			_g11.h["class"] = value;
+		}
+		var attrs = _g11;
+		if(null != attrs) {
+			var attr = attrs.keys();
+			while(attr.hasNext()) {
+				var attr1 = attr.next();
+				el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
+>>>>>>> master
 			}
 		}
 		this.gobbleChar("]");
@@ -1317,6 +1652,7 @@ dots_SelectorParser.prototype = {
 		if(expectingAnyOf != null && !thx_Arrays.contains(expectingAnyOf,c)) {
 			throw new thx_Error("expecting one of " + expectingAnyOf.join(", ") + " at position " + this.index + " of " + this.selector,null,{ fileName : "SelectorParser.hx", lineNumber : 125, className : "dots.SelectorParser", methodName : "gobbleChar"});
 		}
+<<<<<<< HEAD
 		return c;
 	}
 	,gobbleUpTo: function(stopChar) {
@@ -1334,6 +1670,17 @@ dots_SelectorParser.prototype = {
 			}
 		} else {
 			return true;
+=======
+		return this.createSuggestionItem(el,key);
+	}
+	,getLiteralItemIndex: function() {
+		var _g = this.settings.searchLiteralPosition;
+		switch(_g[1]) {
+		case 0:
+			return 0;
+		case 1:
+			return this.elements.length - 1;
+>>>>>>> master
 		}
 	}
 	,isNumeric: function() {
@@ -1344,6 +1691,7 @@ dots_SelectorParser.prototype = {
 			return false;
 		}
 	}
+<<<<<<< HEAD
 	,isAlphaNumeric: function() {
 		if(!this.isAlpha()) {
 			return this.isNumeric();
@@ -1422,6 +1770,204 @@ fancy_Search.loadSuggestions = function(config) {
 					});
 					break;
 				default:
+=======
+	,createLiteralItem: function(label,replaceExisting) {
+		if(replaceExisting == null) {
+			replaceExisting = true;
+		}
+		if(!this.shouldCreateLiteral(this.genKeyForLiteral(label))) {
+			return;
+		}
+		var literalPosition = this.getLiteralItemIndex();
+		var el = this.createSuggestionItemString(this.settings.searchLiteralPrefix + label,this.genKeyForLiteral(label));
+		if(replaceExisting) {
+			this.elements.removeAt(literalPosition);
+		}
+		this.elements.insert(literalPosition,this.genKeyForLiteral(label),el);
+	}
+	,setSuggestions: function(items) {
+		var _gthis = this;
+		this.settings.suggestions = thx_Arrays.distinct(items);
+		var tmp = this.settings.suggestions;
+		var this1 = new thx_StringOrderedMap();
+		this.elements = thx_Arrays.reduce(tmp,function(acc,curr) {
+			var node = _gthis.settings.suggestionToElement(curr);
+			var key = _gthis.genKey(curr);
+			var dom = _gthis.createSuggestionItem(node,key);
+			acc.set(key,dom);
+			return acc;
+		},this1);
+		this.createLiteralItem(StringTools.trim(this.settings.searchLiteralValue(this.searchInput)),false);
+		if(this.isOpen) {
+			this.filter(this.searchInput.value);
+		}
+	}
+	,filter: function(search) {
+		var _gthis = this;
+		search = search.toLowerCase();
+		var f = this.settings.filterFn;
+		var a1 = search;
+		var temp = function(a2) {
+			return f(a1,a2);
+		};
+		var temp1 = this.settings.suggestions.filter(temp);
+		var tmp = thx_Options.cata(this.settings.sortSuggestionsFn,temp1,function(fn) {
+			var f1 = fn;
+			var a11 = search;
+			var tmp1 = function(a21,a3) {
+				return f1(a11,a21,a3);
+			};
+			return thx_Arrays.order(temp1,tmp1);
+		}).slice(0,this.settings.limit);
+		var this1 = new thx_StringOrderedMap();
+		this.filtered = thx_Arrays.reduce(tmp,function(acc,curr) {
+			acc.set(_gthis.genKey(curr),curr);
+			return acc;
+		},this1);
+		thx_Iterators.reduce(this.filtered.keys(),function(list,key) {
+			var dom = _gthis.elements.get(key);
+			var dom1 = _gthis.dehighlight(dom);
+			var dom2 = _gthis.highlight(dom1,search);
+			return dots_Dom.append(list,dom2);
+		},dots_Dom.empty(this.list));
+		var literalValue = StringTools.trim(this.settings.searchLiteralValue(this.searchInput));
+		var createLiteral = this.shouldCreateLiteral(literalValue);
+		if(!thx_Strings.isEmpty(search) && createLiteral) {
+			this.createLiteralItem(literalValue);
+			var literalElement = this.elements.get(this.genKeyForLiteral(literalValue));
+			this.filtered.insert(this.getLiteralItemIndex(),literalValue,null);
+			dots_Dom.insertAtIndex(this.list,literalElement,this.getLiteralItemIndex());
+		}
+		if(!this.filtered.exists(this.selected)) {
+			if(createLiteral) {
+				this.selectItem(literalValue);
+			} else if(this.settings.alwaysSelected) {
+				this.selectItem(this.filtered.keyAt(0));
+			} else {
+				this.selectItem();
+			}
+		}
+		if(this.filtered.length == 0) {
+			var el = this.el;
+			el.classList.add(this.classes.suggestionsEmpty);
+		} else {
+			var el1 = this.el;
+			el1.classList.remove(this.classes.suggestionsEmpty);
+		}
+	}
+	,open: function() {
+		this.isOpen = true;
+		var el = this.el;
+		el.classList.remove(this.classes.suggestionsClosed);
+		var el1 = el;
+		el1.classList.add(this.classes.suggestionsOpen);
+	}
+	,close: function() {
+		this.isOpen = false;
+		this.selectItem();
+		var el = this.el;
+		el.classList.remove(this.classes.suggestionsOpen);
+		var el1 = el;
+		el1.classList.add(this.classes.suggestionsClosed);
+	}
+	,selectItem: function(key) {
+		var _gthis = this;
+		var _e = this.elements.iterator();
+		(function(f) {
+			return thx_Iterators.map(_e,f);
+		})(function(_) {
+			_.classList.remove(_gthis.classes.suggestionItemSelected);
+			return _;
+		});
+		this.selected = key;
+		if(!thx_Strings.isEmpty(this.selected) && this.elements.exists(this.selected)) {
+			var el = this.elements.get(this.selected);
+			el.classList.add(this.classes.suggestionItemSelected);
+		}
+	}
+	,moveSelectionUp: function() {
+		var currentIndex = thx_Iterators.toArray(this.filtered.keys()).indexOf(this.selected);
+		var targetIndex = currentIndex > 0 ? currentIndex - 1 : this.filtered.length - 1;
+		this.selectItem(this.filtered.keyAt(targetIndex));
+	}
+	,moveSelectionDown: function() {
+		var currentIndex = thx_Iterators.toArray(this.filtered.keys()).indexOf(this.selected);
+		var targetIndex = currentIndex + 1 == this.filtered.length ? 0 : currentIndex + 1;
+		this.selectItem(this.filtered.keyAt(targetIndex));
+	}
+	,chooseSelectedItem: function() {
+		var tmp = this.settings.onChooseSelection;
+		var tmp1 = this.searchInput;
+		var value = this.filtered.get(this.selected);
+		tmp(tmp1,null == value ? haxe_ds_Option.None : haxe_ds_Option.Some(value));
+	}
+	,highlight: function(dom,search) {
+		if(thx_Strings.isEmpty(StringTools.trim(search))) {
+			return dom;
+		}
+		var elements = dom.querySelectorAll("." + this.classes.suggestionHighlight.split(" ").join("."));
+		var parts = search.split(" ").filter(function(v) {
+			return v != "";
+		}).map(thx_ERegs.escape);
+		var pattern = new EReg("(" + parts.join("|") + ")","i");
+		var _g = 0;
+		while(_g < elements.length) {
+			var el = elements[_g];
+			++_g;
+			this.highlightElement(el,pattern);
+		}
+		return dom;
+	}
+	,highlightElement: function(dom,pattern) {
+		var _gthis = this;
+		dots_Dom.traverseTextNodes(dom,function(node) {
+			var text = node.textContent;
+			var fragment = window.document.createDocumentFragment();
+			while(pattern.match(text)) {
+				var left = pattern.matchedLeft();
+				if(left != "" && left != null) {
+					fragment.appendChild(window.document.createTextNode(left));
+				}
+				var doc = null;
+				if(null == doc) {
+					doc = window.document;
+				}
+				var el = doc.createElement("strong");
+				var _g1 = 0;
+				var _g2 = [];
+				while(_g1 < _g2.length) {
+					var o = _g2[_g1];
+					++_g1;
+					el.setAttribute(o.name,o.value);
+				}
+				var _g11 = new haxe_ds_StringMap();
+				var value = _gthis.classes.suggestionHighlighted;
+				if(__map_reserved["class"] != null) {
+					_g11.setReserved("class",value);
+				} else {
+					_g11.h["class"] = value;
+				}
+				var attrs = _g11;
+				if(null != attrs) {
+					var attr = attrs.keys();
+					while(attr.hasNext()) {
+						var attr1 = attr.next();
+						el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
+					}
+				}
+				var children = null;
+				if(null != children) {
+					var _g21 = 0;
+					while(_g21 < children.length) {
+						var child = children[_g21];
+						++_g21;
+						el.appendChild(child);
+					}
+				}
+				var textContent = pattern.matched(1);
+				if(null != textContent) {
+					el.appendChild(doc.createTextNode(textContent));
+>>>>>>> master
 				}
 			}
 		}
@@ -1630,8 +2176,42 @@ fancy_search_Reducer.getHighlight = function(menu) {
 	case 0:
 		return haxe_ds_Option.None;
 	case 1:
+<<<<<<< HEAD
 		var h = menu[3];
 		return h;
+=======
+		var m = s[2];
+		b.b += "module ";
+		b.b += m == null ? "null" : "" + m;
+		break;
+	case 2:
+		var line = s[4];
+		var file = s[3];
+		var s1 = s[2];
+		if(s1 != null) {
+			haxe_CallStack.itemToString(b,s1);
+			b.b += " (";
+		}
+		b.b += file == null ? "null" : "" + file;
+		b.b += " line ";
+		b.b += line == null ? "null" : "" + line;
+		if(s1 != null) {
+			b.b += ")";
+		}
+		break;
+	case 3:
+		var meth = s[3];
+		var cname = s[2];
+		b.b += cname == null ? "null" : "" + cname;
+		b.b += ".";
+		b.b += meth == null ? "null" : "" + meth;
+		break;
+	case 4:
+		var n = s[2];
+		b.b += "local function #";
+		b.b += n == null ? "null" : "" + n;
+		break;
+>>>>>>> master
 	}
 };
 fancy_search_Reducer.showSuggestions = function(config,suggestions,highlight) {
@@ -1641,6 +2221,7 @@ fancy_search_Reducer.showSuggestions = function(config,suggestions,highlight) {
 		} else {
 			return haxe_ds_Option.None;
 		}
+<<<<<<< HEAD
 	}),config.alwaysHighlight ? haxe_ds_Option.Some(thx__$Nel_Nel_$Impl_$.head(suggestions)) : haxe_ds_Option.None);
 	return fancy_search_MenuState.Open(fancy_search_DropdownState.Results(suggestions),h);
 };
@@ -1672,6 +2253,20 @@ fancy_search_Reducer.moveHighlight = function(config,suggestions,highlighted,dir
 				} else {
 					newHighlight = haxe_ds_Option.Some(value);
 				}
+=======
+		var m = [];
+		var rie10 = new EReg("^   at ([A-Za-z0-9_. ]+) \\(([^)]+):([0-9]+):([0-9]+)\\)$","");
+		var _g = 0;
+		while(_g < stack.length) {
+			var line = stack[_g];
+			++_g;
+			if(rie10.match(line)) {
+				var path = rie10.matched(1).split(".");
+				var meth = path.pop();
+				var file = rie10.matched(2);
+				var line1 = Std.parseInt(rie10.matched(3));
+				m.push(haxe_StackItem.FilePos(meth == "Anonymous function" ? haxe_StackItem.LocalFunction() : meth == "Global code" ? null : haxe_StackItem.Method(path.join("."),meth),file,line1));
+>>>>>>> master
 			} else {
 				newHighlight = thx_Arrays.getOption(suggArray,i - 1);
 			}
@@ -2418,10 +3013,22 @@ haxe_ds_BalancedTree.prototype = {
 			if(c == 0) {
 				return node.value;
 			}
+<<<<<<< HEAD
 			if(c < 0) {
 				node = node.left;
 			} else {
 				node = node.right;
+=======
+			var l = o.length;
+			var i1;
+			var str1 = "[";
+			s += "\t";
+			var _g11 = 0;
+			var _g2 = l;
+			while(_g11 < _g2) {
+				var i2 = _g11++;
+				str1 += (i2 > 0 ? "," : "") + js_Boot.__string_rec(o[i2],s);
+>>>>>>> master
 			}
 		}
 		return null;
@@ -13534,6 +14141,7 @@ thx_stream_StringStreamExtensions.falsy = function(stream) {
 		}
 	});
 };
+<<<<<<< HEAD
 thx_stream_StringStreamExtensions.join = function(stream,sep) {
 	return stream.reduce(function(acc,v) {
 		return acc + sep + v;
@@ -13575,6 +14183,24 @@ thx_stream_FloatStreamExtensions.average = function(stream) {
 			case 2:
 				o.message(thx_stream_Message.Done);
 				break;
+=======
+js_Boot.__interfLoop = function(cc,cl) {
+	if(cc == null) {
+		return false;
+	}
+	if(cc == cl) {
+		return true;
+	}
+	var intf = cc.__interfaces__;
+	if(intf != null) {
+		var _g1 = 0;
+		var _g = intf.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var i1 = intf[i];
+			if(i1 == cl || js_Boot.__interfLoop(i1,cl)) {
+				return true;
+>>>>>>> master
 			}
 		}).run();
 	});
@@ -13666,6 +14292,7 @@ thx_stream_IntStreamExtensions.insideRange = function(stream,min,max) {
 		} else {
 			return false;
 		}
+<<<<<<< HEAD
 	});
 };
 thx_stream_IntStreamExtensions.lessThan = function(stream,x) {
@@ -13779,6 +14406,13 @@ thx_stream_EitherStreamExtensions.right = function(stream) {
 		case 1:
 			var v = e[2];
 			return haxe_ds_Option.Some(v);
+=======
+		if(cl == Class ? o.__name__ != null : false) {
+			return true;
+		}
+		if(cl == Enum ? o.__ename__ != null : false) {
+			return true;
+>>>>>>> master
 		}
 	});
 };
@@ -13809,6 +14443,7 @@ thx_stream_Subjects.next = function(subject,v) {
 thx_stream_Subjects.error = function(subject,err) {
 	return subject.message(thx_stream_Message.Error(err));
 };
+<<<<<<< HEAD
 thx_stream_Subjects.done = function(subject) {
 	return subject.message(thx_stream_Message.Done);
 };
@@ -13817,6 +14452,32 @@ thx_stream_Subjects.wrapHandler = function(handler) {
 	return function(msg) {
 		if(terminated) {
 			return;
+=======
+var thx_Arrays = function() { };
+thx_Arrays.__name__ = true;
+thx_Arrays.any = function(arr,predicate) {
+	var _g1 = 0;
+	var _g = arr.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		if(predicate(arr[i])) {
+			return true;
+		}
+	}
+	return false;
+};
+thx_Arrays.contains = function(array,element,eq) {
+	if(null == eq) {
+		return thx__$ReadonlyArray_ReadonlyArray_$Impl_$.indexOf(array,element) >= 0;
+	} else {
+		var _g1 = 0;
+		var _g = array.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(eq(array[i],element)) {
+				return true;
+			}
+>>>>>>> master
 		}
 		handler(msg);
 		switch(msg[1]) {
@@ -13897,6 +14558,7 @@ dots_Attributes.properties = (function($this) {
 			_g.h["allowFullScreen"] = value;
 		}
 	}
+<<<<<<< HEAD
 	{
 		var value1 = dots_AttributeType.BooleanAttribute;
 		if(__map_reserved["async"] != null) {
@@ -13911,6 +14573,56 @@ dots_Attributes.properties = (function($this) {
 			_g.setReserved("autoFocus",value2);
 		} else {
 			_g.h["autoFocus"] = value2;
+=======
+	var _g = 0;
+	while(_g < array.length) {
+		var v = [array[_g]];
+		++_g;
+		var keep = !thx_Arrays.any(result,(function(v1) {
+			return function(r) {
+				return predicate(r,v1[0]);
+			};
+		})(v));
+		if(keep) {
+			result.push(v[0]);
+		}
+	}
+	return result;
+};
+thx_Arrays.order = function(array,sort) {
+	var n = array.slice();
+	n.sort(sort);
+	return n;
+};
+thx_Arrays.reduce = function(array,f,initial) {
+	var _g = 0;
+	while(_g < array.length) {
+		var v = array[_g];
+		++_g;
+		initial = f(initial,v);
+	}
+	return initial;
+};
+var thx_ERegs = function() { };
+thx_ERegs.__name__ = true;
+thx_ERegs.escape = function(text) {
+	return thx_ERegs.ESCAPE_PATTERN.map(text,function(ereg) {
+		return "\\" + ereg.matched(1);
+	});
+};
+var thx_Either = { __ename__ : true, __constructs__ : ["Left","Right"] };
+thx_Either.Left = function(value) { var $x = ["Left",0,value]; $x.__enum__ = thx_Either; $x.toString = $estr; return $x; };
+thx_Either.Right = function(value) { var $x = ["Right",1,value]; $x.__enum__ = thx_Either; $x.toString = $estr; return $x; };
+var thx_Error = function(message,stack,pos) {
+	Error.call(this,message);
+	this.message = message;
+	if(null == stack) {
+		try {
+			stack = haxe_CallStack.exceptionStack();
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			stack = [];
+>>>>>>> master
 		}
 	}
 	{
@@ -13953,6 +14665,7 @@ dots_Attributes.properties = (function($this) {
 			_g.h["controls"] = value7;
 		}
 	}
+<<<<<<< HEAD
 	{
 		var value8 = dots_AttributeType.BooleanAttribute;
 		if(__map_reserved["default"] != null) {
@@ -13976,6 +14689,70 @@ dots_Attributes.properties = (function($this) {
 		} else {
 			_g.h["disabled"] = value10;
 		}
+=======
+	,__class__: thx_Error
+});
+var thx_Functions = function() { };
+thx_Functions.__name__ = true;
+thx_Functions.equality = function(a,b) {
+	return a == b;
+};
+var thx_Iterators = function() { };
+thx_Iterators.__name__ = true;
+thx_Iterators.map = function(it,f) {
+	var acc = [];
+	var v = it;
+	while(v.hasNext()) {
+		var v1 = v.next();
+		acc.push(f(v1));
+	}
+	return acc;
+};
+thx_Iterators.reduce = function(it,callback,initial) {
+	var result = initial;
+	while(it.hasNext()) result = callback(result,it.next());
+	return result;
+};
+thx_Iterators.toArray = function(it) {
+	var elements = [];
+	var element = it;
+	while(element.hasNext()) {
+		var element1 = element.next();
+		elements.push(element1);
+	}
+	return elements;
+};
+var thx_Options = function() { };
+thx_Options.__name__ = true;
+thx_Options.map = function(option,callback) {
+	switch(option[1]) {
+	case 0:
+		var v = option[2];
+		return haxe_ds_Option.Some(callback(v));
+	case 1:
+		return haxe_ds_Option.None;
+	}
+};
+thx_Options.cata = function(option,ifNone,f) {
+	switch(option[1]) {
+	case 0:
+		var v = option[2];
+		return f(v);
+	case 1:
+		return ifNone;
+	}
+};
+thx_Options.getOrThrow = function(option,err,posInfo) {
+	if(null == err) {
+		err = new thx_Error("Could not extract value from option",null,posInfo);
+	}
+	switch(option[1]) {
+	case 0:
+		var v = option[2];
+		return v;
+	case 1:
+		throw err;
+>>>>>>> master
 	}
 	{
 		var value11 = dots_AttributeType.OverloadedBooleanAttribute;
@@ -14089,14 +14866,27 @@ dots_Attributes.properties = (function($this) {
 			_g.h["scoped"] = value24;
 		}
 	}
+<<<<<<< HEAD
 	{
 		var value25 = dots_AttributeType.BooleanAttribute;
 		if(__map_reserved["seamless"] != null) {
 			_g.setReserved("seamless",value25);
 		} else {
 			_g.h["seamless"] = value25;
+=======
+	,setState: function(newstate) {
+		var _g = this.state;
+		switch(_g[1]) {
+		case 0:
+			var r = _g[2];
+			throw new thx_Error("future was already \"" + Std.string(r) + "\", can't apply the new state \"" + Std.string(newstate) + "\"",null,{ fileName : "Future.hx", lineNumber : 121, className : "thx.promise.Future", methodName : "setState"});
+		case 1:
+			this.state = haxe_ds_Option.Some(newstate);
+			break;
+>>>>>>> master
 		}
 	}
+<<<<<<< HEAD
 	{
 		var value26 = dots_AttributeType.BooleanProperty;
 		if(__map_reserved["selected"] != null) {
@@ -14254,6 +15044,78 @@ fancy_search_defaults_ClassNameDefaults.defaults = { container : fancy_search_de
 fancy_search_defaults_KeyboardDefaults.defaults = { highlightUp : [38,104], highlightDown : [40,98,9], choose : [13], close : [27]};
 haxe__$Int32_Int32_$Impl_$._mul = Math.imul != null ? Math.imul : function(a,b) {
 	return a * (b & 65535) + (a * (b >>> 16) << 16 | 0) | 0;
+=======
+	,update: function() {
+		var _g = this.state;
+		switch(_g[1]) {
+		case 0:
+			var result = _g[2];
+			var index = -1;
+			while(++index < this.handlers.length) {
+				var handler = this.handlers[index];
+				handler(result);
+			}
+			this.handlers = [];
+			break;
+		case 1:
+			break;
+		}
+	}
+	,__class__: thx_promise_Future
+};
+var thx_promise__$Promise_Promise_$Impl_$ = {};
+thx_promise__$Promise_Promise_$Impl_$.__name__ = true;
+thx_promise__$Promise_Promise_$Impl_$.createUnsafe = function(callback) {
+	var this1 = thx_promise_Future.create(function(cb) {
+		callback(function(v) {
+			cb(thx_Either.Right(v));
+		},function(e) {
+			cb(thx_Either.Left(e));
+		});
+	});
+	return this1;
+};
+thx_promise__$Promise_Promise_$Impl_$.always = function(this1,handler) {
+	var this2 = thx_promise_Future.create(function(cb) {
+		this1.then(function(v) {
+			try {
+				handler();
+				cb(v);
+			} catch( e ) {
+				haxe_CallStack.lastException = e;
+				if (e instanceof js__$Boot_HaxeError) e = e.val;
+				var future = thx_Either.Left(thx_Error.fromDynamic(e,{ fileName : "Promise.hx", lineNumber : 124, className : "thx.promise._Promise.Promise_Impl_", methodName : "always"}));
+				cb(future);
+			}
+		});
+	});
+	return this2;
+};
+thx_promise__$Promise_Promise_$Impl_$.either = function(this1,success,failure) {
+	return thx_promise__$Promise_Promise_$Impl_$.createUnsafe(function(resolve,reject) {
+		this1.then(function(r) {
+			try {
+				switch(r[1]) {
+				case 0:
+					var e = r[2];
+					failure(e);
+					reject(e);
+					break;
+				case 1:
+					var v = r[2];
+					success(v);
+					resolve(v);
+					break;
+				}
+			} catch( e1 ) {
+				haxe_CallStack.lastException = e1;
+				if (e1 instanceof js__$Boot_HaxeError) e1 = e1.val;
+				var tmp = thx_Error.fromDynamic(e1,{ fileName : "Promise.hx", lineNumber : 143, className : "thx.promise._Promise.Promise_Impl_", methodName : "either"});
+				reject(tmp);
+			}
+		});
+	});
+>>>>>>> master
 };
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_ds_ObjectMap.count = 0;
@@ -14277,6 +15139,7 @@ thx_Ints.order = function(i0,i1) {
 		return thx_OrderingImpl.LT;
 	}
 };
+<<<<<<< HEAD
 thx_Ints.monoid = { zero : 0, append : function(a,b) {
 	return a + b;
 }};
@@ -14309,5 +15172,21 @@ thx_Strings.CANONICALIZE_LINES = new EReg("\r\n|\n\r|\r","g");
 thx_Timer.FRAME_RATE = Math.round(16.6666666666666679);
 thx_fp__$Map_Map_$Impl_$.delta = 5;
 thx_fp__$Map_Map_$Impl_$.ratio = 2;
+=======
+var $_, $fid = 0;
+function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
+String.prototype.__class__ = String;
+String.__name__ = true;
+Array.__name__ = true;
+var Int = { };
+var Dynamic = { };
+var Float = Number;
+var Bool = Boolean;
+var Class = { };
+var Enum = { };
+var __map_reserved = {}
+js_Boot.__toStr = ({ }).toString;
+thx_ERegs.ESCAPE_PATTERN = new EReg("([-\\[\\]{}()*+?\\.,\\\\^$|# \t\r\n])","g");
+>>>>>>> master
 Main.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
