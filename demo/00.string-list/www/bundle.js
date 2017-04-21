@@ -2712,7 +2712,7 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 				el1.setAttribute(o1.name,o1.value);
 			}
 			var _g13 = new haxe_ds_StringMap();
-			var value1 = cfg.classes.container + " " + cfg.classes.containerTooShort;
+			var value1 = cfg.classes.container + " " + cfg.classes.containerNotAllowed;
 			if(__map_reserved["class"] != null) {
 				_g13.setReserved("class",value1);
 			} else {
@@ -17365,7 +17365,7 @@ dots_Keys.SINGLE_QUOTE = 222;
 dots_Query.doc = document;
 fancy_search_defaults_ClassNameDefaults.prefix = "fs-suggestion";
 fancy_search_defaults_ClassNameDefaults.containerPrefix = fancy_search_defaults_ClassNameDefaults.prefix + "-container";
-fancy_search_defaults_ClassNameDefaults.defaults = { input : "fs-search", container : fancy_search_defaults_ClassNameDefaults.containerPrefix, containerClosed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-closed", containerOpen : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-open", containerTooShort : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-too-short", containerNoResults : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-empty", containerLoading : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-loading", containerFailed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-failed", list : fancy_search_defaults_ClassNameDefaults.prefix + "-list", label : fancy_search_defaults_ClassNameDefaults.prefix + "-label", item : fancy_search_defaults_ClassNameDefaults.prefix + "-item", itemHighlighted : fancy_search_defaults_ClassNameDefaults.prefix + "-item-highlighted"};
+fancy_search_defaults_ClassNameDefaults.defaults = { input : "fs-search", container : fancy_search_defaults_ClassNameDefaults.containerPrefix, containerClosed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-closed", containerOpen : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-open", containerNotAllowed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-not-allowed", containerNoResults : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-empty", containerLoading : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-loading", containerFailed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-failed", list : fancy_search_defaults_ClassNameDefaults.prefix + "-list", label : fancy_search_defaults_ClassNameDefaults.prefix + "-label", item : fancy_search_defaults_ClassNameDefaults.prefix + "-item", itemHighlighted : fancy_search_defaults_ClassNameDefaults.prefix + "-item-highlighted"};
 fancy_search_defaults_KeyboardDefaults.defaults = { highlightUp : [38,104], highlightDown : [40,98,9], choose : [13], close : [27]};
 haxe__$Int32_Int32_$Impl_$._mul = Math.imul != null ? Math.imul : function(a,b) {
 	return a * (b & 65535) + (a * (b >>> 16) << 16 | 0) | 0;

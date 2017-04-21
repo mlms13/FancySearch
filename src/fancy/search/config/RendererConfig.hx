@@ -24,7 +24,7 @@ typedef ClassNameConfig = {
   container: String,
   containerClosed: String,
   containerOpen: String,
-  containerTooShort: String,
+  containerNotAllowed: String,
   containerNoResults: String,
   containerLoading: String,
   containerFailed: String,

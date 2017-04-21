@@ -35,7 +35,7 @@ class DomStringFilter {
   static function renderMenu<Sug, A>(cfg: RendererConfig<Sug, Element>, dispatch: Action<Sug, String, A> -> Void, state: State<Sug, String, A>): Element {
     return switch state.menu {
       case Closed(Inactive): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerClosed]);
-      case Closed(FailedCondition(reason)): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerTooShort], reason); // TODO
+      case Closed(FailedCondition(reason)): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerNotAllowed], reason); // TODO
       case Open(Loading, _): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerLoading], "LOADING"); // TODO
       case Open(NoResults, _): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerNoResults], "NO RESULTS"); // TODO
       case Open(Failed, _): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerFailed], "FAILED"); // TODO

@@ -56,18 +56,32 @@ class DoomAutocomplete {
     ]);
   }
 
+  // returns space-separated classes, like `"class-one class-two"`
+  static function getContainerClassesForState<Sug>(classes: ClassNameConfig, state: MenuState<Sug>): String {
+    var classArr: Array<String> = [classes.container].append(switch state {
+      case Closed(Inactive): classes.containerClosed;
+      case Closed(FailedCondition(_)): classes.containerNotAllowed;
+      case Open(Loading, _): classes.containerLoading;
+      case Open(NoResults, _): classes.containerNoResults;
+      case Open(Failed, _): classes.containerFailed;
+      case Open(Results(_), _): classes.containerOpen;
+    });
+
+    return classArr.join(" ");
+  }
+
   static function renderMenu<Sug, A, B>(cfg: RendererConfig<Sug, VNode>, dispatch, state: State<Sug, A, B>) {
+    var cls = getContainerClassesForState(cfg.classes, state.menu);
+
     return switch state.menu {
-      case Closed(_): div(["class" => cfg.classes.container + " " + cfg.classes.containerClosed ]);
+      case Closed(_): div(["class" => cls ]);
       case Open(Results(suggs), highlighted):
-        div([
-          "class" => cfg.classes.container + " " + cfg.classes.containerOpen
-        ], [
+        div([ "class" => cls ], [
           ul([
             "class" => cfg.classes.list
           ], suggs.toArray().map(renderMenuItem.bind(state.config.sugEq, cfg, dispatch, highlighted)))
         ]);
-      case Open(_): div();
+      case Open(_): div(["class" => cls ]);
     }
   }
 

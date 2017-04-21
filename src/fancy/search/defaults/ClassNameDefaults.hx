@@ -10,7 +10,7 @@ class ClassNameDefaults {
     container: containerPrefix,
     containerClosed: containerPrefix + "-closed",
     containerOpen: containerPrefix + "-open",
-    containerTooShort: containerPrefix + "-too-short",
+    containerNotAllowed: containerPrefix + "-not-allowed",
     containerNoResults: containerPrefix + "-empty",
     containerLoading: containerPrefix + "-loading",
     containerFailed: containerPrefix + "-failed",

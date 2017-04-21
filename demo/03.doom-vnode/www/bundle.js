@@ -4511,12 +4511,46 @@ fancy_search_renderer_DoomAutocomplete.renderInput = function(keys,classes,dispa
 	}
 	return doom_core__$VNode_VNode_$Impl_$.el("input",_g,null);
 };
+fancy_search_renderer_DoomAutocomplete.getContainerClassesForState = function(classes,state) {
+	var classArr;
+	switch(state[1]) {
+	case 0:
+		switch(state[2][1]) {
+		case 0:
+			classArr = classes.containerClosed;
+			break;
+		case 1:
+			classArr = classes.containerNotAllowed;
+			break;
+		}
+		break;
+	case 1:
+		switch(state[2][1]) {
+		case 0:
+			classArr = classes.containerLoading;
+			break;
+		case 1:
+			classArr = classes.containerNoResults;
+			break;
+		case 2:
+			classArr = classes.containerFailed;
+			break;
+		case 3:
+			classArr = classes.containerOpen;
+			break;
+		}
+		break;
+	}
+	var classArr1 = thx_Arrays.append([classes.container],classArr);
+	return classArr1.join(" ");
+};
 fancy_search_renderer_DoomAutocomplete.renderMenu = function(cfg,dispatch,state) {
+	var cls = fancy_search_renderer_DoomAutocomplete.getContainerClassesForState(cfg.classes,state.menu);
 	var _g = state.menu;
 	switch(_g[1]) {
 	case 0:
 		var _g1 = new haxe_ds_StringMap();
-		var value = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(cfg.classes.container + " " + cfg.classes.containerClosed);
+		var value = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(cls);
 		if(__map_reserved["class"] != null) {
 			_g1.setReserved("class",value);
 		} else {
@@ -4528,7 +4562,7 @@ fancy_search_renderer_DoomAutocomplete.renderMenu = function(cfg,dispatch,state)
 			var highlighted = _g[3];
 			var suggs = _g[2][2];
 			var _g2 = new haxe_ds_StringMap();
-			var value1 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(cfg.classes.container + " " + cfg.classes.containerOpen);
+			var value1 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(cls);
 			if(__map_reserved["class"] != null) {
 				_g2.setReserved("class",value1);
 			} else {
@@ -4550,7 +4584,14 @@ fancy_search_renderer_DoomAutocomplete.renderMenu = function(cfg,dispatch,state)
 			};
 			return doom_core__$VNode_VNode_$Impl_$.el("div",_g2,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core__$VNode_VNode_$Impl_$.el("ul",_g11,doom_core__$VNodes_VNodes_$Impl_$.children(thx__$Nel_Nel_$Impl_$.toArray(suggs).map(children)))]));
 		} else {
-			return doom_core__$VNode_VNode_$Impl_$.el("div",null,null);
+			var _g3 = new haxe_ds_StringMap();
+			var value3 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(cls);
+			if(__map_reserved["class"] != null) {
+				_g3.setReserved("class",value3);
+			} else {
+				_g3.h["class"] = value3;
+			}
+			return doom_core__$VNode_VNode_$Impl_$.el("div",_g3,null);
 		}
 		break;
 	}
@@ -19269,7 +19310,7 @@ dots_Keys.CLOSE_BRAKET = 221;
 dots_Keys.SINGLE_QUOTE = 222;
 fancy_search_defaults_ClassNameDefaults.prefix = "fs-suggestion";
 fancy_search_defaults_ClassNameDefaults.containerPrefix = fancy_search_defaults_ClassNameDefaults.prefix + "-container";
-fancy_search_defaults_ClassNameDefaults.defaults = { input : "fs-search", container : fancy_search_defaults_ClassNameDefaults.containerPrefix, containerClosed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-closed", containerOpen : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-open", containerTooShort : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-too-short", containerNoResults : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-empty", containerLoading : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-loading", containerFailed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-failed", list : fancy_search_defaults_ClassNameDefaults.prefix + "-list", label : fancy_search_defaults_ClassNameDefaults.prefix + "-label", item : fancy_search_defaults_ClassNameDefaults.prefix + "-item", itemHighlighted : fancy_search_defaults_ClassNameDefaults.prefix + "-item-highlighted"};
+fancy_search_defaults_ClassNameDefaults.defaults = { input : "fs-search", container : fancy_search_defaults_ClassNameDefaults.containerPrefix, containerClosed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-closed", containerOpen : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-open", containerNotAllowed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-not-allowed", containerNoResults : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-empty", containerLoading : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-loading", containerFailed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-failed", list : fancy_search_defaults_ClassNameDefaults.prefix + "-list", label : fancy_search_defaults_ClassNameDefaults.prefix + "-label", item : fancy_search_defaults_ClassNameDefaults.prefix + "-item", itemHighlighted : fancy_search_defaults_ClassNameDefaults.prefix + "-item-highlighted"};
 fancy_search_defaults_KeyboardDefaults.defaults = { highlightUp : [38,104], highlightDown : [40,98,9], choose : [13], close : [27]};
 haxe__$Int32_Int32_$Impl_$._mul = Math.imul != null ? Math.imul : function(a,b) {
 	return a * (b & 65535) + (a * (b >>> 16) << 16 | 0) | 0;
