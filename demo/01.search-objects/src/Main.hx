@@ -48,7 +48,13 @@ class Main {
           create("div", [ "style" => "color: #aaa; "], p.github)
         ]);
       },
-      clearButton: None
+      elements: {
+        clearButton: None,
+        failedCondition: None,
+        loading: None,
+        failed: None,
+        noResults: Some(function () return dots.Dom.create("span", "No Results"))
+      }
     });
 
     renderer.next(function (dom) {

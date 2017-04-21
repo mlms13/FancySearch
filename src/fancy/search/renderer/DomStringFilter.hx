@@ -6,6 +6,7 @@ import js.html.InputElement;
 using dots.Dom;
 import dots.Dom.create as c;
 using thx.Arrays;
+import thx.Functions.fn;
 import thx.Lazy;
 using thx.Options;
 
@@ -35,14 +36,19 @@ class DomStringFilter {
   static function renderMenu<Sug, A>(cfg: RendererConfig<Sug, Element>, dispatch: Action<Sug, String, A> -> Void, state: State<Sug, String, A>): Element {
     return switch state.menu {
       case Closed(Inactive): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerClosed]);
-      case Closed(FailedCondition(reason)): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerNotAllowed], reason); // TODO
-      case Open(Loading, _): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerLoading], "LOADING"); // TODO
-      case Open(NoResults, _): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerNoResults], "NO RESULTS"); // TODO
+      case Closed(FailedCondition(reason)): c("div", [
+        "class" => cfg.classes.container + " " + cfg.classes.containerNotAllowed
+      ], cfg.elements.noResults.cata([], fn([_()])));
+      case Open(Loading, _): c("div", [
+        "class" => cfg.classes.container + " " + cfg.classes.containerLoading
+      ], cfg.elements.loading.cata([], fn([_()])));
+      case Open(NoResults, _): c("div", [
+        "class" => cfg.classes.container + " " + cfg.classes.containerNoResults
+      ], cfg.elements.noResults.cata([], fn([_()])));
       case Open(Failed, _): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerFailed], "FAILED"); // TODO
       case Open(Results(suggs), highlighted):
         var div = c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerOpen], [
-          c("ul", ["class" => cfg.classes.list], suggs.map(renderMenuItem.bind(state.config, cfg, dispatch, highlighted))
-            .toArray().toArray()) // first to ReadonlyArray, then to a real one
+          c("ul", ["class" => cfg.classes.list], suggs.toArray().map(renderMenuItem.bind(state.config, cfg, dispatch, highlighted)))
         ]);
         div.on("mouseout", function () dispatch(ChangeHighlight(Unhighlight)));
         div;

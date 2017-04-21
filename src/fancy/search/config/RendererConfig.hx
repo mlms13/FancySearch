@@ -6,9 +6,7 @@ import thx.Lazy;
 typedef RendererConfig<Sug, El> = {
   classes: ClassNameConfig,
   keys: KeyboardConfig,
-  // parseInput: String -> Option<Filter>,
-  // renderInput: Option<Filter> -> String,
-  clearButton: Option<Lazy<El>>,
+  elements: ElementConfig<El>,
   renderSuggestion: Sug -> El
 };
 
@@ -32,4 +30,12 @@ typedef ClassNameConfig = {
   label: String,
   item: String,
   itemHighlighted: String
+};
+
+typedef ElementConfig<El> = {
+  clearButton: Option<Lazy<El>>,
+  failedCondition: Option<String -> El>,
+  loading: Option<Lazy<El>>,
+  noResults: Option<Lazy<El>>,
+  failed: Option<Lazy<El>>
 };

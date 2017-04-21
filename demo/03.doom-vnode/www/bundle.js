@@ -1399,9 +1399,11 @@ Main.main = function() {
 	var search = new fancy_Search(fancy_search_defaults_AllString.sync({ suggestions : foods}));
 	var rendererConfig = { renderSuggestion : function(sugg) {
 		return doom_core__$VNode_VNode_$Impl_$.el("div",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text(sugg,null,null)]));
-	}, keys : fancy_search_defaults_KeyboardDefaults.defaults, classes : fancy_search_defaults_ClassNameDefaults.defaults, clearButton : haxe_ds_Option.None};
+	}, keys : fancy_search_defaults_KeyboardDefaults.defaults, classes : fancy_search_defaults_ClassNameDefaults.defaults, elements : { clearButton : haxe_ds_Option.None, failedCondition : haxe_ds_Option.None, loading : haxe_ds_Option.None, failed : haxe_ds_Option.None, noResults : haxe_ds_Option.Some(function() {
+		return doom_core__$VNode_VNode_$Impl_$.el("span",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text("No Results",null,null)]));
+	})}};
 	var dispatch = function(act) {
-		search.store.dispatch(act,{ fileName : "Main.hx", lineNumber : 28, className : "Main", methodName : "main"});
+		search.store.dispatch(act,{ fileName : "Main.hx", lineNumber : 34, className : "Main", methodName : "main"});
 	};
 	var vnodes = search.store.stream().map(function(state) {
 		return fancy_search_renderer_DoomAutocomplete.render({ state : state, cfg : rendererConfig, dispatch : dispatch});

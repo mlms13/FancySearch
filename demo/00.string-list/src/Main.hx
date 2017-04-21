@@ -28,7 +28,13 @@ class Main {
     var renderer = DomStringFilter.fromInput(input, container, search, {
       classes: fancy.search.defaults.ClassNameDefaults.defaults,
       keys: fancy.search.defaults.KeyboardDefaults.defaults,
-      clearButton: None,
+      elements: {
+        clearButton: None,
+        failedCondition: None,
+        loading: None,
+        failed: None,
+        noResults: Some(function () return dots.Dom.create("span", "No Results"))
+      },
       renderSuggestion: DomStringFilter.renderStringSuggestion
     });
 

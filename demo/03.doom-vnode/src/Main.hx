@@ -22,7 +22,13 @@ class Main {
       },
       keys: fancy.search.defaults.KeyboardDefaults.defaults,
       classes: fancy.search.defaults.ClassNameDefaults.defaults,
-      clearButton: None
+      elements: {
+        clearButton: None,
+        failedCondition: None,
+        loading: None,
+        failed: None,
+        noResults: Some(function () return doom.html.Html.span("No Results"))
+      },
     };
     var dispatch = function (act: Action<String, String, String>) {
       search.store.dispatch(act);

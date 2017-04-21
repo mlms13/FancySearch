@@ -34,12 +34,6 @@
 .fs-suggestion-container-open {
   display: block;
 }
-.fs-suggestion-container-empty:before {
-  color: #ccc;
-  content: "No suggestions match your search";
-  display: block;
-  padding: 5px 10px;
-}
 .fs-suggestion-list {
   box-sizing: border-box;
   list-style: none;
