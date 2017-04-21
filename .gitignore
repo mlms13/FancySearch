@@ -1,6 +1,12 @@
 docs/xml
 node_modules/
+.vscode/
+.haxelib/
 *.zip
 
-# ignore dist for now
+# ignore compiled
+bin/
 dist/
+
+# system files
+.DS_Store

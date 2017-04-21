@@ -1,40 +1,80 @@
-import fancy.Search;
+import haxe.ds.Option;
+import dots.Dom.create;
+using thx.Options;
+using thx.Strings;
+import thx.promise.Promise;
 
-import fancy.search.util.Types;
-using thx.Arrays;
+import fancy.search.config.AppConfig;
+import fancy.search.defaults.AllString;
+import fancy.search.defaults.ClassNameDefaults;
+import fancy.search.defaults.KeyboardDefaults;
+
+typedef Person = {
+  firstName: String,
+  lastName: String,
+  github: String
+};
 
 class Main {
   static function main() {
-    var items : Array<Food> = [
-      { value: "Apple", aliases: ["Fuji", "Honeycrisp", "Gala", "Granny Smith"] },
-      { value: "Bean", aliases: ["Black", "Pinto", "Navy", "Soy", "Northern", "Kidney"] },
-      { value: "Chickpea", aliases: ["Garbanzo Bean"] },
-      { value: "Corn", aliases: [] },
-      { value: "Squash", aliases: ["Summer", "Pumpkin", "Zucchini", "Acorn", "Butternut"] },
-      { value: "Leaf Vegetable", aliases: ["Kale", "Spinach", "Romain", "Iceberg", "Lettuce"] },
+    var people: Array<Person> = [
+      { firstName: "Michael", lastName: "Martin", github: "mlms13" },
+      { firstName: "Franco", lastName: "Ponticelli", github: "fponticelli" },
+      { firstName: "Andy", lastName: "White", github: "andywhite37" },
     ];
-    var options : FancySearchOptions<Food> = {
-      minLength : 0,
-      suggestionOptions : {
-        suggestions : items,
-        limit : 4,
-        alwaysSelected : true,
-        suggestionToString : function (sugg) return sugg.value,
-        filterFn : function (search, sugg) {
-          return sugg.aliases.reduce(function (match, alias) {
-            var valFirst = sugg.value.toLowerCase() + " " + alias.toLowerCase(),
-                valLast = alias.toLowerCase() + " " + sugg.value.toLowerCase();
 
-            return match || valFirst.indexOf(search) >= 0 || valLast.indexOf(search) >= 0;
-          }, false);
-        }
+    var config: AppConfig<Person, String, Option<Person>> = {
+      filterer: makeFilterer(people),
+      sugEq: function (a, b) return a.github == b.github,
+      initFilter: "",
+      initValue: None,
+      allowMenu: thx.fp.Functions.const(Allow),
+      alwaysHighlight: true,
+      getValue: function (highlight: Option<Person>, _, curr: Option<Person>) {
+        return highlight.orElse(curr);
       }
     };
-    var search = Search.createFromSelector('.fancy-container input', options);
+
+    var container: js.html.Element = dots.Query.find(".fancy-container");
+    var input = dots.Query.find(".fancy-container input");
+    var search = new fancy.Search(config);
+
+    var renderer = fancy.search.renderer.DomStringFilter.fromInput(input, container, search, {
+      classes: fancy.search.defaults.ClassNameDefaults.defaults,
+      keys: fancy.search.defaults.KeyboardDefaults.defaults,
+      renderSuggestion: function (p: Person): js.html.Element {
+        return create("div", [
+          create("div", p.firstName + " " + p.lastName),
+          create("div", [ "style" => "color: #aaa; "], p.github)
+        ]);
+      },
+      clearButton: None
+    });
+
+    renderer.next(function (dom) {
+      // remove all children except the first (input)
+      while (container.children.length > 1) {
+        container.removeChild(container.lastChild);
+      }
+
+      // then append the new content after the input
+      dots.Dom.append(container, [ dom ]);
+    }).run();
+
+    search.values.next(function (val: Option<Person>) {
+      input.value = val.cata("", personToString);
+    }).run();
+  }
+
+  static function personToString(p: Person): String {
+    return p.firstName + " " + p.lastName + " " + p.github;
+  }
+
+  static function makeFilterer(people: Array<Person>): Filterer<Person, String> {
+    return function filterer(search: String): Promise<Array<Person>> {
+      return Promise.value(search.isEmpty() ? people : people.filter(function (p) {
+        return personToString(p).caseInsensitiveContains(search);
+      }));
+    }
   }
 }
-
-typedef Food = {
-  value : String,
-  aliases : Array<String>
-};

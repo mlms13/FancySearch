@@ -1,8 +1,8 @@
 -cp src
+-lib dots
 -lib thx.core
 -lib thx.promise
--lib dots
--dce full
+-lib thx.stream
 
 --each
 -cp demo/00.string-list/src
@@ -15,11 +15,18 @@
 -js demo/01.search-objects/www/bundle.js
 
 --next
--cp demo/02.custom-render/src
+-lib doom
+-cp demo/03.doom-vnode/src
 -main Main
--js demo/02.custom-render/www/bundle.js
+-js demo/03.doom-vnode/www/bundle.js
 
 --next
--D shallow-expose
-fancy.Search
--js dist/fancysearch.js
+-lib utest
+-main test.TestAll
+-js bin/test.min.js
+-cmd node bin/test.min.js
+
+# --next
+# -cp demo/02.custom-render/src
+# -main Main
+# -js demo/02.custom-render/www/bundle.js

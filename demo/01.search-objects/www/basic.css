@@ -11,10 +11,8 @@
   right: 20px;
   top: 50%;
   -webkit-transform: translateY(-50%);
-      -ms-transform: translateY(-50%);
           transform: translateY(-50%);
-  -webkit-transition: color 200ms;
-          transition: color 200ms;
+  transition: color 200ms;
 }
 .fs-clear-input-button:hover {
   color: #444;
@@ -48,10 +46,13 @@
   margin: 0;
   padding: 0;
 }
+.fs-suggestion-item,
+.fs-suggestion-label {
+  padding: 8px 10px;
+}
 .fs-suggestion-item {
   color: #666;
-  padding: 5px 10px;
 }
-.fs-suggestion-item-selected {
+.fs-suggestion-item-highlighted {
   background: #eee;
 }
