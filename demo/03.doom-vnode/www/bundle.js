@@ -21,6 +21,645 @@ DateTools.getMonthDays = function(d) {
 		return 28;
 	}
 };
+var doom_core_IRender = function() { };
+doom_core_IRender.__name__ = ["doom","core","IRender"];
+doom_core_IRender.prototype = {
+	apply: null
+	,__class__: doom_core_IRender
+};
+var doom_html_Render = function(doc,namespaces) {
+	if(null == doc) {
+		this.doc = window.document;
+	} else {
+		this.doc = doc;
+	}
+	if(null == namespaces) {
+		this.namespaces = new haxe_ds_StringMap();
+		var key = doom_html_Render.defaultNamespaces.keys();
+		while(key.hasNext()) {
+			var key1 = key.next();
+			var this1 = this.namespaces;
+			var _this = doom_html_Render.defaultNamespaces;
+			var value = __map_reserved[key1] != null ? _this.getReserved(key1) : _this.h[key1];
+			var _this1 = this1;
+			if(__map_reserved[key1] != null) {
+				_this1.setReserved(key1,value);
+			} else {
+				_this1.h[key1] = value;
+			}
+		}
+	} else {
+		this.namespaces = namespaces;
+	}
+	this.domComponentMap = new doom_html__$Render_DomComponentMap();
+};
+doom_html_Render.__name__ = ["doom","html","Render"];
+doom_html_Render.__interfaces__ = [doom_core_IRender];
+doom_html_Render.setEvent = function(el,name,handler) {
+	var f = handler;
+	var a1 = el;
+	el["on" + name] = function(a2) {
+		f(a1,a2);
+	};
+};
+doom_html_Render.removeEvent = function(el,name) {
+	Reflect.deleteField(el,"on" + name);
+};
+doom_html_Render.hasEvent = function(el,name) {
+	return Object.prototype.hasOwnProperty.call(el,"on" + name);
+};
+doom_html_Render.prototype = {
+	doc: null
+	,namespaces: null
+	,domComponentMap: null
+	,mount: function(node,parent) {
+		parent.innerHTML = "";
+		var post = [];
+		var n = this.generateDom(node,post);
+		parent.appendChild(n);
+		var _g = 0;
+		while(_g < post.length) {
+			var f = post[_g];
+			++_g;
+			f();
+		}
+		return n;
+	}
+	,stream: function(stream,parent) {
+		var _gthis = this;
+		var el = null;
+		stream.next(function(node) {
+			if(null == el) {
+				el = _gthis.mount(node,parent);
+			} else {
+				_gthis.apply(node,el);
+			}
+		}).failure(function(err) {
+			throw err;
+		}).run();
+		return;
+	}
+	,apply: function(node,dom) {
+		var post = [];
+		this.applyToNode(node,dom,dom.parentElement,post,false);
+		var _g = 0;
+		while(_g < post.length) {
+			var f = post[_g];
+			++_g;
+			f();
+		}
+	}
+	,generate: function(node) {
+		var post = [];
+		var dom = this.generateDom(node,post);
+		var _g = 0;
+		while(_g < post.length) {
+			var f = post[_g];
+			++_g;
+			f();
+		}
+		return dom;
+	}
+	,applyToNode: function(node,dom,parent,post,tryUnmount) {
+		if(null == node && null == dom) {
+			return null;
+		} else if(null == node) {
+			if(tryUnmount) {
+				this.unmountDomComponent(dom);
+			}
+			parent.removeChild(dom);
+			return null;
+		} else if(null == dom) {
+			var el = this.generateDom(node,post);
+			parent.appendChild(el);
+			return el;
+		}
+		switch(node[1]) {
+		case 0:
+			var onUnmount = node[6];
+			var onMount = node[5];
+			var children = node[4];
+			var attributes = node[3];
+			var name = node[2];
+			if(tryUnmount) {
+				this.unmountDomComponent(dom);
+			}
+			return this.applyElementToNode(name,attributes,children,dom,parent,post);
+		case 1:
+			var onUnmount1 = node[4];
+			var onMount1 = node[3];
+			var comment = node[2];
+			if(tryUnmount) {
+				this.unmountDomComponent(dom);
+			}
+			return this.applyCommentToNode(comment,dom,parent,post);
+		case 2:
+			var onUnmount2 = node[4];
+			var onMount2 = node[3];
+			var code = node[2];
+			if(tryUnmount) {
+				this.unmountDomComponent(dom);
+			}
+			var node1 = dots_Html.parse(code);
+			return this.applyNodeToNode(node1,dom,parent,true);
+		case 3:
+			var onUnmount3 = node[4];
+			var onMount3 = node[3];
+			var text = node[2];
+			if(tryUnmount) {
+				this.unmountDomComponent(dom);
+			}
+			return this.applyTextToNode(text,dom,parent,post);
+		case 4:
+			var comp = node[2];
+			return this.applyComponentToNode(comp,dom,parent,post);
+		case 5:
+			var render = node[2];
+			return this.applyToNode(render(),dom,parent,post,tryUnmount);
+		}
+	}
+	,applyNodeToNode: function(srcDom,dstDom,parent,tryUnmount) {
+		var _gthis = this;
+		if(null == srcDom && null == dstDom) {
+			return null;
+		} else if(null == srcDom) {
+			parent.removeChild(dstDom);
+			return null;
+		} else if(null == dstDom) {
+			parent.appendChild(srcDom);
+			return srcDom;
+		}
+		if(tryUnmount) {
+			this.unmountDomComponent(dstDom);
+		}
+		if(srcDom.nodeType == dstDom.nodeType) {
+			if(srcDom.nodeType == 1) {
+				var srcEl = srcDom;
+				var dstEl = dstDom;
+				if(srcEl.tagName == dstEl.tagName) {
+					this.applyElementAttributes(srcEl,dstEl);
+					thx_Arrays.each(this.zipNodeListAndNodeList(srcEl.childNodes,dstEl.childNodes),function(t) {
+						_gthis.applyNodeToNode(t._0,t._1,dstEl,true);
+					});
+					return dstDom;
+				} else {
+					return this.replaceChild(parent,dstDom,srcDom);
+				}
+			} else if(srcDom.nodeType == 8 || srcDom.nodeType == 3) {
+				dstDom.textContent = srcDom.textContent;
+				return dstDom;
+			} else {
+				return this.replaceChild(parent,dstDom,srcDom);
+			}
+		} else {
+			return this.replaceChild(parent,dstDom,srcDom);
+		}
+	}
+	,migrate: function(src,dst) {
+		var fields = dst.migrationFields();
+		var _g = 0;
+		while(_g < fields.length) {
+			var field = fields[_g];
+			++_g;
+			var f = [Reflect.field(src,field)];
+			if(Reflect.isFunction(f[0])) {
+				var tmp = Reflect.field(dst,field);
+				f[0] = tmp;
+				src[field] = (function(f1) {
+					return function() {
+						f1[0].apply(dst,arguments);
+					};
+				})(f);
+			} else {
+				dst[field] = f[0];
+			}
+		}
+	}
+	,applyComponentToNode: function(newComp,dom,parent,post) {
+		var oldComps = this.domComponentMap.getComponents(dom);
+		if(null != oldComps) {
+			var oldComp = thx_Arrays.find(oldComps,function(comp) {
+				return thx_Types.sameType(comp,newComp);
+			});
+			if(null == oldComp) {
+				var _g = 0;
+				while(_g < oldComps.length) {
+					var oldComp1 = oldComps[_g];
+					++_g;
+					oldComp1.willUnmount();
+					this.domComponentMap.removeByComponent(oldComp1);
+					newComp.willMount();
+					var node = this.renderComponent(newComp);
+					newComp.apply = $bind(this,this.apply);
+					var dom1 = this.applyToNode(node,dom,parent,post,false);
+					newComp.node = dom1;
+					post.splice(0,0,function() {
+						newComp.didMount();
+					});
+					this.domComponentMap.set(newComp,dom1);
+					oldComp1.isUnmounted = true;
+					oldComp1.node = null;
+					oldComp1.didUnmount();
+				}
+				return dom;
+			} else {
+				this.migrate(newComp,oldComp);
+				oldComp.willUpdate();
+				post.push($bind(oldComp,oldComp.didUpdate));
+				if(oldComp.shouldRender()) {
+					this.domComponentMap.removeByComponent(oldComp);
+					var node1 = this.renderComponent(oldComp);
+					var newDom = this.applyToNode(node1,dom,parent,post,false);
+					oldComp.node = newDom;
+					this.domComponentMap.set(oldComp,newDom);
+					return newDom;
+				} else {
+					return dom;
+				}
+			}
+		} else {
+			newComp.willMount();
+			var node2 = this.renderComponent(newComp);
+			newComp.apply = $bind(this,this.apply);
+			var dom2 = this.applyToNode(node2,dom,parent,post,false);
+			newComp.node = dom2;
+			post.splice(0,0,function() {
+				newComp.didMount();
+			});
+			this.domComponentMap.set(newComp,dom2);
+			return dom2;
+		}
+	}
+	,unmountDomComponent: function(dom) {
+		var _g1 = 0;
+		var _g = dom.childNodes.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var child = dom.childNodes[i];
+			this.unmountDomComponent(child);
+		}
+		var comps = this.domComponentMap.getComponents(dom);
+		if(null == comps) {
+			return;
+		}
+		var _g2 = 0;
+		while(_g2 < comps.length) {
+			var comp = comps[_g2];
+			++_g2;
+			this.unmountComponent(comp);
+		}
+	}
+	,renderComponent: function(comp) {
+		return comp.render();
+	}
+	,unmountComponent: function(comp) {
+		this.domComponentMap.removeByComponent(comp);
+		comp.willUnmount();
+		comp.isUnmounted = true;
+		comp.node = null;
+		comp.didUnmount();
+	}
+	,applyElementToNode: function(name,attributes,children,dom,parent,post) {
+		var _gthis = this;
+		if(dom.nodeType == 1 && dom.tagName == name.toUpperCase()) {
+			this.applyNodeAttributes(attributes,dom);
+			thx_Arrays.each(this.zipVNodesAndNodeList(children,dom.childNodes),function(t) {
+				_gthis.applyToNode(t._0,t._1,dom,post,true);
+			});
+			return dom;
+		} else {
+			var el = this.createElement(name,attributes,children,post);
+			return this.replaceChild(parent,dom,el);
+		}
+	}
+	,applyCommentToNode: function(comment,dom,parent,post) {
+		if(dom.nodeType == 8) {
+			dom.textContent = comment;
+			return dom;
+		} else {
+			var el = this.doc.createComment(comment);
+			return this.replaceChild(parent,dom,el);
+		}
+	}
+	,applyTextToNode: function(text,dom,parent,post) {
+		if(dom.nodeType == 3) {
+			dom.textContent = text;
+			return dom;
+		} else {
+			var el = this.doc.createTextNode(text);
+			return this.replaceChild(parent,dom,el);
+		}
+	}
+	,replaceChild: function(parent,oldDom,newDom) {
+		if(oldDom == newDom) {
+			return newDom;
+		}
+		parent.replaceChild(newDom,oldDom);
+		return newDom;
+	}
+	,zipVNodesAndNodeList: function(vnodes,children) {
+		var a = vnodes.length;
+		var b = children.length;
+		var len = a > b ? a : b;
+		var _g = [];
+		var _g2 = 0;
+		var _g1 = len;
+		while(_g2 < _g1) {
+			var i = _g2++;
+			var this1 = { _0 : vnodes[i], _1 : children[i]};
+			_g.push(this1);
+		}
+		return _g;
+	}
+	,zipNodeListAndNodeList: function(left,right) {
+		var a = left.length;
+		var b = right.length;
+		var len = a > b ? a : b;
+		var _g = [];
+		var _g2 = 0;
+		var _g1 = len;
+		while(_g2 < _g1) {
+			var i = _g2++;
+			var this1 = { _0 : left[i], _1 : right[i]};
+			_g.push(this1);
+		}
+		return _g;
+	}
+	,applyElementAttributes: function(srcDom,dstDom) {
+		var _g = [];
+		var _g2 = 0;
+		var _g1 = dstDom.attributes.length;
+		while(_g2 < _g1) {
+			var i = _g2++;
+			_g.push(dstDom.attributes.item(i).name);
+		}
+		var dstAttrs = thx__$Set_Set_$Impl_$.createString(_g);
+		var _g11 = [];
+		var _g3 = 0;
+		var _g21 = srcDom.attributes.length;
+		while(_g3 < _g21) {
+			var i1 = _g3++;
+			_g11.push(srcDom.attributes.item(i1).name);
+		}
+		var srcAttrs = thx__$Set_Set_$Impl_$.createString(_g11);
+		var result = thx__$Set_Set_$Impl_$.copy(dstAttrs);
+		var item = $iterator(thx__$Set_Set_$Impl_$)(srcAttrs);
+		while(item.hasNext()) {
+			var item1 = item.next();
+			result.remove(item1);
+		}
+		var removed = result;
+		var key = $iterator(thx__$Set_Set_$Impl_$)(removed);
+		while(key.hasNext()) {
+			var key1 = key.next();
+			dstDom.removeAttribute(key1);
+		}
+		var key2 = $iterator(thx__$Set_Set_$Impl_$)(srcAttrs);
+		while(key2.hasNext()) {
+			var key3 = key2.next();
+			var srcValue = doom_html_Attributes.getAttribute(srcDom,key3);
+			var dstValue = doom_html_Attributes.getAttribute(dstDom,key3);
+			if(srcValue == dstValue) {
+				continue;
+			}
+			doom_html_Attributes.setDynamicAttribute(dstDom,key3,srcValue);
+		}
+	}
+	,applyNodeAttributes: function(attributes,dom) {
+		var _g = [];
+		var _g2 = 0;
+		var _g1 = dom.attributes.length;
+		while(_g2 < _g1) {
+			var i = _g2++;
+			_g.push(dom.attributes.item(i).name);
+		}
+		var domAttrs = thx__$Set_Set_$Impl_$.createString(_g);
+		var _g11 = [];
+		var key = attributes.keys();
+		while(key.hasNext()) {
+			var key1 = key.next();
+			_g11.push(key1);
+		}
+		var vdomAttrs = thx__$Set_Set_$Impl_$.createString(_g11);
+		var result = thx__$Set_Set_$Impl_$.copy(domAttrs);
+		var item = $iterator(thx__$Set_Set_$Impl_$)(vdomAttrs);
+		while(item.hasNext()) {
+			var item1 = item.next();
+			result.remove(item1);
+		}
+		var removed = result;
+		var key2 = $iterator(thx__$Set_Set_$Impl_$)(removed);
+		while(key2.hasNext()) {
+			var key3 = key2.next();
+			if(doom_html_Render.hasEvent(dom,key3)) {
+				doom_html_Render.removeEvent(dom,key3);
+			} else {
+				dom.removeAttribute(key3);
+			}
+		}
+		var key4 = $iterator(thx__$Set_Set_$Impl_$)(vdomAttrs);
+		while(key4.hasNext()) {
+			var key5 = key4.next();
+			var _g21 = __map_reserved[key5] != null ? attributes.getReserved(key5) : attributes.h[key5];
+			if(_g21 == null) {
+				doom_html_Attributes.removeAttribute(dom,key5);
+			} else {
+				switch(_g21[1]) {
+				case 0:
+					var b = _g21[2];
+					doom_html_Attributes.toggleBoolAttribute(dom,key5,b);
+					break;
+				case 1:
+					var s = _g21[2];
+					if(null == s && key5 == "value") {
+						doom_html_Attributes.setStringAttribute(dom,key5,"");
+					} else {
+						var s1 = _g21[2];
+						if(null == s1 || s1 == "" && key5 != "value") {
+							doom_html_Attributes.removeAttribute(dom,key5);
+						} else {
+							var s2 = _g21[2];
+							doom_html_Attributes.setStringAttribute(dom,key5,s2);
+						}
+					}
+					break;
+				case 2:
+					var e = _g21[2];
+					doom_html_Render.setEvent(dom,key5,(function(f) {
+						return function(el,e1) {
+							f[0](el,e1);
+						};
+					})([e]));
+					break;
+				}
+			}
+		}
+	}
+	,generateDom: function(node,post) {
+		switch(node[1]) {
+		case 0:
+			var onUnmount = node[6];
+			var onMount = node[5];
+			var children = node[4];
+			var attributes = node[3];
+			var name = node[2];
+			var dom = this.createElement(name,attributes,children,post);
+			if(null != onMount) {
+				var f = onMount;
+				var a1 = this;
+				var a2 = dom;
+				post.push(function() {
+					f(a1,a2);
+				});
+			}
+			return dom;
+		case 1:
+			var onUnmount1 = node[4];
+			var onMount1 = node[3];
+			var comment = node[2];
+			var c = this.doc.createComment(comment);
+			if(null != onMount1) {
+				var f1 = onMount1;
+				var a11 = this;
+				var a21 = c;
+				post.push(function() {
+					f1(a11,a21);
+				});
+			}
+			return c;
+		case 2:
+			var onUnmount2 = node[4];
+			var onMount2 = node[3];
+			var code = node[2];
+			var r = dots_Html.parse(code);
+			if(null != onMount2) {
+				var f2 = onMount2;
+				var a12 = this;
+				var a22 = r;
+				post.push(function() {
+					f2(a12,a22);
+				});
+			}
+			return r;
+		case 3:
+			var onUnmount3 = node[4];
+			var onMount3 = node[3];
+			var text = node[2];
+			var t = this.doc.createTextNode(text);
+			if(null != onMount3) {
+				var f3 = onMount3;
+				var a13 = this;
+				var a23 = t;
+				post.push(function() {
+					f3(a13,a23);
+				});
+			}
+			return t;
+		case 4:
+			var comp = node[2];
+			comp.willMount();
+			var node1 = this.renderComponent(comp);
+			var dom1 = this.generateDom(node1,post);
+			comp.node = dom1;
+			comp.apply = $bind(this,this.apply);
+			post.splice(0,0,function() {
+				comp.didMount();
+			});
+			this.domComponentMap.set(comp,dom1);
+			return dom1;
+		case 5:
+			var render = node[2];
+			return this.generateDom(render(),post);
+		}
+	}
+	,createElement: function(name,attributes,children,post) {
+		var colonPos = name.indexOf(":");
+		var el;
+		if(colonPos > 0) {
+			var prefix = name.substring(0,colonPos);
+			var name1 = name.substring(colonPos + 1);
+			var _this = this.namespaces;
+			var ns = __map_reserved[prefix] != null ? _this.getReserved(prefix) : _this.h[prefix];
+			if(null == ns) {
+				throw new thx_Error("element prefix \"" + prefix + "\" is not associated to any namespace. Add the right namespace to Doom.namespaces.",null,{ fileName : "Render.hx", lineNumber : 407, className : "doom.html.Render", methodName : "createElement"});
+			}
+			el = this.doc.createElementNS(ns,name1);
+		} else {
+			el = this.doc.createElement(name);
+		}
+		this.applyNodeAttributes(attributes,el);
+		var child = HxOverrides.iter(children);
+		while(child.hasNext()) {
+			var child1 = child.next();
+			if(null == child1) {
+				continue;
+			}
+			var n = this.generateDom(child1,post);
+			el.appendChild(n);
+		}
+		return el;
+	}
+	,__class__: doom_html_Render
+};
+var doom_html__$Render_DomComponentMap = function() {
+	this.componentToDom = new haxe_ds_ObjectMap();
+	this.domToComponent = new haxe_ds_ObjectMap();
+};
+doom_html__$Render_DomComponentMap.__name__ = ["doom","html","_Render","DomComponentMap"];
+doom_html__$Render_DomComponentMap.prototype = {
+	domToComponent: null
+	,componentToDom: null
+	,getComponents: function(dom) {
+		if(null == dom) {
+			return null;
+		}
+		return this.domToComponent.h[dom.__id__];
+	}
+	,getDom: function(comp) {
+		if(null == comp) {
+			return null;
+		}
+		return this.componentToDom.h[comp.__id__];
+	}
+	,set: function(comp,dom) {
+		this.componentToDom.set(comp,dom);
+		var list = this.domToComponent.h[dom.__id__];
+		if(null == list) {
+			list = [comp];
+			this.domToComponent.set(dom,list);
+		} else {
+			list.push(comp);
+		}
+	}
+	,removeByComponent: function(comp) {
+		var dom = this.componentToDom.h[comp.__id__];
+		this.componentToDom.remove(comp);
+		var list = this.getComponents(dom);
+		if(null == list) {
+			return;
+		}
+		HxOverrides.remove(list,comp);
+		if(list.length == 0) {
+			this.domToComponent.remove(dom);
+		}
+	}
+	,removeByDom: function(dom) {
+		var comps = this.getComponents(dom);
+		this.domToComponent.remove(dom);
+		if(null == comps) {
+			return;
+		}
+		var _g = 0;
+		while(_g < comps.length) {
+			var comp = comps[_g];
+			++_g;
+			this.componentToDom.remove(comp);
+		}
+	}
+	,__class__: doom_html__$Render_DomComponentMap
+};
+var Doom = function() { };
+Doom.__name__ = ["Doom"];
 var EReg = function(r,opt) {
 	this.r = new RegExp(r,opt.split("u").join(""));
 };
@@ -187,15 +826,18 @@ Lambda.has = function(it,elt) {
 var Main = function() { };
 Main.__name__ = ["Main"];
 Main.main = function() {
-	var config = fancy_search_defaults_AllString.sync({ suggestions : ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"], limit : 10, alwaysHighlight : true, onlySuggestions : true});
-	var container = dots_Query.find(".fancy-container");
-	var input = dots_Query.find(".fancy-container input");
-	var search = new fancy_Search(config);
-	var renderer = fancy_search_renderer_DomStringFilter.fromInput(input,container,search,{ classes : fancy_search_defaults_ClassNameDefaults.defaults, keys : fancy_search_defaults_KeyboardDefaults.defaults, clearButton : haxe_ds_Option.None, renderSuggestion : fancy_search_renderer_DomStringFilter.renderStringSuggestion});
-	renderer.next(function(dom) {
-		while(container.children.length > 1) container.removeChild(container.lastChild);
-		dots_Dom.append(container,null,[dom]);
-	}).run();
+	var foods = ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"];
+	var search = new fancy_Search(fancy_search_defaults_AllString.sync({ suggestions : foods}));
+	var rendererConfig = { renderSuggestion : function(sugg) {
+		return doom_core__$VNode_VNode_$Impl_$.el("div",null,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text(sugg,null,null)]));
+	}, keys : fancy_search_defaults_KeyboardDefaults.defaults, classes : fancy_search_defaults_ClassNameDefaults.defaults, clearButton : haxe_ds_Option.None};
+	var dispatch = function(act) {
+		search.store.dispatch(act,{ fileName : "Main.hx", lineNumber : 28, className : "Main", methodName : "main"});
+	};
+	var vnodes = search.store.stream().map(function(state) {
+		return fancy_search_renderer_DoomAutocomplete.render({ state : state, cfg : rendererConfig, dispatch : dispatch});
+	});
+	Doom.browser.stream(vnodes,window.document.querySelector(".fancy-container"));
 };
 Math.__name__ = ["Math"];
 var Reflect = function() { };
@@ -497,6 +1139,1226 @@ Type["typeof"] = function(v) {
 		return ValueType.TUnknown;
 	}
 };
+var doom_core__$AttributeValue_AttributeValue_$Impl_$ = {};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.__name__ = ["doom","core","_AttributeValue","AttributeValue_Impl_"];
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString = function(s) {
+	return doom_core_AttributeValueImpl.StringAttribute(s);
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromBoolMap = function(map) {
+	var values = [];
+	var key = map.keys();
+	while(key.hasNext()) {
+		var key1 = key.next();
+		if(__map_reserved[key1] != null ? map.getReserved(key1) : map.h[key1]) {
+			values.push(key1);
+		}
+	}
+	return doom_core_AttributeValueImpl.StringAttribute(values.join(" "));
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromStringMap = function(map) {
+	var values = [];
+	var key = map.keys();
+	while(key.hasNext()) {
+		var key1 = key.next();
+		var value = __map_reserved[key1] != null ? map.getReserved(key1) : map.h[key1];
+		if(null == value) {
+			continue;
+		}
+		values.push("" + key1 + ":" + value);
+	}
+	return doom_core_AttributeValueImpl.StringAttribute(values.join(";"));
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromBool = function(b) {
+	return doom_core_AttributeValueImpl.BoolAttribute(b);
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler = function(f) {
+	if(null == f) {
+		return doom_core_AttributeValueImpl.BoolAttribute(false);
+	} else {
+		return doom_core_AttributeValueImpl.EventAttribute(f);
+	}
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromHandler = function(f) {
+	var f1 = f;
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e) {
+		e.preventDefault();
+		f1();
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromTypedEventHandler = function(f) {
+	var f1 = f;
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(_,e) {
+		f1(e);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromElementHandler = function(f) {
+	var f1 = f;
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e) {
+		e.preventDefault();
+		var typedEl = el;
+		f1(typedEl);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromElementAndEventHandler = function(f) {
+	var f1 = f;
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e) {
+		f1(el,e);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromStringValueHandler = function(f) {
+	var f1 = f;
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e) {
+		e.preventDefault();
+		var value = dots_Dom.getValue(el);
+		f1(value);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromStringValueAndEventHandler = function(f) {
+	var f1 = f;
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e) {
+		var value = dots_Dom.getValue(el);
+		f1(value,e);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromBoolValueHandler = function(f) {
+	var f1 = f;
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e) {
+		e.preventDefault();
+		var value = el.checked;
+		f1(value);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromBoolValueAndEventHandler = function(f) {
+	var f1 = f;
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e) {
+		var value = el.checked;
+		f1(value,e);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromIntValueHandler = function(f) {
+	var f1 = f;
+	var f2 = function(s) {
+		if(thx_Ints.canParse(s)) {
+			var f3 = thx_Ints.parse(s);
+			f1(f3);
+		}
+	};
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e) {
+		e.preventDefault();
+		var value = dots_Dom.getValue(el);
+		f2(value);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromIntValueAndEventHandler = function(f) {
+	var f1 = f;
+	var f2 = function(s,e) {
+		if(thx_Ints.canParse(s)) {
+			var f3 = thx_Ints.parse(s);
+			f1(f3,e);
+		}
+	};
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e1) {
+		var value = dots_Dom.getValue(el);
+		f2(value,e1);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromFloatValueHandler = function(f) {
+	var f1 = f;
+	var f2 = function(s) {
+		if(thx_Ints.canParse(s)) {
+			var f3 = thx_Ints.parse(s);
+			f1(f3);
+		}
+	};
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e) {
+		e.preventDefault();
+		var value = dots_Dom.getValue(el);
+		f2(value);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.fromFloatValueAndEventHandler = function(f) {
+	var f1 = f;
+	var f2 = function(s,e) {
+		if(thx_Ints.canParse(s)) {
+			var f3 = thx_Ints.parse(s);
+			f1(f3,e);
+		}
+	};
+	return doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e1) {
+		var value = dots_Dom.getValue(el);
+		f2(value,e1);
+	});
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.toString = function(this1) {
+	if(this1[1] == 1) {
+		var s = this1[2];
+		return s;
+	} else {
+		var a = this1;
+		throw new thx_Error("cannot convert attribute " + Std.string(a) + " to string",null,{ fileName : "AttributeValue.hx", lineNumber : 76, className : "doom.core._AttributeValue.AttributeValue_Impl_", methodName : "toString"});
+	}
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.equalsTo = function(this1,that) {
+	if(this1 == null) {
+		return false;
+	} else {
+		switch(this1[1]) {
+		case 0:
+			if(that == null) {
+				return false;
+			} else if(that[1] == 0) {
+				var a = this1[2];
+				var b = that[2];
+				return a == b;
+			} else {
+				return false;
+			}
+			break;
+		case 1:
+			if(that == null) {
+				return false;
+			} else if(that[1] == 1) {
+				var a1 = this1[2];
+				var b1 = that[2];
+				return a1 == b1;
+			} else {
+				return false;
+			}
+			break;
+		default:
+			if(that == null) {
+				return false;
+			} else {
+				return false;
+			}
+		}
+	}
+};
+doom_core__$AttributeValue_AttributeValue_$Impl_$.notEqualsTo = function(this1,that) {
+	return !doom_core__$AttributeValue_AttributeValue_$Impl_$.equalsTo(this1,that);
+};
+var doom_core_AttributeValueImpl = { __ename__ : ["doom","core","AttributeValueImpl"], __constructs__ : ["BoolAttribute","StringAttribute","EventAttribute"] };
+doom_core_AttributeValueImpl.BoolAttribute = function(b) { var $x = ["BoolAttribute",0,b]; $x.__enum__ = doom_core_AttributeValueImpl; return $x; };
+doom_core_AttributeValueImpl.StringAttribute = function(s) { var $x = ["StringAttribute",1,s]; $x.__enum__ = doom_core_AttributeValueImpl; return $x; };
+doom_core_AttributeValueImpl.EventAttribute = function(f) { var $x = ["EventAttribute",2,f]; $x.__enum__ = doom_core_AttributeValueImpl; return $x; };
+var doom_core_Component = function(props,children) {
+	this.isUnmounted = false;
+	this.props = props;
+	this.children = children;
+};
+doom_core_Component.__name__ = ["doom","core","Component"];
+doom_core_Component.prototype = {
+	props: null
+	,children: null
+	,node: null
+	,isUnmounted: null
+	,apply: null
+	,render: function() {
+		throw new thx_error_AbstractMethod({ fileName : "Component.hx", lineNumber : 19, className : "doom.core.Component", methodName : "render"});
+	}
+	,asNode: function() {
+		return doom_core_VNodeImpl.Comp(this);
+	}
+	,update: function(props,pos) {
+		var old = this.props;
+		this.props = props;
+		if(!this.shouldUpdate(old,props) || !this.shouldRender()) {
+			return;
+		}
+		try {
+			this.apply(doom_core_VNodeImpl.Comp(this),this.node);
+		} catch( e ) {
+			haxe_CallStack.lastException = e;
+			if (e instanceof js__$Boot_HaxeError) e = e.val;
+			this.rethrowUpdateError(e,pos);
+		}
+	}
+	,rethrowUpdateError: function(e,pos) {
+		var s = Std.string(e);
+		haxe_Log.trace(s,{ fileName : "Component.hx", lineNumber : 40, className : "doom.core.Component", methodName : "rethrowUpdateError"});
+		if(s.indexOf("apply is not a function") >= 0) {
+			throw new thx_Error("method `apply` has not been correctly migrated to " + Type.getClassName(js_Boot.getClass(this)),null,{ fileName : "Component.hx", lineNumber : 42, className : "doom.core.Component", methodName : "rethrowUpdateError"});
+		} else {
+			throw thx_Error.fromDynamic(e,pos);
+		}
+	}
+	,shouldUpdate: function(oldProps,newProps) {
+		return true;
+	}
+	,shouldRender: function() {
+		return !this.isUnmounted;
+	}
+	,migrationFields: function() {
+		return ["props","update","children"];
+	}
+	,didMount: function() {
+	}
+	,willMount: function() {
+	}
+	,willUpdate: function() {
+	}
+	,didUpdate: function() {
+	}
+	,didUnmount: function() {
+	}
+	,willUnmount: function() {
+	}
+	,__class__: doom_core_Component
+};
+var doom_core_Renderable = function() { };
+doom_core_Renderable.__name__ = ["doom","core","Renderable"];
+doom_core_Renderable.prototype = {
+	render: null
+	,__class__: doom_core_Renderable
+};
+var doom_core_SelectorParser = function(selector) {
+	this.selector = selector;
+	this.index = 0;
+};
+doom_core_SelectorParser.__name__ = ["doom","core","SelectorParser"];
+doom_core_SelectorParser.parseSelector = function(selector,otherAttributes) {
+	var result = new doom_core_SelectorParser(selector).parse();
+	if(otherAttributes != null) {
+		result.attributes = doom_core_SelectorParser.mergeAttributes(result.attributes,otherAttributes);
+	}
+	return result;
+};
+doom_core_SelectorParser.mergeAttributes = function(dest,other) {
+	return thx_Iterators.reduce(other.keys(),function(acc,key) {
+		var value = __map_reserved[key] != null ? other.getReserved(key) : other.h[key];
+		if(key == "class" && (__map_reserved[key] != null ? acc.existsReserved(key) : acc.h.hasOwnProperty(key))) {
+			var previousValue = __map_reserved[key] != null ? acc.getReserved(key) : acc.h[key];
+			value = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString("" + doom_core__$AttributeValue_AttributeValue_$Impl_$.toString(previousValue) + " " + doom_core__$AttributeValue_AttributeValue_$Impl_$.toString(value));
+		}
+		if(__map_reserved[key] != null) {
+			acc.setReserved(key,value);
+		} else {
+			acc.h[key] = value;
+		}
+		return acc;
+	},dest);
+};
+doom_core_SelectorParser.prototype = {
+	selector: null
+	,index: null
+	,parse: function() {
+		var tag = this.gobbleTag();
+		var attributes = this.gobbleAttributes();
+		return { tag : tag, attributes : attributes};
+	}
+	,gobbleTag: function() {
+		if(this.isIdentifierStart()) {
+			return this.gobbleIdentifier();
+		} else {
+			return "div";
+		}
+	}
+	,gobbleAttributes: function() {
+		var attributes = new haxe_ds_StringMap();
+		while(this.index < this.selector.length) {
+			var attribute = this.gobbleAttribute();
+			if(attribute.key == "class" && (__map_reserved["class"] != null ? attributes.existsReserved("class") : attributes.h.hasOwnProperty("class"))) {
+				var previousClass = doom_core__$AttributeValue_AttributeValue_$Impl_$.toString(__map_reserved["class"] != null ? attributes.getReserved("class") : attributes.h["class"]);
+				attribute.value = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString("" + previousClass + " " + doom_core__$AttributeValue_AttributeValue_$Impl_$.toString(attribute.value));
+			}
+			var key = attribute.key;
+			var value = attribute.value;
+			if(__map_reserved[key] != null) {
+				attributes.setReserved(key,value);
+			} else {
+				attributes.h[key] = value;
+			}
+		}
+		return attributes;
+	}
+	,gobbleAttribute: function() {
+		var _g = this["char"]();
+		switch(_g) {
+		case "#":
+			return this.gobbleElementId();
+		case ".":
+			return this.gobbleElementClass();
+		case "[":
+			return this.gobbleElementAttribute();
+		default:
+			var unknown = _g;
+			throw new thx_Error("unknown selector char \"" + unknown + "\" at pos " + this.index,null,{ fileName : "SelectorParser.hx", lineNumber : 79, className : "doom.core.SelectorParser", methodName : "gobbleAttribute"});
+		}
+	}
+	,gobbleElementId: function() {
+		this.gobbleChar("#");
+		var id = this.gobbleIdentifier();
+		return { key : "id", value : doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(id)};
+	}
+	,gobbleElementClass: function() {
+		this.gobbleChar(".");
+		var id = this.gobbleIdentifier();
+		return { key : "class", value : doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(id)};
+	}
+	,gobbleElementAttribute: function() {
+		this.gobbleChar("[");
+		var key = this.gobbleIdentifier();
+		this.gobbleChar("=");
+		var value = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(this.gobbleUpTo("]"));
+		if(thx_Bools.canParse(doom_core__$AttributeValue_AttributeValue_$Impl_$.toString(value))) {
+			value = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromBool(thx_Bools.parse(doom_core__$AttributeValue_AttributeValue_$Impl_$.toString(value)));
+		}
+		this.gobbleChar("]");
+		return { key : key, value : value};
+	}
+	,gobbleIdentifier: function() {
+		var result = [];
+		result.push(this.gobbleChar());
+		while(this.isIdentifierPart()) result.push(this.gobbleChar());
+		return result.join("");
+	}
+	,gobbleChar: function(expecting,expectingAnyOf) {
+		var c = this.selector.charAt(this.index++);
+		if(expecting != null && expecting != c) {
+			throw new thx_Error("expecting " + expecting + " at position " + this.index + " of " + this.selector,null,{ fileName : "SelectorParser.hx", lineNumber : 119, className : "doom.core.SelectorParser", methodName : "gobbleChar"});
+		}
+		if(expectingAnyOf != null && !thx_Arrays.contains(expectingAnyOf,c)) {
+			throw new thx_Error("expecting one of " + expectingAnyOf.join(", ") + " at position " + this.index + " of " + this.selector,null,{ fileName : "SelectorParser.hx", lineNumber : 122, className : "doom.core.SelectorParser", methodName : "gobbleChar"});
+		}
+		return c;
+	}
+	,gobbleUpTo: function(stopChar) {
+		var result = [];
+		while(this["char"]() != stopChar) result.push(this.gobbleChar());
+		return result.join("");
+	}
+	,isAlpha: function() {
+		var c = this.code();
+		if(!(c >= 65 && c <= 90)) {
+			if(c >= 97) {
+				return c <= 122;
+			} else {
+				return false;
+			}
+		} else {
+			return true;
+		}
+	}
+	,isNumeric: function() {
+		var c = this.code();
+		if(c >= 48) {
+			return c <= 57;
+		} else {
+			return false;
+		}
+	}
+	,isAlphaNumeric: function() {
+		if(!this.isAlpha()) {
+			return this.isNumeric();
+		} else {
+			return true;
+		}
+	}
+	,isAny: function(cs) {
+		var _g = 0;
+		while(_g < cs.length) {
+			var c = cs[_g];
+			++_g;
+			if(c == this["char"]()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	,isIdentifierStart: function() {
+		return this.isAlpha();
+	}
+	,isIdentifierPart: function() {
+		if(!(this.isAlpha() || this.isNumeric())) {
+			return this.isAny(["_","-"]);
+		} else {
+			return true;
+		}
+	}
+	,isIdStart: function() {
+		return this["char"]() == "#";
+	}
+	,isClassStart: function() {
+		return this["char"]() == ".";
+	}
+	,'char': function() {
+		return this.selector.charAt(this.index);
+	}
+	,code: function() {
+		return HxOverrides.cca(this.selector,this.index);
+	}
+	,__class__: doom_core_SelectorParser
+};
+var doom_core__$VNode_VNode_$Impl_$ = {};
+doom_core__$VNode_VNode_$Impl_$.__name__ = ["doom","core","_VNode","VNode_Impl_"];
+doom_core__$VNode_VNode_$Impl_$.text = function(text) {
+	return doom_core_VNodeImpl.Text(text,null,null);
+};
+doom_core__$VNode_VNode_$Impl_$.comp = function(comp) {
+	return doom_core_VNodeImpl.Comp(comp);
+};
+doom_core__$VNode_VNode_$Impl_$.raw = function(content) {
+	return doom_core_VNodeImpl.Raw(content,null,null);
+};
+doom_core__$VNode_VNode_$Impl_$.comment = function(content) {
+	return doom_core_VNodeImpl.Comment(content,null,null);
+};
+doom_core__$VNode_VNode_$Impl_$.el = function(name,attributes,children) {
+	if(null == attributes) {
+		attributes = new haxe_ds_StringMap();
+	}
+	if(null == children) {
+		children = doom_core__$VNodes_VNodes_$Impl_$.children([]);
+	}
+	return doom_core_VNodeImpl.Element(name,attributes,children,null,null);
+};
+doom_core__$VNode_VNode_$Impl_$.lazy = function(fn) {
+	return doom_core_VNodeImpl.Lazy(fn);
+};
+doom_core__$VNode_VNode_$Impl_$.renderable = function(r) {
+	return doom_core_VNodeImpl.Lazy($bind(r,r.render));
+};
+doom_core__$VNode_VNode_$Impl_$.asNodes = function(this1) {
+	return doom_core__$VNodes_VNodes_$Impl_$.children([this1]);
+};
+doom_core__$VNode_VNode_$Impl_$.mount = function(this1,mount) {
+	switch(this1[1]) {
+	case 0:
+		if(this1[5] == null) {
+			var onUnmount = this1[6];
+			var name = this1[2];
+			var attributes = this1[3];
+			var children = this1[4];
+			return doom_core_VNodeImpl.Element(name,attributes,children,mount,onUnmount);
+		} else {
+			var onUnmount1 = this1[6];
+			var name1 = this1[2];
+			var attributes1 = this1[3];
+			var children1 = this1[4];
+			var onMount = this1[5];
+			var fa = onMount;
+			var fb = mount;
+			return doom_core_VNodeImpl.Element(name1,attributes1,children1,function(v1,v2) {
+				fa(v1,v2);
+				fb(v1,v2);
+			},onUnmount1);
+		}
+		break;
+	case 1:
+		if(this1[3] == null) {
+			var onUnmount2 = this1[4];
+			var comment = this1[2];
+			return doom_core_VNodeImpl.Comment(comment,mount,onUnmount2);
+		} else {
+			var onUnmount3 = this1[4];
+			var comment1 = this1[2];
+			var onMount1 = this1[3];
+			var fa1 = onMount1;
+			var fb1 = mount;
+			return doom_core_VNodeImpl.Comment(comment1,function(v11,v21) {
+				fa1(v11,v21);
+				fb1(v11,v21);
+			},onUnmount3);
+		}
+		break;
+	case 2:
+		if(this1[3] == null) {
+			var onUnmount4 = this1[4];
+			var code = this1[2];
+			return doom_core_VNodeImpl.Raw(code,mount,onUnmount4);
+		} else {
+			var onUnmount5 = this1[4];
+			var code1 = this1[2];
+			var onMount2 = this1[3];
+			var fa2 = onMount2;
+			var fb2 = mount;
+			return doom_core_VNodeImpl.Raw(code1,function(v12,v22) {
+				fa2(v12,v22);
+				fb2(v12,v22);
+			},onUnmount5);
+		}
+		break;
+	case 3:
+		if(this1[3] == null) {
+			var onUnmount6 = this1[4];
+			var text = this1[2];
+			return doom_core_VNodeImpl.Text(text,mount,onUnmount6);
+		} else {
+			var onUnmount7 = this1[4];
+			var text1 = this1[2];
+			var onMount3 = this1[3];
+			var fa3 = onMount3;
+			var fb3 = mount;
+			return doom_core_VNodeImpl.Text(text1,function(v13,v23) {
+				fa3(v13,v23);
+				fb3(v13,v23);
+			},onUnmount7);
+		}
+		break;
+	case 4:
+		var comp = this1[2];
+		throw new thx_Error("Component does not support `onMount`, use `Component.didMount` or `Component.willMount`",null,{ fileName : "VNode.hx", lineNumber : 53, className : "doom.core._VNode.VNode_Impl_", methodName : "mount"});
+	case 5:
+		var render = this1[2];
+		return doom_core_VNodeImpl.Lazy(function() {
+			var node = render();
+			return doom_core__$VNode_VNode_$Impl_$.mount(node,mount);
+		});
+	}
+};
+var doom_core_VNodeImpl = { __ename__ : ["doom","core","VNodeImpl"], __constructs__ : ["Element","Comment","Raw","Text","Comp","Lazy"] };
+doom_core_VNodeImpl.Element = function(name,attributes,children,onMount,onUnmount) { var $x = ["Element",0,name,attributes,children,onMount,onUnmount]; $x.__enum__ = doom_core_VNodeImpl; return $x; };
+doom_core_VNodeImpl.Comment = function(comment,onMount,onUnmount) { var $x = ["Comment",1,comment,onMount,onUnmount]; $x.__enum__ = doom_core_VNodeImpl; return $x; };
+doom_core_VNodeImpl.Raw = function(code,onMount,onUnmount) { var $x = ["Raw",2,code,onMount,onUnmount]; $x.__enum__ = doom_core_VNodeImpl; return $x; };
+doom_core_VNodeImpl.Text = function(text,onMount,onUnmount) { var $x = ["Text",3,text,onMount,onUnmount]; $x.__enum__ = doom_core_VNodeImpl; return $x; };
+doom_core_VNodeImpl.Comp = function(comp) { var $x = ["Comp",4,comp]; $x.__enum__ = doom_core_VNodeImpl; return $x; };
+doom_core_VNodeImpl.Lazy = function(render) { var $x = ["Lazy",5,render]; $x.__enum__ = doom_core_VNodeImpl; return $x; };
+var doom_core__$VNodes_VNodes_$Impl_$ = {};
+doom_core__$VNodes_VNodes_$Impl_$.__name__ = ["doom","core","_VNodes","VNodes_Impl_"];
+doom_core__$VNodes_VNodes_$Impl_$.child = function(child) {
+	return doom_core__$VNodes_VNodes_$Impl_$.children([child]);
+};
+doom_core__$VNodes_VNodes_$Impl_$.text = function(text) {
+	return doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Text(text,null,null)]);
+};
+doom_core__$VNodes_VNodes_$Impl_$.comp = function(comp) {
+	return doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Comp(comp)]);
+};
+doom_core__$VNodes_VNodes_$Impl_$.children = function(children) {
+	var this1 = children;
+	return this1;
+};
+doom_core__$VNodes_VNodes_$Impl_$.lazy = function(fn) {
+	return doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Lazy(fn)]);
+};
+doom_core__$VNodes_VNodes_$Impl_$.renderable = function(r) {
+	return doom_core__$VNodes_VNodes_$Impl_$.children([doom_core_VNodeImpl.Lazy($bind(r,r.render))]);
+};
+doom_core__$VNodes_VNodes_$Impl_$._new = function(arr) {
+	var this1 = arr;
+	return this1;
+};
+doom_core__$VNodes_VNodes_$Impl_$.add = function(this1,child) {
+	this1.push(child);
+	return doom_core__$VNodes_VNodes_$Impl_$.children(this1);
+};
+doom_core__$VNodes_VNodes_$Impl_$.prepend = function(this1,child) {
+	this1.unshift(child);
+	return doom_core__$VNodes_VNodes_$Impl_$.children(this1);
+};
+doom_core__$VNodes_VNodes_$Impl_$.concat = function(this1,other) {
+	return doom_core__$VNodes_VNodes_$Impl_$.children(this1.concat(other));
+};
+doom_core__$VNodes_VNodes_$Impl_$.copy = function(this1) {
+	return doom_core__$VNodes_VNodes_$Impl_$.children(this1.slice());
+};
+doom_core__$VNodes_VNodes_$Impl_$.filter = function(this1,predicate) {
+	return doom_core__$VNodes_VNodes_$Impl_$.children(this1.filter(predicate));
+};
+doom_core__$VNodes_VNodes_$Impl_$.toArray = function(this1) {
+	return this1;
+};
+var doom_html_AttributeType = { __ename__ : ["doom","html","AttributeType"], __constructs__ : ["BooleanAttribute","Property","BooleanProperty","OverloadedBooleanAttribute","NumericAttribute","PositiveNumericAttribute","SideEffectProperty"] };
+doom_html_AttributeType.BooleanAttribute = ["BooleanAttribute",0];
+doom_html_AttributeType.BooleanAttribute.__enum__ = doom_html_AttributeType;
+doom_html_AttributeType.Property = ["Property",1];
+doom_html_AttributeType.Property.__enum__ = doom_html_AttributeType;
+doom_html_AttributeType.BooleanProperty = ["BooleanProperty",2];
+doom_html_AttributeType.BooleanProperty.__enum__ = doom_html_AttributeType;
+doom_html_AttributeType.OverloadedBooleanAttribute = ["OverloadedBooleanAttribute",3];
+doom_html_AttributeType.OverloadedBooleanAttribute.__enum__ = doom_html_AttributeType;
+doom_html_AttributeType.NumericAttribute = ["NumericAttribute",4];
+doom_html_AttributeType.NumericAttribute.__enum__ = doom_html_AttributeType;
+doom_html_AttributeType.PositiveNumericAttribute = ["PositiveNumericAttribute",5];
+doom_html_AttributeType.PositiveNumericAttribute.__enum__ = doom_html_AttributeType;
+doom_html_AttributeType.SideEffectProperty = ["SideEffectProperty",6];
+doom_html_AttributeType.SideEffectProperty.__enum__ = doom_html_AttributeType;
+var doom_html_Attributes = function() { };
+doom_html_Attributes.__name__ = ["doom","html","Attributes"];
+doom_html_Attributes.getAttribute = function(el,name) {
+	var _this = doom_html_Attributes.properties;
+	var prop = __map_reserved[name] != null ? _this.getReserved(name) : _this.h[name];
+	if(prop == null) {
+		return el.getAttribute(name);
+	} else {
+		switch(prop[1]) {
+		case 1:case 2:case 6:
+			return Reflect.field(el,name);
+		case 0:case 3:case 4:case 5:
+			return el.getAttribute(name);
+		}
+	}
+};
+doom_html_Attributes.setDynamicAttribute = function(el,name,value) {
+	var _this = doom_html_Attributes.properties;
+	var prop = __map_reserved[name] != null ? _this.getReserved(name) : _this.h[name];
+	if(prop == null) {
+		el.setAttribute(name,value);
+	} else {
+		switch(prop[1]) {
+		case 1:case 2:case 6:
+			el[name] = value;
+			break;
+		case 0:case 3:case 4:case 5:
+			el.setAttribute(name,value);
+			break;
+		}
+	}
+	return;
+};
+doom_html_Attributes.setStringAttribute = function(el,name,value) {
+	var _this = doom_html_Attributes.properties;
+	var prop = __map_reserved[name] != null ? _this.getReserved(name) : _this.h[name];
+	if(prop == null) {
+		el.setAttribute(name,value);
+	} else {
+		switch(prop[1]) {
+		case 1:case 2:case 6:
+			el[name] = value;
+			break;
+		case 0:case 3:case 4:case 5:
+			el.setAttribute(name,value);
+			break;
+		}
+	}
+	return;
+};
+doom_html_Attributes.toggleBoolAttribute = function(el,name,value) {
+	var _this = doom_html_Attributes.properties;
+	var prop = __map_reserved[name] != null ? _this.getReserved(name) : _this.h[name];
+	if(prop == null) {
+		if(value) {
+			el.setAttribute(name,name);
+		} else {
+			el.removeAttribute(name);
+		}
+	} else {
+		switch(prop[1]) {
+		case 1:case 2:case 6:
+			el[name] = value;
+			break;
+		case 0:case 3:case 4:case 5:
+			if(value) {
+				el.setAttribute(name,name);
+			} else {
+				el.removeAttribute(name);
+			}
+			break;
+		}
+	}
+	return;
+};
+doom_html_Attributes.removeAttribute = function(el,name) {
+	el.removeAttribute(name);
+};
+var doom_html_Component = function(props,children) {
+	doom_core_Component.call(this,props,children);
+};
+doom_html_Component.__name__ = ["doom","html","Component"];
+doom_html_Component.__super__ = doom_core_Component;
+doom_html_Component.prototype = $extend(doom_core_Component.prototype,{
+	classes: function() {
+		return "";
+	}
+	,selector: function() {
+		var parts = StringTools.trim(this.classes()).split(" ").filter(function(cls) {
+			return cls != "";
+		});
+		if(parts.length == 0) {
+			return "";
+		}
+		return parts.map(function(part) {
+			return "." + part;
+		}).join("");
+	}
+	,get_element: function() {
+		return this.node;
+	}
+	,__class__: doom_html_Component
+});
+var doom_html__$EventHandler_EventHandler_$Impl_$ = {};
+doom_html__$EventHandler_EventHandler_$Impl_$.__name__ = ["doom","html","_EventHandler","EventHandler_Impl_"];
+doom_html__$EventHandler_EventHandler_$Impl_$.fromHandler = function(f) {
+	return function(el,e) {
+		e.preventDefault();
+		f();
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromEventHandler = function(f) {
+	return function(_,e) {
+		f(e);
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromElementHandler = function(f) {
+	return function(el,e) {
+		e.preventDefault();
+		var typedEl = el;
+		f(typedEl);
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromElementAndEventHandler = function(f) {
+	return function(el,e) {
+		f(el,e);
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromStringValueHandler = function(f) {
+	return function(el,e) {
+		e.preventDefault();
+		var value = dots_Dom.getValue(el);
+		f(value);
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromStringValueAndEventHandler = function(f) {
+	return function(el,e) {
+		var value = dots_Dom.getValue(el);
+		f(value,e);
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromBoolValueHandler = function(f) {
+	return function(el,e) {
+		e.preventDefault();
+		var value = el.checked;
+		f(value);
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromBoolValueAndEventHandler = function(f) {
+	return function(el,e) {
+		var value = el.checked;
+		f(value,e);
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromIntValueHandler = function(f) {
+	var f1 = function(s) {
+		if(thx_Ints.canParse(s)) {
+			var f2 = thx_Ints.parse(s);
+			f(f2);
+		}
+	};
+	return function(el,e) {
+		e.preventDefault();
+		var value = dots_Dom.getValue(el);
+		f1(value);
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromIntValueAndEventHandler = function(f) {
+	var f1 = function(s,e) {
+		if(thx_Ints.canParse(s)) {
+			var f2 = thx_Ints.parse(s);
+			f(f2,e);
+		}
+	};
+	return function(el,e1) {
+		var value = dots_Dom.getValue(el);
+		f1(value,e1);
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromFloatValueHandler = function(f) {
+	var f1 = function(s) {
+		if(thx_Floats.canParse(s)) {
+			var f2 = thx_Floats.parse(s);
+			f(f2);
+		}
+	};
+	return function(el,e) {
+		e.preventDefault();
+		var value = dots_Dom.getValue(el);
+		f1(value);
+	};
+};
+doom_html__$EventHandler_EventHandler_$Impl_$.fromFloatValueAndEventHandler = function(f) {
+	var f1 = function(s,e) {
+		if(thx_Floats.canParse(s)) {
+			var f2 = thx_Floats.parse(s);
+			f(f2,e);
+		}
+	};
+	return function(el,e1) {
+		var value = dots_Dom.getValue(el);
+		f1(value,e1);
+	};
+};
+var doom_html_Html = function() { };
+doom_html_Html.__name__ = ["doom","html","Html"];
+doom_html_Html.a = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("a",attributes,children);
+};
+doom_html_Html.abbr = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("abbr",attributes,children);
+};
+doom_html_Html.address = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("address",attributes,children);
+};
+doom_html_Html.area = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("area",attributes,null);
+};
+doom_html_Html.article = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("article",attributes,children);
+};
+doom_html_Html.aside = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("aside",attributes,children);
+};
+doom_html_Html.audio = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("audio",attributes,children);
+};
+doom_html_Html.b = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("b",attributes,children);
+};
+doom_html_Html.base = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("base",attributes,null);
+};
+doom_html_Html.bdi = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("bdi",attributes,children);
+};
+doom_html_Html.bdo = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("bdo",attributes,children);
+};
+doom_html_Html.blockquote = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("blockquote",attributes,children);
+};
+doom_html_Html.body = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("body",attributes,children);
+};
+doom_html_Html.br = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("br",attributes,null);
+};
+doom_html_Html.button = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("button",attributes,children);
+};
+doom_html_Html.canvas = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("canvas",attributes,children);
+};
+doom_html_Html.caption = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("caption",attributes,children);
+};
+doom_html_Html.cite = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("cite",attributes,children);
+};
+doom_html_Html.code = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("code",attributes,children);
+};
+doom_html_Html.col = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("col",attributes,null);
+};
+doom_html_Html.colgroup = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("colgroup",attributes,children);
+};
+doom_html_Html.data = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("data",attributes,children);
+};
+doom_html_Html.datalist = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("datalist",attributes,children);
+};
+doom_html_Html.dd = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("dd",attributes,children);
+};
+doom_html_Html.del = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("del",attributes,children);
+};
+doom_html_Html.details = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("details",attributes,children);
+};
+doom_html_Html.dfn = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("dfn",attributes,children);
+};
+doom_html_Html.dialog = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("dialog",attributes,children);
+};
+doom_html_Html.div = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("div",attributes,children);
+};
+doom_html_Html.dl = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("dl",attributes,children);
+};
+doom_html_Html.dt = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("dt",attributes,children);
+};
+doom_html_Html.em = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("em",attributes,children);
+};
+doom_html_Html.embed = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("embed",attributes,null);
+};
+doom_html_Html.fieldset = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("fieldset",attributes,children);
+};
+doom_html_Html.figcaption = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("figcaption",attributes,children);
+};
+doom_html_Html.figure = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("figure",attributes,children);
+};
+doom_html_Html.footer = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("footer",attributes,children);
+};
+doom_html_Html.form = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("form",attributes,children);
+};
+doom_html_Html.h1 = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("h1",attributes,children);
+};
+doom_html_Html.h2 = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("h2",attributes,children);
+};
+doom_html_Html.h3 = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("h3",attributes,children);
+};
+doom_html_Html.h4 = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("h4",attributes,children);
+};
+doom_html_Html.h5 = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("h5",attributes,children);
+};
+doom_html_Html.h6 = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("h6",attributes,children);
+};
+doom_html_Html.head = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("head",attributes,children);
+};
+doom_html_Html.header = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("header",attributes,children);
+};
+doom_html_Html.hgroup = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("hgroup",attributes,children);
+};
+doom_html_Html.hr = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("hr",attributes,null);
+};
+doom_html_Html.html = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("html",attributes,children);
+};
+doom_html_Html.i = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("i",attributes,children);
+};
+doom_html_Html.iframe = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("iframe",attributes,children);
+};
+doom_html_Html.img = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("img",attributes,null);
+};
+doom_html_Html.input = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("input",attributes,null);
+};
+doom_html_Html.ins = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("ins",attributes,children);
+};
+doom_html_Html.kbd = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("kbd",attributes,children);
+};
+doom_html_Html.keygen = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("keygen",attributes,null);
+};
+doom_html_Html.label = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("label",attributes,children);
+};
+doom_html_Html.legend = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("legend",attributes,children);
+};
+doom_html_Html.li = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("li",attributes,children);
+};
+doom_html_Html.link = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("link",attributes,null);
+};
+doom_html_Html.main = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("main",attributes,children);
+};
+doom_html_Html.map = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("map",attributes,children);
+};
+doom_html_Html.mark = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("mark",attributes,children);
+};
+doom_html_Html.menu = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("menu",attributes,children);
+};
+doom_html_Html.menuitem = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("menuitem",attributes,children);
+};
+doom_html_Html.meta = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("meta",attributes,null);
+};
+doom_html_Html.meter = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("meter",attributes,children);
+};
+doom_html_Html.nav = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("nav",attributes,children);
+};
+doom_html_Html.noscript = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("noscript",attributes,children);
+};
+doom_html_Html.object = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("object",attributes,children);
+};
+doom_html_Html.ol = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("ol",attributes,children);
+};
+doom_html_Html.optgroup = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("optgroup",attributes,children);
+};
+doom_html_Html.option = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("option",attributes,children);
+};
+doom_html_Html.output = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("output",attributes,children);
+};
+doom_html_Html.p = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("p",attributes,children);
+};
+doom_html_Html.param = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("param",attributes,null);
+};
+doom_html_Html.pre = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("pre",attributes,children);
+};
+doom_html_Html.progress = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("progress",attributes,children);
+};
+doom_html_Html.q = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("q",attributes,children);
+};
+doom_html_Html.rb = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("rb",attributes,children);
+};
+doom_html_Html.rp = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("rp",attributes,children);
+};
+doom_html_Html.rt = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("rt",attributes,children);
+};
+doom_html_Html.rtc = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("rtc",attributes,children);
+};
+doom_html_Html.ruby = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("ruby",attributes,children);
+};
+doom_html_Html.s = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("s",attributes,children);
+};
+doom_html_Html.samp = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("samp",attributes,children);
+};
+doom_html_Html.script = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("script",attributes,children);
+};
+doom_html_Html.section = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("section",attributes,children);
+};
+doom_html_Html.select = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("select",attributes,children);
+};
+doom_html_Html.small = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("small",attributes,children);
+};
+doom_html_Html.source = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("source",attributes,null);
+};
+doom_html_Html.span = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("span",attributes,children);
+};
+doom_html_Html.strong = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("strong",attributes,children);
+};
+doom_html_Html.style = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("style",attributes,children);
+};
+doom_html_Html.sub = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("sub",attributes,children);
+};
+doom_html_Html.summary = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("summary",attributes,children);
+};
+doom_html_Html.sup = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("sup",attributes,children);
+};
+doom_html_Html.table = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("table",attributes,children);
+};
+doom_html_Html.tbody = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("tbody",attributes,children);
+};
+doom_html_Html.td = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("td",attributes,children);
+};
+doom_html_Html.template = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("template",attributes,children);
+};
+doom_html_Html.textarea = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("textarea",attributes,children);
+};
+doom_html_Html.tfoot = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("tfoot",attributes,children);
+};
+doom_html_Html.th = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("th",attributes,children);
+};
+doom_html_Html.thead = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("thead",attributes,children);
+};
+doom_html_Html.time = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("time",attributes,children);
+};
+doom_html_Html.title = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("title",attributes,children);
+};
+doom_html_Html.tr = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("tr",attributes,children);
+};
+doom_html_Html.track = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("track",attributes,null);
+};
+doom_html_Html.u = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("u",attributes,children);
+};
+doom_html_Html.ul = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("ul",attributes,children);
+};
+doom_html_Html.htmlvar = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("var",attributes,children);
+};
+doom_html_Html.video = function(attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el("video",attributes,children);
+};
+doom_html_Html.wbr = function(attributes) {
+	return doom_core__$VNode_VNode_$Impl_$.el("wbr",attributes,null);
+};
+doom_html_Html.D = function(selector,attributes,children) {
+	var parseResult = doom_core_SelectorParser.parseSelector(selector,attributes);
+	return doom_core__$VNode_VNode_$Impl_$.el(parseResult.tag,parseResult.attributes,children);
+};
+doom_html_Html.el = function(name,attributes,children) {
+	return doom_core__$VNode_VNode_$Impl_$.el(name,attributes,children);
+};
+doom_html_Html.text = function(content) {
+	return doom_core_VNodeImpl.Text(content,null,null);
+};
+doom_html_Html.comment = function(content) {
+	return doom_core_VNodeImpl.Comment(content,null,null);
+};
+doom_html_Html.raw = function(content) {
+	return doom_core_VNodeImpl.Raw(content,null,null);
+};
+doom_html_Html.dummy = function(text) {
+	if(text == null) {
+		text = "empty node";
+	}
+	var _g = new haxe_ds_StringMap();
+	var value = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString("display:none");
+	if(__map_reserved["style"] != null) {
+		_g.setReserved("style",value);
+	} else {
+		_g.h["style"] = value;
+	}
+	var value1 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(text);
+	if(__map_reserved["data-comment"] != null) {
+		_g.setReserved("data-comment",value1);
+	} else {
+		_g.h["data-comment"] = value1;
+	}
+	return doom_core__$VNode_VNode_$Impl_$.el("div",_g);
+};
+doom_html_Html.comp = function(comp) {
+	return doom_core_VNodeImpl.Comp(comp);
+};
 var dots_AttributeType = { __ename__ : ["dots","AttributeType"], __constructs__ : ["BooleanAttribute","Property","BooleanProperty","OverloadedBooleanAttribute","NumericAttribute","PositiveNumericAttribute","SideEffectProperty"] };
 dots_AttributeType.BooleanAttribute = ["BooleanAttribute",0];
 dots_AttributeType.BooleanAttribute.__enum__ = dots_AttributeType;
@@ -618,16 +2480,6 @@ dots_Attributes.toggleBoolAttribute = function(el,name,value) {
 };
 dots_Attributes.removeAttribute = function(el,name) {
 	el.removeAttribute(name);
-};
-var dots_HTMLCollections = function() { };
-dots_HTMLCollections.__name__ = ["dots","HTMLCollections"];
-dots_HTMLCollections.toArray = function(it) {
-	return Array.prototype.slice.call(it);
-};
-var dots_NodeLists = function() { };
-dots_NodeLists.__name__ = ["dots","NodeLists"];
-dots_NodeLists.toArray = function(it) {
-	return Array.prototype.slice.call(it);
 };
 var dots_Dom = function() { };
 dots_Dom.__name__ = ["dots","Dom"];
@@ -1039,42 +2891,49 @@ dots__$EventHandler_EventHandler_$Impl_$.fromFloatValueHandler = function(f) {
 dots__$EventHandler_EventHandler_$Impl_$.toCallback = function(this1) {
 	return this1;
 };
-var dots_Keys = function() { };
-dots_Keys.__name__ = ["dots","Keys"];
-var dots_Query = function() { };
-dots_Query.__name__ = ["dots","Query"];
-dots_Query.find = function(selector,ctx) {
-	return (ctx != null ? ctx : dots_Query.doc).querySelector(selector);
+var dots_Html = function() { };
+dots_Html.__name__ = ["dots","Html"];
+dots_Html.parseNodes = function(html) {
+	if(!dots_Html.pattern.match(html)) {
+		throw new js__$Boot_HaxeError("Invalid pattern \"" + html + "\"");
+	}
+	var el;
+	var _g = dots_Html.pattern.matched(1).toLowerCase();
+	switch(_g) {
+	case "tbody":case "thead":
+		el = window.document.createElement("table");
+		break;
+	case "td":case "th":
+		el = window.document.createElement("tr");
+		break;
+	case "tr":
+		el = window.document.createElement("tbody");
+		break;
+	default:
+		el = window.document.createElement("div");
+	}
+	el.innerHTML = html;
+	return el.childNodes;
 };
-dots_Query.selectNodes = function(selector,ctx) {
-	return (ctx != null ? ctx : dots_Query.doc).querySelectorAll(selector);
-};
-dots_Query.select = function(selector,ctx) {
-	var list = dots_Query.selectNodes(selector,ctx);
+dots_Html.parseArray = function(html) {
+	var list = dots_Html.parseNodes(html);
 	return Array.prototype.slice.call(list,0);
 };
-dots_Query.getElementIndex = function(el) {
-	var index = 0;
-	while(true) {
-		el = el.previousElementSibling;
-		if(!(null != el)) {
-			break;
-		}
-		++index;
+dots_Html.parseElement = function(html) {
+	return dots_Html.parseNodes(html)[0];
+};
+dots_Html.parse = function(html) {
+	var nodes = dots_Html.parseNodes(html);
+	if(nodes.length > 1) {
+		var doc = window.document.createDocumentFragment();
+		while(nodes.length > 0) doc.appendChild(nodes[0]);
+		return doc;
+	} else {
+		return nodes[0];
 	}
-	return index;
 };
-dots_Query.siblings = function(node) {
-	var it = node.parentNode.children;
-	return Array.prototype.slice.call(it).filter(function(n) {
-		return n != node;
-	});
-};
-dots_Query.childrenOf = function(children,parent) {
-	return children.filter(function(child) {
-		return child.parentElement == parent;
-	});
-};
+var dots_Keys = function() { };
+dots_Keys.__name__ = ["dots","Keys"];
 var dots_SelectorParser = function(selector) {
 	this.selector = selector;
 	this.index = 0;
@@ -1653,461 +3512,159 @@ var fancy_search_defaults_ClassNameDefaults = function() { };
 fancy_search_defaults_ClassNameDefaults.__name__ = ["fancy","search","defaults","ClassNameDefaults"];
 var fancy_search_defaults_KeyboardDefaults = function() { };
 fancy_search_defaults_KeyboardDefaults.__name__ = ["fancy","search","defaults","KeyboardDefaults"];
-var fancy_search_renderer_DomStringFilter = function() { };
-fancy_search_renderer_DomStringFilter.__name__ = ["fancy","search","renderer","DomStringFilter"];
-fancy_search_renderer_DomStringFilter.renderStringSuggestion = function(sugg) {
-	var doc = null;
-	if(null == doc) {
-		doc = window.document;
-	}
-	var el = doc.createElement("li");
-	var _g = 0;
-	var _g1 = [];
-	while(_g < _g1.length) {
-		var o = _g1[_g];
-		++_g;
-		el.setAttribute(o.name,o.value);
-	}
-	var attrs = null;
-	if(null != attrs) {
-		var attr = attrs.keys();
-		while(attr.hasNext()) {
-			var attr1 = attr.next();
-			el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
-		}
-	}
-	var children = null;
-	if(null != children) {
-		var _g2 = 0;
-		while(_g2 < children.length) {
-			var child = children[_g2];
-			++_g2;
-			el.appendChild(child);
-		}
-	}
-	var textContent = sugg;
-	if(null != textContent) {
-		el.appendChild(doc.createTextNode(textContent));
-	}
-	return el;
+var fancy_search_renderer_DoomAutocomplete = function() { };
+fancy_search_renderer_DoomAutocomplete.__name__ = ["fancy","search","renderer","DoomAutocomplete"];
+fancy_search_renderer_DoomAutocomplete.render = function(props) {
+	return doom_core__$VNode_VNode_$Impl_$.el("div",null,doom_core__$VNodes_VNodes_$Impl_$.children([fancy_search_renderer_DoomAutocomplete.renderInput(props.dispatch,props.state.filter),fancy_search_renderer_DoomAutocomplete.renderMenu(props.cfg,props.dispatch,props.state)]));
 };
-fancy_search_renderer_DomStringFilter.renderMenuItem = function(config,renderCfg,dispatch,highlighted,sugg) {
+fancy_search_renderer_DoomAutocomplete.renderInput = function(dispatch,value) {
+	var _g = new haxe_ds_StringMap();
+	var value1 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString("fancify");
+	if(__map_reserved["class"] != null) {
+		_g.setReserved("class",value1);
+	} else {
+		_g.h["class"] = value1;
+	}
+	var value2 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString("text");
+	if(__map_reserved["type"] != null) {
+		_g.setReserved("type",value2);
+	} else {
+		_g.h["type"] = value2;
+	}
+	var value3 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString("Search for Something");
+	if(__map_reserved["placeholder"] != null) {
+		_g.setReserved("placeholder",value3);
+	} else {
+		_g.h["placeholder"] = value3;
+	}
+	var value4 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(value);
+	if(__map_reserved["value"] != null) {
+		_g.setReserved("value",value4);
+	} else {
+		_g.h["value"] = value4;
+	}
+	var f = function(el,_) {
+		var inpt = el;
+		dispatch(fancy_search_Action.SetFilter(inpt.value));
+	};
+	var value5 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el1,e) {
+		f(el1,e);
+	});
+	if(__map_reserved["focus"] != null) {
+		_g.setReserved("focus",value5);
+	} else {
+		_g.h["focus"] = value5;
+	}
+	var f1 = function() {
+		dispatch(fancy_search_Action.CloseMenu);
+	};
+	var value6 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el2,e1) {
+		e1.preventDefault();
+		f1();
+	});
+	if(__map_reserved["blur"] != null) {
+		_g.setReserved("blur",value6);
+	} else {
+		_g.h["blur"] = value6;
+	}
+	var f2 = function(el3,_1) {
+		var inpt1 = el3;
+		dispatch(fancy_search_Action.SetFilter(inpt1.value));
+	};
+	var value7 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el4,e2) {
+		f2(el4,e2);
+	});
+	if(__map_reserved["input"] != null) {
+		_g.setReserved("input",value7);
+	} else {
+		_g.h["input"] = value7;
+	}
+	return doom_core__$VNode_VNode_$Impl_$.el("input",_g,null);
+};
+fancy_search_renderer_DoomAutocomplete.renderMenu = function(cfg,dispatch,state) {
+	var _g = state.menu;
+	switch(_g[1]) {
+	case 0:
+		var _g1 = new haxe_ds_StringMap();
+		var value = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(cfg.classes.container + " " + cfg.classes.containerClosed);
+		if(__map_reserved["class"] != null) {
+			_g1.setReserved("class",value);
+		} else {
+			_g1.h["class"] = value;
+		}
+		return doom_core__$VNode_VNode_$Impl_$.el("div",_g1,null);
+	case 1:
+		if(_g[2][1] == 3) {
+			var highlighted = _g[3];
+			var suggs = _g[2][2];
+			var _g2 = new haxe_ds_StringMap();
+			var value1 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(cfg.classes.container + " " + cfg.classes.containerOpen);
+			if(__map_reserved["class"] != null) {
+				_g2.setReserved("class",value1);
+			} else {
+				_g2.h["class"] = value1;
+			}
+			var _g11 = new haxe_ds_StringMap();
+			var value2 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(cfg.classes.list);
+			if(__map_reserved["class"] != null) {
+				_g11.setReserved("class",value2);
+			} else {
+				_g11.h["class"] = value2;
+			}
+			var eq = state.config.sugEq;
+			var cfg1 = cfg;
+			var dispatch1 = dispatch;
+			var highlighted1 = highlighted;
+			var children = function(item) {
+				return fancy_search_renderer_DoomAutocomplete.renderMenuItem(eq,cfg1,dispatch1,highlighted1,item);
+			};
+			return doom_core__$VNode_VNode_$Impl_$.el("div",_g2,doom_core__$VNodes_VNodes_$Impl_$.children([doom_core__$VNode_VNode_$Impl_$.el("ul",_g11,doom_core__$VNodes_VNodes_$Impl_$.children(thx__$Nel_Nel_$Impl_$.toArray(suggs).map(children)))]));
+		} else {
+			return doom_core__$VNode_VNode_$Impl_$.el("div",null,null);
+		}
+		break;
+	}
+};
+fancy_search_renderer_DoomAutocomplete.renderMenuItem = function(eq,cfg,dispatch,highlighted,item) {
 	var highlightClass = thx_Options.cata(highlighted,"",function(h) {
-		if(config.sugEq(sugg,h)) {
-			return renderCfg.classes.itemHighlighted;
+		if(eq(item,h)) {
+			return cfg.classes.itemHighlighted;
 		} else {
 			return "";
 		}
 	});
-	var doc = null;
-	if(null == doc) {
-		doc = window.document;
-	}
-	var el = doc.createElement("li");
-	var _g1 = 0;
-	var _g2 = [];
-	while(_g1 < _g2.length) {
-		var o = _g2[_g1];
-		++_g1;
-		el.setAttribute(o.name,o.value);
-	}
-	var _g11 = new haxe_ds_StringMap();
-	var value = renderCfg.classes.item + " " + highlightClass;
+	var _g = new haxe_ds_StringMap();
+	var value = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromString(cfg.classes.item + " " + highlightClass);
 	if(__map_reserved["class"] != null) {
-		_g11.setReserved("class",value);
+		_g.setReserved("class",value);
 	} else {
-		_g11.h["class"] = value;
+		_g.h["class"] = value;
 	}
-	var attrs = _g11;
-	if(null != attrs) {
-		var attr = attrs.keys();
-		while(attr.hasNext()) {
-			var attr1 = attr.next();
-			el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
-		}
-	}
-	var children = [renderCfg.renderSuggestion(sugg)];
-	if(null != children) {
-		var _g21 = 0;
-		while(_g21 < children.length) {
-			var child = children[_g21];
-			++_g21;
-			el.appendChild(child);
-		}
-	}
-	var textContent = null;
-	if(null != textContent) {
-		el.appendChild(doc.createTextNode(textContent));
-	}
-	var li = el;
 	var f = function() {
-		dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Specific(sugg)));
+		dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Specific(item)));
 	};
-	li.addEventListener("mouseover",function(e) {
+	var value1 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el,e) {
 		e.preventDefault();
 		f();
 	});
+	if(__map_reserved["mouseover"] != null) {
+		_g.setReserved("mouseover",value1);
+	} else {
+		_g.h["mouseover"] = value1;
+	}
 	var f1 = function() {
 		dispatch(fancy_search_Action.ChooseCurrent);
 	};
-	li.addEventListener("mouseup",function(e1) {
+	var value2 = doom_core__$AttributeValue_AttributeValue_$Impl_$.fromEventHandler(function(el1,e1) {
 		e1.preventDefault();
 		f1();
 	});
-	return li;
-};
-fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) {
-	var _g = state.menu;
-	switch(_g[1]) {
-	case 0:
-		switch(_g[2][1]) {
-		case 0:
-			var doc = null;
-			if(null == doc) {
-				doc = window.document;
-			}
-			var el = doc.createElement("div");
-			var _g1 = 0;
-			var _g2 = [];
-			while(_g1 < _g2.length) {
-				var o = _g2[_g1];
-				++_g1;
-				el.setAttribute(o.name,o.value);
-			}
-			var _g11 = new haxe_ds_StringMap();
-			var value = cfg.classes.container + " " + cfg.classes.containerClosed;
-			if(__map_reserved["class"] != null) {
-				_g11.setReserved("class",value);
-			} else {
-				_g11.h["class"] = value;
-			}
-			var attrs = _g11;
-			if(null != attrs) {
-				var attr = attrs.keys();
-				while(attr.hasNext()) {
-					var attr1 = attr.next();
-					el.setAttribute(attr1,__map_reserved[attr1] != null ? attrs.getReserved(attr1) : attrs.h[attr1]);
-				}
-			}
-			var children = null;
-			if(null != children) {
-				var _g21 = 0;
-				while(_g21 < children.length) {
-					var child = children[_g21];
-					++_g21;
-					el.appendChild(child);
-				}
-			}
-			var textContent = null;
-			if(null != textContent) {
-				el.appendChild(doc.createTextNode(textContent));
-			}
-			return el;
-		case 1:
-			var reason = _g[2][2];
-			var doc1 = null;
-			if(null == doc1) {
-				doc1 = window.document;
-			}
-			var el1 = doc1.createElement("div");
-			var _g12 = 0;
-			var _g22 = [];
-			while(_g12 < _g22.length) {
-				var o1 = _g22[_g12];
-				++_g12;
-				el1.setAttribute(o1.name,o1.value);
-			}
-			var _g13 = new haxe_ds_StringMap();
-			var value1 = cfg.classes.container + " " + cfg.classes.containerTooShort;
-			if(__map_reserved["class"] != null) {
-				_g13.setReserved("class",value1);
-			} else {
-				_g13.h["class"] = value1;
-			}
-			var attrs1 = _g13;
-			if(null != attrs1) {
-				var attr2 = attrs1.keys();
-				while(attr2.hasNext()) {
-					var attr3 = attr2.next();
-					el1.setAttribute(attr3,__map_reserved[attr3] != null ? attrs1.getReserved(attr3) : attrs1.h[attr3]);
-				}
-			}
-			var children1 = null;
-			if(null != children1) {
-				var _g23 = 0;
-				while(_g23 < children1.length) {
-					var child1 = children1[_g23];
-					++_g23;
-					el1.appendChild(child1);
-				}
-			}
-			var textContent1 = reason;
-			if(null != textContent1) {
-				el1.appendChild(doc1.createTextNode(textContent1));
-			}
-			return el1;
-		}
-		break;
-	case 1:
-		switch(_g[2][1]) {
-		case 0:
-			var doc2 = null;
-			if(null == doc2) {
-				doc2 = window.document;
-			}
-			var el2 = doc2.createElement("div");
-			var _g14 = 0;
-			var _g24 = [];
-			while(_g14 < _g24.length) {
-				var o2 = _g24[_g14];
-				++_g14;
-				el2.setAttribute(o2.name,o2.value);
-			}
-			var _g15 = new haxe_ds_StringMap();
-			var value2 = cfg.classes.container + " " + cfg.classes.containerLoading;
-			if(__map_reserved["class"] != null) {
-				_g15.setReserved("class",value2);
-			} else {
-				_g15.h["class"] = value2;
-			}
-			var attrs2 = _g15;
-			if(null != attrs2) {
-				var attr4 = attrs2.keys();
-				while(attr4.hasNext()) {
-					var attr5 = attr4.next();
-					el2.setAttribute(attr5,__map_reserved[attr5] != null ? attrs2.getReserved(attr5) : attrs2.h[attr5]);
-				}
-			}
-			var children2 = null;
-			if(null != children2) {
-				var _g25 = 0;
-				while(_g25 < children2.length) {
-					var child2 = children2[_g25];
-					++_g25;
-					el2.appendChild(child2);
-				}
-			}
-			var textContent2 = "LOADING";
-			if(null != textContent2) {
-				el2.appendChild(doc2.createTextNode(textContent2));
-			}
-			return el2;
-		case 1:
-			var doc3 = null;
-			if(null == doc3) {
-				doc3 = window.document;
-			}
-			var el3 = doc3.createElement("div");
-			var _g16 = 0;
-			var _g26 = [];
-			while(_g16 < _g26.length) {
-				var o3 = _g26[_g16];
-				++_g16;
-				el3.setAttribute(o3.name,o3.value);
-			}
-			var _g17 = new haxe_ds_StringMap();
-			var value3 = cfg.classes.container + " " + cfg.classes.containerNoResults;
-			if(__map_reserved["class"] != null) {
-				_g17.setReserved("class",value3);
-			} else {
-				_g17.h["class"] = value3;
-			}
-			var attrs3 = _g17;
-			if(null != attrs3) {
-				var attr6 = attrs3.keys();
-				while(attr6.hasNext()) {
-					var attr7 = attr6.next();
-					el3.setAttribute(attr7,__map_reserved[attr7] != null ? attrs3.getReserved(attr7) : attrs3.h[attr7]);
-				}
-			}
-			var children3 = null;
-			if(null != children3) {
-				var _g27 = 0;
-				while(_g27 < children3.length) {
-					var child3 = children3[_g27];
-					++_g27;
-					el3.appendChild(child3);
-				}
-			}
-			var textContent3 = "NO RESULTS";
-			if(null != textContent3) {
-				el3.appendChild(doc3.createTextNode(textContent3));
-			}
-			return el3;
-		case 2:
-			var doc4 = null;
-			if(null == doc4) {
-				doc4 = window.document;
-			}
-			var el4 = doc4.createElement("div");
-			var _g18 = 0;
-			var _g28 = [];
-			while(_g18 < _g28.length) {
-				var o4 = _g28[_g18];
-				++_g18;
-				el4.setAttribute(o4.name,o4.value);
-			}
-			var _g19 = new haxe_ds_StringMap();
-			var value4 = cfg.classes.container + " " + cfg.classes.containerFailed;
-			if(__map_reserved["class"] != null) {
-				_g19.setReserved("class",value4);
-			} else {
-				_g19.h["class"] = value4;
-			}
-			var attrs4 = _g19;
-			if(null != attrs4) {
-				var attr8 = attrs4.keys();
-				while(attr8.hasNext()) {
-					var attr9 = attr8.next();
-					el4.setAttribute(attr9,__map_reserved[attr9] != null ? attrs4.getReserved(attr9) : attrs4.h[attr9]);
-				}
-			}
-			var children4 = null;
-			if(null != children4) {
-				var _g29 = 0;
-				while(_g29 < children4.length) {
-					var child4 = children4[_g29];
-					++_g29;
-					el4.appendChild(child4);
-				}
-			}
-			var textContent4 = "FAILED";
-			if(null != textContent4) {
-				el4.appendChild(doc4.createTextNode(textContent4));
-			}
-			return el4;
-		case 3:
-			var highlighted = _g[3];
-			var suggs = _g[2][2];
-			var doc5 = null;
-			if(null == doc5) {
-				doc5 = window.document;
-			}
-			var el5 = doc5.createElement("div");
-			var _g210 = 0;
-			var _g3 = [];
-			while(_g210 < _g3.length) {
-				var o5 = _g3[_g210];
-				++_g210;
-				el5.setAttribute(o5.name,o5.value);
-			}
-			var _g211 = new haxe_ds_StringMap();
-			var value5 = cfg.classes.container + " " + cfg.classes.containerOpen;
-			if(__map_reserved["class"] != null) {
-				_g211.setReserved("class",value5);
-			} else {
-				_g211.h["class"] = value5;
-			}
-			var attrs5 = _g211;
-			if(null != attrs5) {
-				var attr10 = attrs5.keys();
-				while(attr10.hasNext()) {
-					var attr11 = attr10.next();
-					el5.setAttribute(attr11,__map_reserved[attr11] != null ? attrs5.getReserved(attr11) : attrs5.h[attr11]);
-				}
-			}
-			var doc6 = null;
-			if(null == doc6) {
-				doc6 = window.document;
-			}
-			var el6 = doc6.createElement("ul");
-			var _g4 = 0;
-			var _g5 = [];
-			while(_g4 < _g5.length) {
-				var o6 = _g5[_g4];
-				++_g4;
-				el6.setAttribute(o6.name,o6.value);
-			}
-			var _g41 = new haxe_ds_StringMap();
-			var value6 = cfg.classes.list;
-			if(__map_reserved["class"] != null) {
-				_g41.setReserved("class",value6);
-			} else {
-				_g41.h["class"] = value6;
-			}
-			var attrs6 = _g41;
-			if(null != attrs6) {
-				var attr12 = attrs6.keys();
-				while(attr12.hasNext()) {
-					var attr13 = attr12.next();
-					el6.setAttribute(attr13,__map_reserved[attr13] != null ? attrs6.getReserved(attr13) : attrs6.h[attr13]);
-				}
-			}
-			var config = state.config;
-			var renderCfg = cfg;
-			var dispatch1 = dispatch;
-			var highlighted1 = highlighted;
-			var children5 = thx__$Nel_Nel_$Impl_$.toArray(thx__$Nel_Nel_$Impl_$.map(suggs,function(sugg) {
-				return fancy_search_renderer_DomStringFilter.renderMenuItem(config,renderCfg,dispatch1,highlighted1,sugg);
-			})).slice();
-			if(null != children5) {
-				var _g51 = 0;
-				while(_g51 < children5.length) {
-					var child5 = children5[_g51];
-					++_g51;
-					el6.appendChild(child5);
-				}
-			}
-			var textContent5 = null;
-			if(null != textContent5) {
-				el6.appendChild(doc6.createTextNode(textContent5));
-			}
-			var children6 = [el6];
-			if(null != children6) {
-				var _g42 = 0;
-				while(_g42 < children6.length) {
-					var child6 = children6[_g42];
-					++_g42;
-					el5.appendChild(child6);
-				}
-			}
-			var textContent6 = null;
-			if(null != textContent6) {
-				el5.appendChild(doc5.createTextNode(textContent6));
-			}
-			var div = el5;
-			var f = function() {
-				dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Unhighlight));
-			};
-			div.addEventListener("mouseout",function(e) {
-				e.preventDefault();
-				f();
-			});
-			return div;
-		}
-		break;
+	if(__map_reserved["mouseup"] != null) {
+		_g.setReserved("mouseup",value2);
+	} else {
+		_g.h["mouseup"] = value2;
 	}
-};
-fancy_search_renderer_DomStringFilter.fromInput = function(input,container,search,cfg) {
-	var cfg1 = cfg;
-	var dispatch = function(act) {
-		search.store.dispatch(act,{ fileName : "DomStringFilter.hx", lineNumber : 53, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
-	};
-	var menu = function(state) {
-		return fancy_search_renderer_DomStringFilter.renderMenu(cfg1,dispatch,state);
-	};
-	var menu1 = search.store.stream().map(menu);
-	input.addEventListener("focus",function(_) {
-		search.store.dispatch(fancy_search_Action.SetFilter(input.value),{ fileName : "DomStringFilter.hx", lineNumber : 55, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
-	});
-	input.addEventListener("blur",function(_1) {
-		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "DomStringFilter.hx", lineNumber : 56, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
-	});
-	input.addEventListener("input",function(_2) {
-		search.store.dispatch(fancy_search_Action.SetFilter(input.value),{ fileName : "DomStringFilter.hx", lineNumber : 57, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
-	});
-	input.addEventListener("keydown",function(e) {
-		e.stopPropagation();
-		var code = e.which != null ? e.which : e.keyCode;
-		if(thx_Arrays.contains(cfg.keys.highlightUp,code)) {
-			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Up)),{ fileName : "DomStringFilter.hx", lineNumber : 63, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
-		} else if(thx_Arrays.contains(cfg.keys.highlightDown,code)) {
-			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Down)),{ fileName : "DomStringFilter.hx", lineNumber : 65, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
-		} else if(thx_Arrays.contains(cfg.keys.choose,code)) {
-			search.store.dispatch(fancy_search_Action.ChooseCurrent,{ fileName : "DomStringFilter.hx", lineNumber : 67, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
-		}
-	});
-	return menu1;
+	return doom_core__$VNode_VNode_$Impl_$.el("li",_g,doom_core__$VNodes_VNodes_$Impl_$.children([cfg.renderSuggestion(item)]));
 };
 var haxe_StackItem = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","LocalFunction"] };
 haxe_StackItem.CFunction = ["CFunction",0];
@@ -10637,6 +12194,14 @@ thx_ValidationExtensions.appendVNels = function(target,items) {
 thx_ValidationExtensions.appendValidations = function(target,items) {
 	return thx_Arrays.reduce(items,thx_ValidationExtensions.appendValidation,target);
 };
+var thx_error_AbstractMethod = function(posInfo) {
+	thx_Error.call(this,"method " + posInfo.className + "." + posInfo.methodName + "() is abstract",null,posInfo);
+};
+thx_error_AbstractMethod.__name__ = ["thx","error","AbstractMethod"];
+thx_error_AbstractMethod.__super__ = thx_Error;
+thx_error_AbstractMethod.prototype = $extend(thx_Error.prototype,{
+	__class__: thx_error_AbstractMethod
+});
 var thx_error_ErrorWrapper = function(message,innerError,stack,pos) {
 	thx_Error.call(this,message,stack,pos);
 	this.innerError = innerError;
@@ -13757,6 +15322,308 @@ if(typeof(scope.performance.now) == "undefined") {
 	scope.performance.now = now;
 }
 DateTools.DAYS_OF_MONTH = [31,28,31,30,31,30,31,31,30,31,30,31];
+doom_html_Render.defaultNamespaces = (function($this) {
+	var $r;
+	var _g = new haxe_ds_StringMap();
+	if(__map_reserved["svg"] != null) {
+		_g.setReserved("svg","http://www.w3.org/2000/svg");
+	} else {
+		_g.h["svg"] = "http://www.w3.org/2000/svg";
+	}
+	if(__map_reserved["xlink"] != null) {
+		_g.setReserved("xlink","http://www.w3.org/1999/xlink");
+	} else {
+		_g.h["xlink"] = "http://www.w3.org/1999/xlink";
+	}
+	if(__map_reserved["ev"] != null) {
+		_g.setReserved("ev","http://www.w3.org/2001/xml-events");
+	} else {
+		_g.h["ev"] = "http://www.w3.org/2001/xml-events";
+	}
+	if(__map_reserved["xsl"] != null) {
+		_g.setReserved("xsl","http://www.w3.org/1999/XSL/Transform");
+	} else {
+		_g.h["xsl"] = "http://www.w3.org/1999/XSL/Transform";
+	}
+	if(__map_reserved["m"] != null) {
+		_g.setReserved("m","http://www.w3.org/1998/Math/MathML");
+	} else {
+		_g.h["m"] = "http://www.w3.org/1998/Math/MathML";
+	}
+	$r = _g;
+	return $r;
+}(this));
+Doom.browser = new doom_html_Render();
+doom_html_Attributes.properties = (function($this) {
+	var $r;
+	var _g = new haxe_ds_StringMap();
+	{
+		var value = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["allowFullScreen"] != null) {
+			_g.setReserved("allowFullScreen",value);
+		} else {
+			_g.h["allowFullScreen"] = value;
+		}
+	}
+	{
+		var value1 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["async"] != null) {
+			_g.setReserved("async",value1);
+		} else {
+			_g.h["async"] = value1;
+		}
+	}
+	{
+		var value2 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["autoFocus"] != null) {
+			_g.setReserved("autoFocus",value2);
+		} else {
+			_g.h["autoFocus"] = value2;
+		}
+	}
+	{
+		var value3 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["autoPlay"] != null) {
+			_g.setReserved("autoPlay",value3);
+		} else {
+			_g.h["autoPlay"] = value3;
+		}
+	}
+	{
+		var value4 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["capture"] != null) {
+			_g.setReserved("capture",value4);
+		} else {
+			_g.h["capture"] = value4;
+		}
+	}
+	{
+		var value5 = doom_html_AttributeType.BooleanProperty;
+		if(__map_reserved["checked"] != null) {
+			_g.setReserved("checked",value5);
+		} else {
+			_g.h["checked"] = value5;
+		}
+	}
+	{
+		var value6 = doom_html_AttributeType.PositiveNumericAttribute;
+		if(__map_reserved["cols"] != null) {
+			_g.setReserved("cols",value6);
+		} else {
+			_g.h["cols"] = value6;
+		}
+	}
+	{
+		var value7 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["contentEditable"] != null) {
+			_g.setReserved("contentEditable",value7);
+		} else {
+			_g.h["contentEditable"] = value7;
+		}
+	}
+	{
+		var value8 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["controls"] != null) {
+			_g.setReserved("controls",value8);
+		} else {
+			_g.h["controls"] = value8;
+		}
+	}
+	{
+		var value9 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["default"] != null) {
+			_g.setReserved("default",value9);
+		} else {
+			_g.h["default"] = value9;
+		}
+	}
+	{
+		var value10 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["defer"] != null) {
+			_g.setReserved("defer",value10);
+		} else {
+			_g.h["defer"] = value10;
+		}
+	}
+	{
+		var value11 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["disabled"] != null) {
+			_g.setReserved("disabled",value11);
+		} else {
+			_g.h["disabled"] = value11;
+		}
+	}
+	{
+		var value12 = doom_html_AttributeType.OverloadedBooleanAttribute;
+		if(__map_reserved["download"] != null) {
+			_g.setReserved("download",value12);
+		} else {
+			_g.h["download"] = value12;
+		}
+	}
+	{
+		var value13 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["formNoValidate"] != null) {
+			_g.setReserved("formNoValidate",value13);
+		} else {
+			_g.h["formNoValidate"] = value13;
+		}
+	}
+	{
+		var value14 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["hidden"] != null) {
+			_g.setReserved("hidden",value14);
+		} else {
+			_g.h["hidden"] = value14;
+		}
+	}
+	{
+		var value15 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["loop"] != null) {
+			_g.setReserved("loop",value15);
+		} else {
+			_g.h["loop"] = value15;
+		}
+	}
+	{
+		var value16 = doom_html_AttributeType.BooleanProperty;
+		if(__map_reserved["multiple"] != null) {
+			_g.setReserved("multiple",value16);
+		} else {
+			_g.h["multiple"] = value16;
+		}
+	}
+	{
+		var value17 = doom_html_AttributeType.BooleanProperty;
+		if(__map_reserved["muted"] != null) {
+			_g.setReserved("muted",value17);
+		} else {
+			_g.h["muted"] = value17;
+		}
+	}
+	{
+		var value18 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["noValidate"] != null) {
+			_g.setReserved("noValidate",value18);
+		} else {
+			_g.h["noValidate"] = value18;
+		}
+	}
+	{
+		var value19 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["open"] != null) {
+			_g.setReserved("open",value19);
+		} else {
+			_g.h["open"] = value19;
+		}
+	}
+	{
+		var value20 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["readOnly"] != null) {
+			_g.setReserved("readOnly",value20);
+		} else {
+			_g.h["readOnly"] = value20;
+		}
+	}
+	{
+		var value21 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["required"] != null) {
+			_g.setReserved("required",value21);
+		} else {
+			_g.h["required"] = value21;
+		}
+	}
+	{
+		var value22 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["reversed"] != null) {
+			_g.setReserved("reversed",value22);
+		} else {
+			_g.h["reversed"] = value22;
+		}
+	}
+	{
+		var value23 = doom_html_AttributeType.PositiveNumericAttribute;
+		if(__map_reserved["rows"] != null) {
+			_g.setReserved("rows",value23);
+		} else {
+			_g.h["rows"] = value23;
+		}
+	}
+	{
+		var value24 = doom_html_AttributeType.NumericAttribute;
+		if(__map_reserved["rowSpan"] != null) {
+			_g.setReserved("rowSpan",value24);
+		} else {
+			_g.h["rowSpan"] = value24;
+		}
+	}
+	{
+		var value25 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["scoped"] != null) {
+			_g.setReserved("scoped",value25);
+		} else {
+			_g.h["scoped"] = value25;
+		}
+	}
+	{
+		var value26 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["seamless"] != null) {
+			_g.setReserved("seamless",value26);
+		} else {
+			_g.h["seamless"] = value26;
+		}
+	}
+	{
+		var value27 = doom_html_AttributeType.BooleanProperty;
+		if(__map_reserved["selected"] != null) {
+			_g.setReserved("selected",value27);
+		} else {
+			_g.h["selected"] = value27;
+		}
+	}
+	{
+		var value28 = doom_html_AttributeType.PositiveNumericAttribute;
+		if(__map_reserved["size"] != null) {
+			_g.setReserved("size",value28);
+		} else {
+			_g.h["size"] = value28;
+		}
+	}
+	{
+		var value29 = doom_html_AttributeType.PositiveNumericAttribute;
+		if(__map_reserved["span"] != null) {
+			_g.setReserved("span",value29);
+		} else {
+			_g.h["span"] = value29;
+		}
+	}
+	{
+		var value30 = doom_html_AttributeType.NumericAttribute;
+		if(__map_reserved["start"] != null) {
+			_g.setReserved("start",value30);
+		} else {
+			_g.h["start"] = value30;
+		}
+	}
+	{
+		var value31 = doom_html_AttributeType.SideEffectProperty;
+		if(__map_reserved["value"] != null) {
+			_g.setReserved("value",value31);
+		} else {
+			_g.h["value"] = value31;
+		}
+	}
+	{
+		var value32 = doom_html_AttributeType.BooleanAttribute;
+		if(__map_reserved["itemScope"] != null) {
+			_g.setReserved("itemScope",value32);
+		} else {
+			_g.h["itemScope"] = value32;
+		}
+	}
+	$r = _g;
+	return $r;
+}(this));
 dots_Attributes.properties = (function($this) {
 	var $r;
 	var _g = new haxe_ds_StringMap();
@@ -14019,6 +15886,7 @@ dots_Attributes.properties = (function($this) {
 	$r = _g;
 	return $r;
 }(this));
+dots_Html.pattern = new EReg("[<]([^> ]+)","");
 dots_Keys.BACKSPACE = 8;
 dots_Keys.TAB = 9;
 dots_Keys.ENTER = 13;
@@ -14118,7 +15986,6 @@ dots_Keys.OPEN_BRACKET = 219;
 dots_Keys.BACK_SLASH = 220;
 dots_Keys.CLOSE_BRAKET = 221;
 dots_Keys.SINGLE_QUOTE = 222;
-dots_Query.doc = document;
 fancy_search_defaults_ClassNameDefaults.prefix = "fs-suggestion";
 fancy_search_defaults_ClassNameDefaults.containerPrefix = fancy_search_defaults_ClassNameDefaults.prefix + "-container";
 fancy_search_defaults_ClassNameDefaults.defaults = { container : fancy_search_defaults_ClassNameDefaults.containerPrefix, containerClosed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-closed", containerOpen : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-open", containerTooShort : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-too-short", containerNoResults : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-empty", containerLoading : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-loading", containerFailed : fancy_search_defaults_ClassNameDefaults.containerPrefix + "-failed", list : fancy_search_defaults_ClassNameDefaults.prefix + "-list", label : fancy_search_defaults_ClassNameDefaults.prefix + "-label", item : fancy_search_defaults_ClassNameDefaults.prefix + "-item", itemHighlighted : fancy_search_defaults_ClassNameDefaults.prefix + "-item-highlighted"};

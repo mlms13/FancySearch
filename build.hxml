@@ -18,7 +18,7 @@
 -lib doom
 -cp demo/03.doom-vnode/src
 -main Main
--js demo/03.search-objects/www/bundle.js
+-js demo/03.doom-vnode/www/bundle.js
 
 --next
 -lib utest
