@@ -1,6 +1,12 @@
 {
   "dependencies": [
     {
+      "name": "doom",
+      "type": "git",
+      "ref": "3c6fd1f",
+      "url": "git@github.com:fponticelli/doom"
+    },
+    {
       "name": "dots",
       "type": "git",
       "dir": "src",

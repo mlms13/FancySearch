@@ -32,7 +32,7 @@ class Main {
       renderSuggestion: DomStringFilter.renderStringSuggestion
     });
 
-    renderer.next(function (dom) {
+    renderer.next(function (dom: Element) {
       // remove all children except the first (input)
       while (container.children.length > 1) {
         container.removeChild(container.lastChild);

@@ -15,6 +15,12 @@
 -js demo/01.search-objects/www/bundle.js
 
 --next
+-lib doom
+-cp demo/03.doom-vnode/src
+-main Main
+-js demo/03.search-objects/www/bundle.js
+
+--next
 -lib utest
 -main test.TestAll
 -js bin/test.min.js

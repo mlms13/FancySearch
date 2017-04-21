@@ -17,7 +17,7 @@ typedef Person = {
 
 class Main {
   static function main() {
-    var people : Array<Person> = [
+    var people: Array<Person> = [
       { firstName: "Michael", lastName: "Martin", github: "mlms13" },
       { firstName: "Franco", lastName: "Ponticelli", github: "fponticelli" },
       { firstName: "Andy", lastName: "White", github: "andywhite37" },
