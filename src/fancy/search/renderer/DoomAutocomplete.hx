@@ -21,14 +21,14 @@ typedef Props<Sug, Value> = {
 class DoomAutocomplete {
   public static function render<Sug, Value>(props: Props<Sug, Value>) {
     return div([
-      renderInput(props.cfg.keys, props.dispatch, props.state.filter),
+      renderInput(props.cfg.keys, props.cfg.classes, props.dispatch, props.state.filter),
       renderMenu(props.cfg, props.dispatch, props.state)
     ]);
   }
 
-  static function renderInput(keys: KeyboardConfig, dispatch, value: String) {
+  static function renderInput(keys: KeyboardConfig, classes: ClassNameConfig, dispatch, value: String) {
     return input([
-      "class" => "fancify",
+      "class" => "fancify " + classes.input,
       "type" => "text",
       "placeholder" => "Search for Something",
       "value" => value,

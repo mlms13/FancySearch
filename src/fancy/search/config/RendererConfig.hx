@@ -20,6 +20,7 @@ typedef KeyboardConfig = {
 };
 
 typedef ClassNameConfig = {
+  input: String,
   container: String,
   containerClosed: String,
   containerOpen: String,
