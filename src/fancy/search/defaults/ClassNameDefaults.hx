@@ -6,7 +6,7 @@ class ClassNameDefaults {
   public static var prefix(default, never) = "fs-suggestion";
   public static var containerPrefix(default, never) = prefix + "-container";
   public static var defaults(default, never): ClassNameConfig = {
-    input: "fs-search",
+    input: "fs-search-input",
     container: containerPrefix,
     containerClosed: containerPrefix + "-closed",
     containerOpen: containerPrefix + "-open",
