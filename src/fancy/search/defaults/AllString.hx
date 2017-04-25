@@ -9,27 +9,14 @@ import thx.promise.Promise;
 import fancy.search.config.AppConfig;
 import fancy.search.defaults.AutocompleteDefaults;
 
-typedef SyncStringConfigOptions = {
+typedef SyncStringOptions = {
   suggestions: Array<String>,
-  ?limit: Int,
   ?minLength: Int,
-  ?alwaysHighlight: Bool
+  ?alwaysHighlight: Bool,
+  ?limit: Int
 };
 
 class AllString {
-  static function create(
-    filterer: String -> Promise<Array<String>>,
-    ?minLength = 0,
-    ?alwaysHighlight = true
-  ): AppConfig<String, String, StringOrSuggestion<String>> {
-    return AutocompleteDefaults.create(
-      filterer,
-      thx.Strings.order.equal,
-      minLength,
-      alwaysHighlight
-    );
-  }
-
   //////////////////////////////////////////////////////////////////////////////
   // Property helpers
   //////////////////////////////////////////////////////////////////////////////
@@ -44,23 +31,25 @@ class AllString {
    *  @param limit - Optionally slice the list down to something smaller
    *  @return Filterer<String>
    */
-  public static function filterStringsSync(all: Array<String>, limit: Option<Int>): Filterer<String, String> {
-    return function (search: String): Promise<Array<String>> {
-      // TODO: could sort here, favoring matches near the beginning
-      var filtered = search.isEmpty() ? all : all.filter(Strings.caseInsensitiveContains.bind(_, search));
-      return Promise.value(limit.cata(filtered, fn(filtered.slice(0, _))));
-    }
+  public static inline function filterStringsSync(all: Array<String>, limit: Option<Int>): Filterer<String, String> {
+    // this default filterer doesn't resort based on relevance. since we know
+    // we're sorting strings, we could do a more specialized filter that
+    // prioritizes results where the search string is closer to index 0.
+    return AutocompleteDefaults.filterSync(all, Strings.caseInsensitiveContains, limit);
   }
 
   //////////////////////////////////////////////////////////////////////////////
   // Configuration constructors
   //////////////////////////////////////////////////////////////////////////////
 
-  public static function sync(opts: SyncStringConfigOptions): AppConfig<String, String, StringOrSuggestion<String>> {
-    return create(
-      filterStringsSync(opts.suggestions, Options.ofValue(opts.limit)),
-      opts.minLength,
-      opts.alwaysHighlight
-    );
+  public static function sync(opts: SyncStringOptions): AppConfig<String, String, StringOrSuggestion<String>> {
+    return AutocompleteDefaults.sync({
+      suggestions: opts.suggestions,
+      filter: Strings.caseInsensitiveContains,
+      limit: opts.limit,
+      sugEq: Strings.order.equal,
+      minLength: opts.minLength,
+      alwaysHighlight: opts.alwaysHighlight
+    });
   }
 }
