@@ -7,12 +7,12 @@ using thx.Strings;
 import thx.promise.Promise;
 
 import fancy.search.config.AppConfig;
+import fancy.search.defaults.AutocompleteDefaults;
 
 typedef SyncStringConfigOptions = {
   suggestions: Array<String>,
   ?limit: Int,
   ?minLength: Int,
-  ?onlySuggestions: Bool,
   ?alwaysHighlight: Bool
 };
 
@@ -20,22 +20,14 @@ class AllString {
   static function create(
     filterer: String -> Promise<Array<String>>,
     ?minLength = 0,
-    ?onlySuggestions = false,
     ?alwaysHighlight = true
-  ): AppConfig<String, String, String> {
-    return {
-      filterer: filterer,
-      sugEq: function (a, b) return a == b,
-      allowMenu: function (filter: String) {
-        return filter.length >= minLength ? Allow : Disallow("Input too short");
-      },
-      alwaysHighlight: alwaysHighlight,
-      initValue: "",
-      initFilter: "",
-      getValue: function (highlight: Option<String>, filter: String, curr: String) {
-        return highlight.getOrElse(onlySuggestions ? curr : filter);
-      }
-    };
+  ): AppConfig<String, String, StringOrSuggestion<String>> {
+    return AutocompleteDefaults.create(
+      filterer,
+      thx.Strings.order.equal,
+      minLength,
+      alwaysHighlight
+    );
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -64,11 +56,10 @@ class AllString {
   // Configuration constructors
   //////////////////////////////////////////////////////////////////////////////
 
-  public static function sync(opts: SyncStringConfigOptions): AppConfig<String, String, String> {
+  public static function sync(opts: SyncStringConfigOptions): AppConfig<String, String, StringOrSuggestion<String>> {
     return create(
       filterStringsSync(opts.suggestions, Options.ofValue(opts.limit)),
       opts.minLength,
-      opts.onlySuggestions,
       opts.alwaysHighlight
     );
   }

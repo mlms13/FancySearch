@@ -14,6 +14,7 @@ import fancy.search.State;
 import fancy.search.Action;
 import fancy.search.config.AppConfig;
 import fancy.search.defaults.AllString;
+import fancy.search.defaults.AutocompleteDefaults;
 
 class TestSearch {
   static var suggestions = [
@@ -28,7 +29,6 @@ class TestSearch {
 
   static var simpleConfig = AllString.sync({
     suggestions: suggestions,
-    onlySuggestions: true,
     alwaysHighlight: false
   });
 
@@ -54,7 +54,7 @@ class TestSearch {
       .next(function (val) {
         Assert.same(simpleConfig, val.config);
         Assert.same("", val.filter);
-        Assert.same("", val.value);
+        Assert.same(Raw(""), val.value);
         Assert.same(Closed(Inactive), val.menu);
       })
       .always(Assert.createAsync())
@@ -277,7 +277,7 @@ class TestSearch {
       Closed(Inactive) // closed after choosing
     ]);
 
-    assertStates(search.values, ["", "Corn"]);
+    assertStates(search.values, [Raw(""), Suggestion("Corn")]);
 
     search.store.dispatch(OpenMenu)
       .dispatch(ChangeHighlight(Specific("Corn")))

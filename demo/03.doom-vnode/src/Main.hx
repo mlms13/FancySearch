@@ -30,11 +30,11 @@ class Main {
         noResults: Some(function () return doom.html.Html.span("No Results"))
       },
     };
-    var dispatch = function (act: Action<String, String, String>) {
+    var dispatch = function (act) {
       search.store.dispatch(act);
     }
 
-    var vnodes = search.store.stream().map(function (state: State<String, String, String>) {
+    var vnodes = search.store.stream().map(function (state) {
       return DoomAutocomplete.render({
         state: state,
         cfg: rendererConfig,

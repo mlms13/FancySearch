@@ -9,7 +9,7 @@ import fancy.search.config.AppConfig;
 
 class Main {
   static function main() {
-    var config: AppConfig<String, String, String> = fancy.search.defaults.AllString.sync({
+    var config = fancy.search.defaults.AllString.sync({
       suggestions: [
         "Apple", "Banana", "Barley", "Black Bean", "Carrot", "Corn",
         "Cucumber", "Dates", "Eggplant", "Fava Beans", "Kale", "Lettuce", "Lime",
@@ -17,8 +17,7 @@ class Main {
         "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
       ],
       limit: 10,
-      alwaysHighlight: true,
-      onlySuggestions: true
+      alwaysHighlight: true
     });
 
     var container: Element = dots.Query.find(".fancy-container");

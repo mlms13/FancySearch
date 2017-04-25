@@ -2661,27 +2661,16 @@ fancy_search_config_AllowMenu.__empty_constructs__ = [fancy_search_config_AllowM
 var fancy_search_defaults_AllString = function() { };
 $hxClasses["fancy.search.defaults.AllString"] = fancy_search_defaults_AllString;
 fancy_search_defaults_AllString.__name__ = ["fancy","search","defaults","AllString"];
-fancy_search_defaults_AllString.create = function(filterer,minLength,onlySuggestions,alwaysHighlight) {
+fancy_search_defaults_AllString.create = function(filterer,minLength,alwaysHighlight) {
 	if(alwaysHighlight == null) {
 		alwaysHighlight = true;
-	}
-	if(onlySuggestions == null) {
-		onlySuggestions = false;
 	}
 	if(minLength == null) {
 		minLength = 0;
 	}
-	return { filterer : filterer, sugEq : function(a,b) {
-		return a == b;
-	}, allowMenu : function(filter) {
-		if(filter.length >= minLength) {
-			return fancy_search_config_AllowMenu.Allow;
-		} else {
-			return fancy_search_config_AllowMenu.Disallow("Input too short");
-		}
-	}, alwaysHighlight : alwaysHighlight, initValue : "", initFilter : "", getValue : function(highlight,filter1,curr) {
-		return thx_Options.getOrElse(highlight,onlySuggestions ? curr : filter1);
-	}};
+	return fancy_search_defaults_AutocompleteDefaults.create(filterer,function(a0,a1) {
+		return thx__$Ord_Ord_$Impl_$.equal(thx_Strings.order,a0,a1);
+	},minLength,alwaysHighlight);
 };
 fancy_search_defaults_AllString.filterStringsSync = function(all,limit) {
 	return function(search) {
@@ -2702,7 +2691,31 @@ fancy_search_defaults_AllString.filterStringsSync = function(all,limit) {
 };
 fancy_search_defaults_AllString.sync = function(opts) {
 	var value = opts.limit;
-	return fancy_search_defaults_AllString.create(fancy_search_defaults_AllString.filterStringsSync(opts.suggestions,null == value ? haxe_ds_Option.None : haxe_ds_Option.Some(value)),opts.minLength,opts.onlySuggestions,opts.alwaysHighlight);
+	return fancy_search_defaults_AllString.create(fancy_search_defaults_AllString.filterStringsSync(opts.suggestions,null == value ? haxe_ds_Option.None : haxe_ds_Option.Some(value)),opts.minLength,opts.alwaysHighlight);
+};
+var fancy_search_defaults_StringOrSuggestion = $hxClasses["fancy.search.defaults.StringOrSuggestion"] = { __ename__ : ["fancy","search","defaults","StringOrSuggestion"], __constructs__ : ["Raw","Suggestion"] };
+fancy_search_defaults_StringOrSuggestion.Raw = function(val) { var $x = ["Raw",0,val]; $x.__enum__ = fancy_search_defaults_StringOrSuggestion; return $x; };
+fancy_search_defaults_StringOrSuggestion.Suggestion = function(sugg) { var $x = ["Suggestion",1,sugg]; $x.__enum__ = fancy_search_defaults_StringOrSuggestion; return $x; };
+fancy_search_defaults_StringOrSuggestion.__empty_constructs__ = [];
+var fancy_search_defaults_AutocompleteDefaults = function() { };
+$hxClasses["fancy.search.defaults.AutocompleteDefaults"] = fancy_search_defaults_AutocompleteDefaults;
+fancy_search_defaults_AutocompleteDefaults.__name__ = ["fancy","search","defaults","AutocompleteDefaults"];
+fancy_search_defaults_AutocompleteDefaults.create = function(filterer,sugEq,minLength,alwaysHighlight) {
+	if(alwaysHighlight == null) {
+		alwaysHighlight = true;
+	}
+	if(minLength == null) {
+		minLength = 0;
+	}
+	return { filterer : filterer, sugEq : sugEq, allowMenu : function(filter) {
+		if(filter.length >= minLength) {
+			return fancy_search_config_AllowMenu.Allow;
+		} else {
+			return fancy_search_config_AllowMenu.Disallow("Input too short");
+		}
+	}, alwaysHighlight : alwaysHighlight, initValue : fancy_search_defaults_StringOrSuggestion.Raw(""), initFilter : "", getValue : function(highlight,filter1,curr) {
+		return thx_Options.getOrElse(thx_Options.map(highlight,fancy_search_defaults_StringOrSuggestion.Suggestion),fancy_search_defaults_StringOrSuggestion.Raw(filter1));
+	}};
 };
 var fancy_search_defaults_ClassNameDefaults = function() { };
 $hxClasses["fancy.search.defaults.ClassNameDefaults"] = fancy_search_defaults_ClassNameDefaults;
