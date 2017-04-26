@@ -16,7 +16,9 @@ enum StringOrSuggestion<Sug> {
 typedef BaseAutocompleteOptions<Sug> = {
   sugEq: Sug -> Sug -> Bool,
   ?minLength: Int,
-  ?alwaysHighlight: Bool
+  ?alwaysHighlight: Bool,
+  ?initValue: Sug,
+  ?initFilter: String
 };
 
 typedef SyncAutocompleteOptions<Sug> = {
@@ -44,8 +46,10 @@ class AutocompleteDefaults {
   static function create<Sug>(
     filterer: String -> Promise<Array<Sug>>,
     sugEq: Sug -> Sug -> Bool,
-    ?minLength = 0,
-    ?alwaysHighlight = true
+    initValue: Option<Sug>,
+    initFilter = "",
+    minLength = 0,
+    alwaysHighlight = true
   ): AppConfig<Sug, String, StringOrSuggestion<Sug>> {
     return {
       filterer: filterer,
@@ -54,8 +58,8 @@ class AutocompleteDefaults {
         return filter.length >= minLength ? Allow : Disallow("Input too short");
       },
       alwaysHighlight: alwaysHighlight,
-      initValue: Raw(""),
-      initFilter: "",
+      initValue: initValue.cata(Raw(""), Suggestion),
+      initFilter: initFilter,
       getValue: function (highlight: Option<Sug>, filter: String, curr: StringOrSuggestion<Sug>) {
         return highlight.map(Suggestion).getOrElse(Raw(filter));
       }
@@ -70,13 +74,22 @@ class AutocompleteDefaults {
   }
 
   public static inline function async<Sug>(opts: AsyncAutocompleteOptions<Sug>): AppConfig<Sug, String, StringOrSuggestion<Sug>> {
-    return create(opts.filterer, opts.sugEq, opts.minLength, opts.alwaysHighlight);
+    return create(
+      opts.filterer,
+      opts.sugEq,
+      Options.ofValue(opts.initValue),
+      opts.initFilter,
+      opts.minLength,
+      opts.alwaysHighlight
+    );
   }
 
   public static inline function sync<Sug>(opts: SyncAutocompleteOptions<Sug>): AppConfig<Sug, String, StringOrSuggestion<Sug>> {
     return create(
       filterSync(opts.suggestions, opts.filter, Options.ofValue(opts.limit)),
       opts.sugEq,
+      Options.ofValue(opts.initValue),
+      opts.initFilter,
       opts.minLength,
       opts.alwaysHighlight
     );
