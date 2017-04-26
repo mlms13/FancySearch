@@ -8,9 +8,9 @@ import thx.promise.Promise;
 
 import fancy.search.config.AppConfig;
 
-enum StringOrSuggestion<Sug> {
-  Raw(val: String);
-  Suggestion(sugg: Sug);
+enum StringOrValue<Val> {
+  Raw(val: String, prev: Option<Val>);
+  Value(val: Val);
 }
 
 typedef BaseAutocompleteOptions<Sug, Val> = {
@@ -51,7 +51,7 @@ class AutocompleteDefaults {
     initFilter = "",
     minLength = 0,
     alwaysHighlight = true
-  ): AppConfig<Sug, String, StringOrSuggestion<Val>> {
+  ): AppConfig<Sug, String, StringOrValue<Val>> {
     return {
       filterer: filterer,
       sugEq: sugEq,
@@ -59,11 +59,18 @@ class AutocompleteDefaults {
         return filter.length >= minLength ? Allow : Disallow("Input too short");
       },
       alwaysHighlight: alwaysHighlight,
-      initValue: initValue.cata(Raw(""), Suggestion),
+      initValue: initValue.cata(Raw("", None), Value),
       initFilter: initFilter,
-      getValue: function (highlight: Option<Sug>, filter: String, curr: StringOrSuggestion<Val>): StringOrSuggestion<Val> {
-        return highlight.map(toValue).cata(Raw(filter), Suggestion);
+      getValue: function (highlight: Option<Sug>, filter: String, curr: StringOrValue<Val>): StringOrValue<Val> {
+        return highlight.map(toValue).cata(Raw(filter, getValue(curr)), Value);
       }
+    };
+  }
+
+  static function getValue<Val>(x: StringOrValue<Val>): Option<Val> {
+    return switch x {
+      case Value(val): Some(val);
+      case Raw(_, val): val;
     };
   }
 
@@ -74,11 +81,11 @@ class AutocompleteDefaults {
     }
   }
 
-  public static inline function async<Sug>(opts: AsyncAutocompleteOptions<Sug, Sug>): AppConfig<Sug, String, StringOrSuggestion<Sug>> {
+  public static inline function async<Sug>(opts: AsyncAutocompleteOptions<Sug, Sug>): AppConfig<Sug, String, StringOrValue<Sug>> {
     return asyncMapToValue(opts, thx.Functions.identity);
   }
 
-  public static inline function sync<Sug>(opts: SyncAutocompleteOptions<Sug, Sug>): AppConfig<Sug, String, StringOrSuggestion<Sug>> {
+  public static inline function sync<Sug>(opts: SyncAutocompleteOptions<Sug, Sug>): AppConfig<Sug, String, StringOrValue<Sug>> {
     return create(
       filterSync(opts.suggestions, opts.filter, Options.ofValue(opts.limit)),
       opts.sugEq,
@@ -97,7 +104,7 @@ class AutocompleteDefaults {
   public static inline function asyncMapToValue<Sug, Val>(
     opts: AsyncAutocompleteOptions<Sug, Val>,
     toValue: Sug -> Val
-  ): AppConfig<Sug, String, StringOrSuggestion<Val>> {
+  ): AppConfig<Sug, String, StringOrValue<Val>> {
     return create(
       opts.filterer,
       opts.sugEq,

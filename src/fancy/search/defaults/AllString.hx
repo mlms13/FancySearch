@@ -42,7 +42,7 @@ class AllString {
   // Configuration constructors
   //////////////////////////////////////////////////////////////////////////////
 
-  public static function sync(opts: SyncStringOptions): AppConfig<String, String, StringOrSuggestion<String>> {
+  public static function sync(opts: SyncStringOptions): AppConfig<String, String, StringOrValue<String>> {
     return AutocompleteDefaults.sync({
       suggestions: opts.suggestions,
       filter: Strings.caseInsensitiveContains,

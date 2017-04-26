@@ -54,7 +54,7 @@ class TestSearch {
       .next(function (val) {
         Assert.same(simpleConfig, val.config);
         Assert.same("", val.filter);
-        Assert.same(Raw(""), val.value);
+        Assert.same(Raw("", None), val.value);
         Assert.same(Closed(Inactive), val.menu);
       })
       .always(Assert.createAsync())
@@ -277,7 +277,7 @@ class TestSearch {
       Closed(Inactive) // closed after choosing
     ]);
 
-    assertStates(search.values, [Raw(""), Suggestion("Corn")]);
+    assertStates(search.values, [Raw("", None), Value("Corn")]);
 
     search.store.dispatch(OpenMenu)
       .dispatch(ChangeHighlight(Specific("Corn")))
