@@ -13,23 +13,23 @@ enum StringOrSuggestion<Sug> {
   Suggestion(sugg: Sug);
 }
 
-typedef BaseAutocompleteOptions<Sug> = {
+typedef BaseAutocompleteOptions<Sug, Val> = {
   sugEq: Sug -> Sug -> Bool,
   ?minLength: Int,
   ?alwaysHighlight: Bool,
-  ?initValue: Sug,
+  ?initValue: Val,
   ?initFilter: String
 };
 
-typedef SyncAutocompleteOptions<Sug> = {
-  > BaseAutocompleteOptions<Sug>,
+typedef SyncAutocompleteOptions<Sug, Val> = {
+  > BaseAutocompleteOptions<Sug, Val>,
   suggestions: Array<Sug>,
   filter: Sug -> String -> Bool,
   ?limit: Int
 };
 
-typedef AsyncAutocompleteOptions<Sug> = {
-  > BaseAutocompleteOptions<Sug>,
+typedef AsyncAutocompleteOptions<Sug, Val> = {
+  > BaseAutocompleteOptions<Sug, Val>,
   filterer: String -> Promise<Array<Sug>>
 }
 
@@ -43,14 +43,15 @@ typedef AsyncAutocompleteOptions<Sug> = {
  *  `Raw` input string if nothing was highlighted.
  */
 class AutocompleteDefaults {
-  static function create<Sug>(
+  static function create<Sug, Val>(
     filterer: String -> Promise<Array<Sug>>,
     sugEq: Sug -> Sug -> Bool,
-    initValue: Option<Sug>,
+    toValue: Sug -> Val,
+    initValue: Option<Val>,
     initFilter = "",
     minLength = 0,
     alwaysHighlight = true
-  ): AppConfig<Sug, String, StringOrSuggestion<Sug>> {
+  ): AppConfig<Sug, String, StringOrSuggestion<Val>> {
     return {
       filterer: filterer,
       sugEq: sugEq,
@@ -60,8 +61,8 @@ class AutocompleteDefaults {
       alwaysHighlight: alwaysHighlight,
       initValue: initValue.cata(Raw(""), Suggestion),
       initFilter: initFilter,
-      getValue: function (highlight: Option<Sug>, filter: String, curr: StringOrSuggestion<Sug>) {
-        return highlight.map(Suggestion).getOrElse(Raw(filter));
+      getValue: function (highlight: Option<Sug>, filter: String, curr: StringOrSuggestion<Val>): StringOrSuggestion<Val> {
+        return highlight.map(toValue).cata(Raw(filter), Suggestion);
       }
     };
   }
@@ -73,10 +74,15 @@ class AutocompleteDefaults {
     }
   }
 
-  public static inline function async<Sug>(opts: AsyncAutocompleteOptions<Sug>): AppConfig<Sug, String, StringOrSuggestion<Sug>> {
+  public static inline function async<Sug>(opts: AsyncAutocompleteOptions<Sug, Sug>): AppConfig<Sug, String, StringOrSuggestion<Sug>> {
+    return asyncMapToValue(opts, thx.Functions.identity);
+  }
+
+  public static inline function sync<Sug>(opts: SyncAutocompleteOptions<Sug, Sug>): AppConfig<Sug, String, StringOrSuggestion<Sug>> {
     return create(
-      opts.filterer,
+      filterSync(opts.suggestions, opts.filter, Options.ofValue(opts.limit)),
       opts.sugEq,
+      thx.Functions.identity,
       Options.ofValue(opts.initValue),
       opts.initFilter,
       opts.minLength,
@@ -84,10 +90,18 @@ class AutocompleteDefaults {
     );
   }
 
-  public static inline function sync<Sug>(opts: SyncAutocompleteOptions<Sug>): AppConfig<Sug, String, StringOrSuggestion<Sug>> {
+  /**
+   *  Useful when your value type is different from the Suggestion type, but
+   *  you can easily map from Sug to Value.
+   */
+  public static inline function asyncMapToValue<Sug, Val>(
+    opts: AsyncAutocompleteOptions<Sug, Val>,
+    toValue: Sug -> Val
+  ): AppConfig<Sug, String, StringOrSuggestion<Val>> {
     return create(
-      filterSync(opts.suggestions, opts.filter, Options.ofValue(opts.limit)),
+      opts.filterer,
       opts.sugEq,
+      toValue,
       Options.ofValue(opts.initValue),
       opts.initFilter,
       opts.minLength,
