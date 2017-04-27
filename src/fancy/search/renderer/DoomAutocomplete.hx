@@ -14,7 +14,7 @@ import fancy.search.config.RendererConfig;
 
 typedef Props<Sug, Value> = {
   state: State<Sug, String, Value>,
-  cfg: RendererConfig<Sug, VNode>,
+  cfg: RendererConfig<Sug, String, VNode>,
   dispatch: Action<Sug, String, Value> -> Void
 };
 
@@ -70,7 +70,7 @@ class DoomAutocomplete {
     return classArr.join(" ");
   }
 
-  static function renderMenu<Sug, A, B>(cfg: RendererConfig<Sug, VNode>, dispatch, state: State<Sug, A, B>) {
+  static function renderMenu<Sug, Val>(cfg: RendererConfig<Sug, String, VNode>, dispatch, state: State<Sug, String, Val>) {
     var cls = getContainerClassesForState(cfg.classes, state.menu);
 
     return switch state.menu {
@@ -79,13 +79,13 @@ class DoomAutocomplete {
         div([ "class" => cls ], [
           ul([
             "class" => cfg.classes.list
-          ], suggs.toArray().map(renderMenuItem.bind(state.config.sugEq, cfg, dispatch, highlighted)))
+          ], suggs.toArray().map(renderMenuItem.bind(state.config.sugEq, cfg, state.filter, dispatch, highlighted)))
         ]);
       case Open(_): div(["class" => cls ]);
     }
   }
 
-  static function renderMenuItem<Sug>(eq, cfg: RendererConfig<Sug, VNode>, dispatch, highlighted: Option<Sug>, item: Sug): VNode {
+  static function renderMenuItem<Sug>(eq, cfg: RendererConfig<Sug, String, VNode>, filter: String, dispatch, highlighted: Option<Sug>, item: Sug): VNode {
     var highlightClass = highlighted.cata("", function (h) {
       return eq(item, h) ? cfg.classes.itemHighlighted : "";
     });
@@ -94,6 +94,6 @@ class DoomAutocomplete {
       "class" => cfg.classes.item + " " + highlightClass,
       "mouseover" => function () dispatch(ChangeHighlight(Specific(item))),
       "mouseup" => function () dispatch(ChooseCurrent)
-    ], cfg.renderSuggestion(item));
+    ], cfg.renderSuggestion(item, filter));
   }
 }

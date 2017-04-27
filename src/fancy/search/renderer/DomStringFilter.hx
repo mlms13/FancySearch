@@ -16,24 +16,24 @@ import fancy.search.config.AppConfig;
 import fancy.search.config.RendererConfig;
 
 class DomStringFilter {
-  public static function renderStringSuggestion(sugg: String) {
-    return c("li", sugg);
+  public static function renderStringSuggestion(sugg: String, filter: String) {
+    return c("li", sugg); // TODO: add emphasis
   }
 
   // render the item; apply special treatment if it matches the highlighted element
-  static function renderMenuItem<Sug, Value>(config: AppConfig<Sug, String, Value>, renderCfg: RendererConfig<Sug, Element>, dispatch: Action<Sug, String, Value> -> Void, highlighted: Option<Sug>, sugg: Sug): Element {
+  static function renderMenuItem<Sug, Value>(config: AppConfig<Sug, String, Value>, renderCfg: RendererConfig<Sug, String, Element>, filter: String, dispatch: Action<Sug, String, Value> -> Void, highlighted: Option<Sug>, sugg: Sug): Element {
     var highlightClass = highlighted.cata("",  function (h) {
       // if a highlight exists and it matches the stringified version of this suggestion
       // return the highglight class
       return config.sugEq(sugg, h) ? renderCfg.classes.itemHighlighted : "";
     });
-    var li = c("li", [ "class" => renderCfg.classes.item + " " + highlightClass, ], [ renderCfg.renderSuggestion(sugg) ]);
+    var li = c("li", [ "class" => renderCfg.classes.item + " " + highlightClass, ], [ renderCfg.renderSuggestion(sugg, filter) ]);
     li.on("mouseover", function () dispatch(ChangeHighlight(Specific(sugg))));
     li.on("mouseup", function () {dispatch(ChooseCurrent); });
     return li;
   }
 
-  static function renderMenu<Sug, A>(cfg: RendererConfig<Sug, Element>, dispatch: Action<Sug, String, A> -> Void, state: State<Sug, String, A>): Element {
+  static function renderMenu<Sug, A>(cfg: RendererConfig<Sug, String, Element>, dispatch: Action<Sug, String, A> -> Void, state: State<Sug, String, A>): Element {
     return switch state.menu {
       case Closed(Inactive): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerClosed]);
       case Closed(FailedCondition(reason)): c("div", [
@@ -48,14 +48,14 @@ class DomStringFilter {
       case Open(Failed, _): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerFailed], "FAILED"); // TODO
       case Open(Results(suggs), highlighted):
         var div = c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerOpen], [
-          c("ul", ["class" => cfg.classes.list], suggs.toArray().map(renderMenuItem.bind(state.config, cfg, dispatch, highlighted)))
+          c("ul", ["class" => cfg.classes.list], suggs.toArray().map(renderMenuItem.bind(state.config, cfg, state.filter, dispatch, highlighted)))
         ]);
         div.on("mouseout", function () dispatch(ChangeHighlight(Unhighlight)));
         div;
     };
   }
 
-  public static function fromInput<Sug, Val>(input: InputElement, container: Element, search: Search<Sug, String, Val>, cfg: RendererConfig<Sug, Element>): thx.stream.Stream<Element> {
+  public static function fromInput<Sug, Val>(input: InputElement, container: Element, search: Search<Sug, String, Val>, cfg: RendererConfig<Sug, String, Element>): thx.stream.Stream<Element> {
     var menu = search.store.stream().map(renderMenu.bind(cfg, function (act) search.store.dispatch(act)));
 
     input.on("focus", function (_) search.store.dispatch(SetFilter(input.value)));

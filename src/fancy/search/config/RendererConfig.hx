@@ -3,11 +3,11 @@ package fancy.search.config;
 import haxe.ds.Option;
 import thx.Lazy;
 
-typedef RendererConfig<Sug, El> = {
+typedef RendererConfig<Sug, Filter, El> = {
   classes: ClassNameConfig,
   keys: KeyboardConfig,
   elements: ElementConfig<El>,
-  renderSuggestion: Sug -> El
+  renderSuggestion: Sug -> Filter -> El
 };
 
 typedef KeyboardConfig = {

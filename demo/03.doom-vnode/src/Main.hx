@@ -16,9 +16,9 @@ class Main {
       "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
     ];
     var search = new fancy.Search(AllString.sync({ suggestions: foods }));
-    var rendererConfig: RendererConfig<String, doom.core.VNode> = {
-      renderSuggestion: function (sugg: String) {
-        return doom.html.Html.div(sugg);
+    var rendererConfig: RendererConfig<String, String, doom.core.VNode> = {
+      renderSuggestion: function (sugg: String, filter: String) {
+        return doom.html.Html.span(sugg);
       },
       keys: fancy.search.defaults.KeyboardDefaults.defaults,
       classes: fancy.search.defaults.ClassNameDefaults.defaults,
