@@ -706,11 +706,11 @@ var Main = function() { };
 $hxClasses["Main"] = Main;
 Main.__name__ = ["Main"];
 Main.main = function() {
-	var config = fancy_search_defaults_AllString.sync({ suggestions : ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"], limit : 10, alwaysHighlight : true});
+	var config = fancy_search_defaults_AllString.sync({ suggestions : ["Apple","Banana","Barley","Black Bean","Carrot","Corn","Cucumber","Dates","Eggplant","Fava Beans","Kale","Lettuce","Lime","Lima Bean","Mango","Melon","Orange","Peach","Pear","Pepper","Potato","Radish","Spinach","Tomato","Turnip","Zucchini"], limit : 10, alwaysHighlight : true, minLength : 1});
 	var container = dots_Query.find(".fancy-container");
 	var input = dots_Query.find(".fancy-container input");
 	var search = new fancy_Search(config);
-	var renderer = fancy_search_renderer_DomStringFilter.fromInput(input,container,search,{ classes : fancy_search_defaults_ClassNameDefaults.defaults, keys : fancy_search_defaults_KeyboardDefaults.defaults, elements : { clearButton : haxe_ds_Option.None, failedCondition : haxe_ds_Option.None, loading : haxe_ds_Option.None, failed : haxe_ds_Option.None, noResults : haxe_ds_Option.Some(function() {
+	var renderer = fancy_search_renderer_DomStringFilter.fromInput(input,search,{ classes : fancy_search_defaults_ClassNameDefaults.defaults, keys : fancy_search_defaults_KeyboardDefaults.defaults, elements : { clearButton : haxe_ds_Option.None, failedCondition : haxe_ds_Option.Some(function(_) {
 		var doc = null;
 		if(null == doc) {
 			doc = window.document;
@@ -740,11 +740,46 @@ Main.main = function() {
 				el.appendChild(child);
 			}
 		}
-		var textContent = "No Results";
+		var textContent = "Start typing to begin your search";
 		if(null != textContent) {
 			el.appendChild(doc.createTextNode(textContent));
 		}
 		return el;
+	}), loading : haxe_ds_Option.None, failed : haxe_ds_Option.None, noResults : haxe_ds_Option.Some(function() {
+		var doc1 = null;
+		if(null == doc1) {
+			doc1 = window.document;
+		}
+		var el1 = doc1.createElement("span");
+		var _g3 = 0;
+		var _g11 = [];
+		while(_g3 < _g11.length) {
+			var o1 = _g11[_g3];
+			++_g3;
+			el1.setAttribute(o1.name,o1.value);
+		}
+		var attrs1 = null;
+		if(null != attrs1) {
+			var attr2 = attrs1.keys();
+			while(attr2.hasNext()) {
+				var attr3 = attr2.next();
+				el1.setAttribute(attr3,__map_reserved[attr3] != null ? attrs1.getReserved(attr3) : attrs1.h[attr3]);
+			}
+		}
+		var children1 = null;
+		if(null != children1) {
+			var _g4 = 0;
+			while(_g4 < children1.length) {
+				var child1 = children1[_g4];
+				++_g4;
+				el1.appendChild(child1);
+			}
+		}
+		var textContent1 = "No Results";
+		if(null != textContent1) {
+			el1.appendChild(doc1.createTextNode(textContent1));
+		}
+		return el1;
 	})}, renderSuggestion : fancy_search_renderer_DomStringFilter.renderStringSuggestion});
 	renderer.next(function(dom) {
 		while(container.children.length > 1) container.removeChild(container.lastChild);
@@ -2289,7 +2324,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 2:
-				tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 3:
 				tmp3 = state.menu;
@@ -2314,7 +2349,8 @@ fancy_search_Reducer.reduce = function(state,action) {
 				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 2:
-				tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+				var filter1 = action[2];
+				tmp3 = fancy_search_Reducer.openMenu(state.config,filter1);
 				break;
 			case 3:
 				tmp3 = state.menu;
@@ -2808,9 +2844,9 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 					el1.setAttribute(attr3,__map_reserved[attr3] != null ? attrs1.getReserved(attr3) : attrs1.h[attr3]);
 				}
 			}
-			var children1 = thx_Options.cata(cfg.elements.noResults,[],function(_) {
-				return [_()];
-			});
+			var children1 = thx_Options.toArray(thx_Options.map(cfg.elements.failedCondition,function(lazy) {
+				return lazy(reason);
+			}));
 			if(null != children1) {
 				var _g23 = 0;
 				while(_g23 < children1.length) {
@@ -2856,9 +2892,9 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 					el2.setAttribute(attr5,__map_reserved[attr5] != null ? attrs2.getReserved(attr5) : attrs2.h[attr5]);
 				}
 			}
-			var children2 = thx_Options.cata(cfg.elements.loading,[],function(_1) {
-				return [_1()];
-			});
+			var children2 = thx_Options.toArray(thx_Options.map(cfg.elements.loading,function(lazy1) {
+				return lazy1();
+			}));
 			if(null != children2) {
 				var _g25 = 0;
 				while(_g25 < children2.length) {
@@ -2900,9 +2936,9 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 					el3.setAttribute(attr7,__map_reserved[attr7] != null ? attrs3.getReserved(attr7) : attrs3.h[attr7]);
 				}
 			}
-			var children3 = thx_Options.cata(cfg.elements.noResults,[],function(_2) {
-				return [_2()];
-			});
+			var children3 = thx_Options.toArray(thx_Options.map(cfg.elements.noResults,function(lazy2) {
+				return lazy2();
+			}));
 			if(null != children3) {
 				var _g27 = 0;
 				while(_g27 < children3.length) {
@@ -2944,7 +2980,9 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 					el4.setAttribute(attr9,__map_reserved[attr9] != null ? attrs4.getReserved(attr9) : attrs4.h[attr9]);
 				}
 			}
-			var children4 = null;
+			var children4 = thx_Options.toArray(thx_Options.map(cfg.elements.failed,function(lazy3) {
+				return lazy3();
+			}));
 			if(null != children4) {
 				var _g29 = 0;
 				while(_g29 < children4.length) {
@@ -2953,7 +2991,7 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 					el4.appendChild(child4);
 				}
 			}
-			var textContent4 = "FAILED";
+			var textContent4 = null;
 			if(null != textContent4) {
 				el4.appendChild(doc4.createTextNode(textContent4));
 			}
@@ -3062,33 +3100,34 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 		break;
 	}
 };
-fancy_search_renderer_DomStringFilter.fromInput = function(input,container,search,cfg) {
+fancy_search_renderer_DomStringFilter.fromInput = function(input,search,cfg) {
 	var cfg1 = cfg;
 	var dispatch = function(act) {
-		search.store.dispatch(act,{ fileName : "DomStringFilter.hx", lineNumber : 59, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+		search.store.dispatch(act,{ fileName : "DomStringFilter.hx", lineNumber : 61, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 	};
 	var menu = function(state) {
 		return fancy_search_renderer_DomStringFilter.renderMenu(cfg1,dispatch,state);
 	};
 	var menu1 = search.store.stream().map(menu);
 	input.addEventListener("focus",function(_) {
-		search.store.dispatch(fancy_search_Action.SetFilter(input.value),{ fileName : "DomStringFilter.hx", lineNumber : 61, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.SetFilter(input.value),{ fileName : "DomStringFilter.hx", lineNumber : 64, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "DomStringFilter.hx", lineNumber : 65, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 	});
 	input.addEventListener("blur",function(_1) {
-		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "DomStringFilter.hx", lineNumber : 62, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "DomStringFilter.hx", lineNumber : 67, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 	});
 	input.addEventListener("input",function(_2) {
-		search.store.dispatch(fancy_search_Action.SetFilter(input.value),{ fileName : "DomStringFilter.hx", lineNumber : 63, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.SetFilter(input.value),{ fileName : "DomStringFilter.hx", lineNumber : 68, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 	});
 	input.addEventListener("keydown",function(e) {
 		e.stopPropagation();
 		var code = e.which != null ? e.which : e.keyCode;
 		if(thx_Arrays.contains(cfg.keys.highlightUp,code)) {
-			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Up)),{ fileName : "DomStringFilter.hx", lineNumber : 69, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Up)),{ fileName : "DomStringFilter.hx", lineNumber : 74, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 		} else if(thx_Arrays.contains(cfg.keys.highlightDown,code)) {
-			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Down)),{ fileName : "DomStringFilter.hx", lineNumber : 71, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Down)),{ fileName : "DomStringFilter.hx", lineNumber : 76, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 		} else if(thx_Arrays.contains(cfg.keys.choose,code)) {
-			search.store.dispatch(fancy_search_Action.ChooseCurrent,{ fileName : "DomStringFilter.hx", lineNumber : 73, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+			search.store.dispatch(fancy_search_Action.ChooseCurrent,{ fileName : "DomStringFilter.hx", lineNumber : 78, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 		}
 	});
 	return menu1;

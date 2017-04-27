@@ -77,8 +77,12 @@ class Reducer {
         // the middleware will handle firing the next action
         case [Open(_, highlight), SetFilter(_)]: Open(Loading, highlight);
 
-        // open a closed menu when the filter changes
-        case [Closed(_), SetFilter(_)]: Open(Loading, None);
+        // if the menu was closed because it failed a condition, re-run
+        // that check with the new filter when filter changes
+        case [Closed(FailedCondition(_)), SetFilter(filter)]: openMenu(state.config, filter);
+
+        // but if the menu was inactive, it stays that way
+        case [Closed(Inactive), SetFilter(_)]: Closed(Inactive);
 
         // menu closes when a value is chosen
         case [_, ChooseCurrent] | [_, SetValue(_)]: Closed(Inactive);

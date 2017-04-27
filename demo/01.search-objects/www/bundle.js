@@ -717,7 +717,7 @@ Main.main = function() {
 	var container = dots_Query.find(".fancy-container");
 	var input = dots_Query.find(".fancy-container input");
 	var search = new fancy_Search(config);
-	var renderer = fancy_search_renderer_DomStringFilter.fromInput(input,container,search,{ classes : fancy_search_defaults_ClassNameDefaults.defaults, keys : fancy_search_defaults_KeyboardDefaults.defaults, renderSuggestion : function(p,filter) {
+	var renderer = fancy_search_renderer_DomStringFilter.fromInput(input,search,{ classes : fancy_search_defaults_ClassNameDefaults.defaults, keys : fancy_search_defaults_KeyboardDefaults.defaults, renderSuggestion : function(p,filter) {
 		var doc = null;
 		if(null == doc) {
 			doc = window.document;
@@ -2418,7 +2418,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 2:
-				tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 3:
 				tmp3 = state.menu;
@@ -2443,7 +2443,8 @@ fancy_search_Reducer.reduce = function(state,action) {
 				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 2:
-				tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+				var filter1 = action[2];
+				tmp3 = fancy_search_Reducer.openMenu(state.config,filter1);
 				break;
 			case 3:
 				tmp3 = state.menu;
@@ -2937,9 +2938,9 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 					el1.setAttribute(attr3,__map_reserved[attr3] != null ? attrs1.getReserved(attr3) : attrs1.h[attr3]);
 				}
 			}
-			var children1 = thx_Options.cata(cfg.elements.noResults,[],function(_) {
-				return [_()];
-			});
+			var children1 = thx_Options.toArray(thx_Options.map(cfg.elements.failedCondition,function(lazy) {
+				return lazy(reason);
+			}));
 			if(null != children1) {
 				var _g23 = 0;
 				while(_g23 < children1.length) {
@@ -2985,9 +2986,9 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 					el2.setAttribute(attr5,__map_reserved[attr5] != null ? attrs2.getReserved(attr5) : attrs2.h[attr5]);
 				}
 			}
-			var children2 = thx_Options.cata(cfg.elements.loading,[],function(_1) {
-				return [_1()];
-			});
+			var children2 = thx_Options.toArray(thx_Options.map(cfg.elements.loading,function(lazy1) {
+				return lazy1();
+			}));
 			if(null != children2) {
 				var _g25 = 0;
 				while(_g25 < children2.length) {
@@ -3029,9 +3030,9 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 					el3.setAttribute(attr7,__map_reserved[attr7] != null ? attrs3.getReserved(attr7) : attrs3.h[attr7]);
 				}
 			}
-			var children3 = thx_Options.cata(cfg.elements.noResults,[],function(_2) {
-				return [_2()];
-			});
+			var children3 = thx_Options.toArray(thx_Options.map(cfg.elements.noResults,function(lazy2) {
+				return lazy2();
+			}));
 			if(null != children3) {
 				var _g27 = 0;
 				while(_g27 < children3.length) {
@@ -3073,7 +3074,9 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 					el4.setAttribute(attr9,__map_reserved[attr9] != null ? attrs4.getReserved(attr9) : attrs4.h[attr9]);
 				}
 			}
-			var children4 = null;
+			var children4 = thx_Options.toArray(thx_Options.map(cfg.elements.failed,function(lazy3) {
+				return lazy3();
+			}));
 			if(null != children4) {
 				var _g29 = 0;
 				while(_g29 < children4.length) {
@@ -3082,7 +3085,7 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 					el4.appendChild(child4);
 				}
 			}
-			var textContent4 = "FAILED";
+			var textContent4 = null;
 			if(null != textContent4) {
 				el4.appendChild(doc4.createTextNode(textContent4));
 			}
@@ -3191,33 +3194,34 @@ fancy_search_renderer_DomStringFilter.renderMenu = function(cfg,dispatch,state) 
 		break;
 	}
 };
-fancy_search_renderer_DomStringFilter.fromInput = function(input,container,search,cfg) {
+fancy_search_renderer_DomStringFilter.fromInput = function(input,search,cfg) {
 	var cfg1 = cfg;
 	var dispatch = function(act) {
-		search.store.dispatch(act,{ fileName : "DomStringFilter.hx", lineNumber : 59, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+		search.store.dispatch(act,{ fileName : "DomStringFilter.hx", lineNumber : 61, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 	};
 	var menu = function(state) {
 		return fancy_search_renderer_DomStringFilter.renderMenu(cfg1,dispatch,state);
 	};
 	var menu1 = search.store.stream().map(menu);
 	input.addEventListener("focus",function(_) {
-		search.store.dispatch(fancy_search_Action.SetFilter(input.value),{ fileName : "DomStringFilter.hx", lineNumber : 61, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.SetFilter(input.value),{ fileName : "DomStringFilter.hx", lineNumber : 64, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.OpenMenu,{ fileName : "DomStringFilter.hx", lineNumber : 65, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 	});
 	input.addEventListener("blur",function(_1) {
-		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "DomStringFilter.hx", lineNumber : 62, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.CloseMenu,{ fileName : "DomStringFilter.hx", lineNumber : 67, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 	});
 	input.addEventListener("input",function(_2) {
-		search.store.dispatch(fancy_search_Action.SetFilter(input.value),{ fileName : "DomStringFilter.hx", lineNumber : 63, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+		search.store.dispatch(fancy_search_Action.SetFilter(input.value),{ fileName : "DomStringFilter.hx", lineNumber : 68, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 	});
 	input.addEventListener("keydown",function(e) {
 		e.stopPropagation();
 		var code = e.which != null ? e.which : e.keyCode;
 		if(thx_Arrays.contains(cfg.keys.highlightUp,code)) {
-			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Up)),{ fileName : "DomStringFilter.hx", lineNumber : 69, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Up)),{ fileName : "DomStringFilter.hx", lineNumber : 74, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 		} else if(thx_Arrays.contains(cfg.keys.highlightDown,code)) {
-			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Down)),{ fileName : "DomStringFilter.hx", lineNumber : 71, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+			search.store.dispatch(fancy_search_Action.ChangeHighlight(fancy_search_HighlightChangeType.Move(fancy_search_Direction.Down)),{ fileName : "DomStringFilter.hx", lineNumber : 76, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 		} else if(thx_Arrays.contains(cfg.keys.choose,code)) {
-			search.store.dispatch(fancy_search_Action.ChooseCurrent,{ fileName : "DomStringFilter.hx", lineNumber : 73, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
+			search.store.dispatch(fancy_search_Action.ChooseCurrent,{ fileName : "DomStringFilter.hx", lineNumber : 78, className : "fancy.search.renderer.DomStringFilter", methodName : "fromInput"});
 		}
 	});
 	return menu1;

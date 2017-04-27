@@ -124,6 +124,26 @@ class TestSearch {
     search.store.dispatch(OpenMenu);
   }
 
+  // when a minimum character count is required, the search state should stay
+  // closed as long as the condition fails
+  public function testMinLength() {
+    var config = AllString.sync({
+      suggestions: suggestions,
+      alwaysHighlight: false,
+      minLength: 2
+    });
+
+    var search = new Search(config);
+    assertMenuStates(search.store, [
+      Closed(Inactive),
+      Closed(FailedCondition("Input too short")),
+      Closed(FailedCondition("Input too short"))
+    ]);
+
+    search.store.dispatch(OpenMenu);
+    search.store.dispatch(SetFilter("a"));
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // TEST HIGHLIGHT
   //////////////////////////////////////////////////////////////////////////////

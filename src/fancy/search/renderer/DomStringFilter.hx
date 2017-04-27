@@ -38,14 +38,16 @@ class DomStringFilter {
       case Closed(Inactive): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerClosed]);
       case Closed(FailedCondition(reason)): c("div", [
         "class" => cfg.classes.container + " " + cfg.classes.containerNotAllowed
-      ], cfg.elements.noResults.cata([], fn([_()])));
+      ], cfg.elements.failedCondition.map(lazy -> lazy(reason)).toArray());
       case Open(Loading, _): c("div", [
         "class" => cfg.classes.container + " " + cfg.classes.containerLoading
-      ], cfg.elements.loading.cata([], fn([_()])));
+      ], cfg.elements.loading.map(lazy -> lazy()).toArray());
       case Open(NoResults, _): c("div", [
         "class" => cfg.classes.container + " " + cfg.classes.containerNoResults
-      ], cfg.elements.noResults.cata([], fn([_()])));
-      case Open(Failed, _): c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerFailed], "FAILED"); // TODO
+      ], cfg.elements.noResults.map(lazy -> lazy()).toArray());
+      case Open(Failed, _): c("div", [
+        "class" => cfg.classes.container + " " + cfg.classes.containerFailed
+      ], cfg.elements.failed.map(lazy -> lazy()).toArray());
       case Open(Results(suggs), highlighted):
         var div = c("div", ["class" => cfg.classes.container + " " + cfg.classes.containerOpen], [
           c("ul", ["class" => cfg.classes.list], suggs.toArray().map(renderMenuItem.bind(state.config, cfg, state.filter, dispatch, highlighted)))
@@ -55,10 +57,13 @@ class DomStringFilter {
     };
   }
 
-  public static function fromInput<Sug, Val>(input: InputElement, container: Element, search: Search<Sug, String, Val>, cfg: RendererConfig<Sug, String, Element>): thx.stream.Stream<Element> {
+  public static function fromInput<Sug, Val>(input: InputElement, search: Search<Sug, String, Val>, cfg: RendererConfig<Sug, String, Element>): thx.stream.Stream<Element> {
     var menu = search.store.stream().map(renderMenu.bind(cfg, function (act) search.store.dispatch(act)));
 
-    input.on("focus", function (_) search.store.dispatch(SetFilter(input.value)));
+    input.on("focus", function (_) {
+      search.store.dispatch(SetFilter(input.value));
+      search.store.dispatch(OpenMenu);
+    });
     input.on("blur", function (_) search.store.dispatch(CloseMenu));
     input.on("input", function (_) search.store.dispatch(SetFilter(input.value)));
     input.on("keydown", function (e: js.html.KeyboardEvent) {

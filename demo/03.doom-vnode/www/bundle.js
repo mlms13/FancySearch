@@ -4131,7 +4131,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 2:
-				tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 3:
 				tmp3 = state.menu;
@@ -4156,7 +4156,8 @@ fancy_search_Reducer.reduce = function(state,action) {
 				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
 				break;
 			case 2:
-				tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+				var filter1 = action[2];
+				tmp3 = fancy_search_Reducer.openMenu(state.config,filter1);
 				break;
 			case 3:
 				tmp3 = state.menu;

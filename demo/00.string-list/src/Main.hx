@@ -17,22 +17,23 @@ class Main {
         "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
       ],
       limit: 10,
-      alwaysHighlight: true
+      alwaysHighlight: true,
+      minLength: 1
     });
 
     var container: Element = dots.Query.find(".fancy-container");
     var input = dots.Query.find(".fancy-container input");
     var search = new fancy.Search(config);
 
-    var renderer = DomStringFilter.fromInput(input, container, search, {
+    var renderer = DomStringFilter.fromInput(input, search, {
       classes: fancy.search.defaults.ClassNameDefaults.defaults,
       keys: fancy.search.defaults.KeyboardDefaults.defaults,
       elements: {
         clearButton: None,
-        failedCondition: None,
+        failedCondition: Some(_ -> dots.Dom.create("span", ["class" => "fs-message"], "Start typing to begin your search")),
         loading: None,
         failed: None,
-        noResults: Some(function () return dots.Dom.create("span", "No Results"))
+        noResults: Some(() -> dots.Dom.create("span", ["class" => "fs-message"], "No Results"))
       },
       renderSuggestion: DomStringFilter.renderStringSuggestion
     });

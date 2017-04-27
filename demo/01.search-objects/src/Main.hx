@@ -39,7 +39,7 @@ class Main {
     var input = dots.Query.find(".fancy-container input");
     var search = new fancy.Search(config);
 
-    var renderer = fancy.search.renderer.DomStringFilter.fromInput(input, container, search, {
+    var renderer = fancy.search.renderer.DomStringFilter.fromInput(input, search, {
       classes: fancy.search.defaults.ClassNameDefaults.defaults,
       keys: fancy.search.defaults.KeyboardDefaults.defaults,
       renderSuggestion: function (p: Person, filter: String): js.html.Element {
