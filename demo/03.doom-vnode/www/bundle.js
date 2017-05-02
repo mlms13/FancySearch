@@ -4095,6 +4095,7 @@ var fancy_search_Reducer = function() { };
 $hxClasses["fancy.search.Reducer"] = fancy_search_Reducer;
 fancy_search_Reducer.__name__ = ["fancy","search","Reducer"];
 fancy_search_Reducer.reduce = function(state,action) {
+	haxe_Log.trace(action,{ fileName : "Reducer.hx", lineNumber : 14, className : "fancy.search.Reducer", methodName : "reduce"});
 	var state1 = state.config;
 	var tmp;
 	if(action[1] == 2) {
@@ -4125,7 +4126,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 		case 0:
 			switch(action[1]) {
 			case 0:
-				tmp3 = fancy_search_Reducer.openMenu(state.config,state.filter);
+				tmp3 = fancy_search_Reducer.openMenu(state.config,state.filter,haxe_ds_Option.None);
 				break;
 			case 1:
 				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
@@ -4157,7 +4158,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 				break;
 			case 2:
 				var filter1 = action[2];
-				tmp3 = fancy_search_Reducer.openMenu(state.config,filter1);
+				tmp3 = fancy_search_Reducer.openMenu(state.config,filter1,haxe_ds_Option.None);
 				break;
 			case 3:
 				tmp3 = state.menu;
@@ -4185,7 +4186,8 @@ fancy_search_Reducer.reduce = function(state,action) {
 			break;
 		case 2:
 			var highlight = _g[3];
-			tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,highlight);
+			var filter2 = action[2];
+			tmp3 = fancy_search_Reducer.openMenu(state.config,filter2,highlight);
 			break;
 		case 3:
 			switch(action[2][1]) {
@@ -4253,11 +4255,11 @@ fancy_search_Reducer.reduce = function(state,action) {
 	}
 	return { config : state1, filter : tmp, value : tmp1, menu : tmp3};
 };
-fancy_search_Reducer.openMenu = function(config,filter) {
+fancy_search_Reducer.openMenu = function(config,filter,highlight) {
 	var _g = config.allowMenu(filter);
 	switch(_g[1]) {
 	case 0:
-		return fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+		return fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,highlight);
 	case 1:
 		var reason = _g[2];
 		return fancy_search_MenuState.Closed(fancy_search_ClosedReason.FailedCondition(reason));

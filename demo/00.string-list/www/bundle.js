@@ -716,14 +716,20 @@ Main.main = function() {
 			doc = window.document;
 		}
 		var el = doc.createElement("span");
-		var _g = 0;
-		var _g1 = [];
-		while(_g < _g1.length) {
-			var o = _g1[_g];
-			++_g;
+		var _g1 = 0;
+		var _g2 = [];
+		while(_g1 < _g2.length) {
+			var o = _g2[_g1];
+			++_g1;
 			el.setAttribute(o.name,o.value);
 		}
-		var attrs = null;
+		var _g11 = new haxe_ds_StringMap();
+		if(__map_reserved["class"] != null) {
+			_g11.setReserved("class","fs-message");
+		} else {
+			_g11.h["class"] = "fs-message";
+		}
+		var attrs = _g11;
 		if(null != attrs) {
 			var attr = attrs.keys();
 			while(attr.hasNext()) {
@@ -733,10 +739,10 @@ Main.main = function() {
 		}
 		var children = null;
 		if(null != children) {
-			var _g2 = 0;
-			while(_g2 < children.length) {
-				var child = children[_g2];
-				++_g2;
+			var _g21 = 0;
+			while(_g21 < children.length) {
+				var child = children[_g21];
+				++_g21;
 				el.appendChild(child);
 			}
 		}
@@ -751,14 +757,20 @@ Main.main = function() {
 			doc1 = window.document;
 		}
 		var el1 = doc1.createElement("span");
-		var _g3 = 0;
-		var _g11 = [];
-		while(_g3 < _g11.length) {
-			var o1 = _g11[_g3];
-			++_g3;
+		var _g12 = 0;
+		var _g22 = [];
+		while(_g12 < _g22.length) {
+			var o1 = _g22[_g12];
+			++_g12;
 			el1.setAttribute(o1.name,o1.value);
 		}
-		var attrs1 = null;
+		var _g13 = new haxe_ds_StringMap();
+		if(__map_reserved["class"] != null) {
+			_g13.setReserved("class","fs-message");
+		} else {
+			_g13.h["class"] = "fs-message";
+		}
+		var attrs1 = _g13;
 		if(null != attrs1) {
 			var attr2 = attrs1.keys();
 			while(attr2.hasNext()) {
@@ -768,10 +780,10 @@ Main.main = function() {
 		}
 		var children1 = null;
 		if(null != children1) {
-			var _g4 = 0;
-			while(_g4 < children1.length) {
-				var child1 = children1[_g4];
-				++_g4;
+			var _g23 = 0;
+			while(_g23 < children1.length) {
+				var child1 = children1[_g23];
+				++_g23;
 				el1.appendChild(child1);
 			}
 		}
@@ -2288,6 +2300,7 @@ var fancy_search_Reducer = function() { };
 $hxClasses["fancy.search.Reducer"] = fancy_search_Reducer;
 fancy_search_Reducer.__name__ = ["fancy","search","Reducer"];
 fancy_search_Reducer.reduce = function(state,action) {
+	haxe_Log.trace(action,{ fileName : "Reducer.hx", lineNumber : 14, className : "fancy.search.Reducer", methodName : "reduce"});
 	var state1 = state.config;
 	var tmp;
 	if(action[1] == 2) {
@@ -2318,7 +2331,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 		case 0:
 			switch(action[1]) {
 			case 0:
-				tmp3 = fancy_search_Reducer.openMenu(state.config,state.filter);
+				tmp3 = fancy_search_Reducer.openMenu(state.config,state.filter,haxe_ds_Option.None);
 				break;
 			case 1:
 				tmp3 = fancy_search_MenuState.Closed(fancy_search_ClosedReason.Inactive);
@@ -2350,7 +2363,7 @@ fancy_search_Reducer.reduce = function(state,action) {
 				break;
 			case 2:
 				var filter1 = action[2];
-				tmp3 = fancy_search_Reducer.openMenu(state.config,filter1);
+				tmp3 = fancy_search_Reducer.openMenu(state.config,filter1,haxe_ds_Option.None);
 				break;
 			case 3:
 				tmp3 = state.menu;
@@ -2378,7 +2391,8 @@ fancy_search_Reducer.reduce = function(state,action) {
 			break;
 		case 2:
 			var highlight = _g[3];
-			tmp3 = fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,highlight);
+			var filter2 = action[2];
+			tmp3 = fancy_search_Reducer.openMenu(state.config,filter2,highlight);
 			break;
 		case 3:
 			switch(action[2][1]) {
@@ -2446,11 +2460,11 @@ fancy_search_Reducer.reduce = function(state,action) {
 	}
 	return { config : state1, filter : tmp, value : tmp1, menu : tmp3};
 };
-fancy_search_Reducer.openMenu = function(config,filter) {
+fancy_search_Reducer.openMenu = function(config,filter,highlight) {
 	var _g = config.allowMenu(filter);
 	switch(_g[1]) {
 	case 0:
-		return fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,haxe_ds_Option.None);
+		return fancy_search_MenuState.Open(fancy_search_DropdownState.Loading,highlight);
 	case 1:
 		var reason = _g[2];
 		return fancy_search_MenuState.Closed(fancy_search_ClosedReason.FailedCondition(reason));

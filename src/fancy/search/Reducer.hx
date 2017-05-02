@@ -32,7 +32,7 @@ class Reducer {
       // most of that actions affect the menu state
       menu: switch [state.menu, action] {
         // if the menu is closed and we're told to open it, try
-        case [Closed(Inactive), OpenMenu]: openMenu(state.config, state.filter);
+        case [Closed(Inactive), OpenMenu]: openMenu(state.config, state.filter, None);
 
         // if the menu is already open or unopenable, ignore requests to open
         case [Open(_), OpenMenu] | [Closed(FailedCondition(_)), OpenMenu]: state.menu;
@@ -75,11 +75,11 @@ class Reducer {
 
         // any other time the filter changes, switch the menu to a loading state
         // the middleware will handle firing the next action
-        case [Open(_, highlight), SetFilter(_)]: Open(Loading, highlight);
+        case [Open(_, highlight), SetFilter(filter)]: openMenu(state.config, filter, highlight);
 
         // if the menu was closed because it failed a condition, re-run
         // that check with the new filter when filter changes
-        case [Closed(FailedCondition(_)), SetFilter(filter)]: openMenu(state.config, filter);
+        case [Closed(FailedCondition(_)), SetFilter(filter)]: openMenu(state.config, filter, None);
 
         // but if the menu was inactive, it stays that way
         case [Closed(Inactive), SetFilter(_)]: Closed(Inactive);
@@ -91,9 +91,9 @@ class Reducer {
   }
 
   // show the correct menu state, given a request to open it
-  static function openMenu<Sug, Filter, Value>(config: AppConfig<Sug, Filter, Value>, filter: Filter): MenuState<Sug> {
+  static function openMenu<Sug, Filter, Value>(config: AppConfig<Sug, Filter, Value>, filter: Filter, highlight: Option<Sug>): MenuState<Sug> {
     return switch config.allowMenu(filter) {
-      case Allow: Open(Loading, None);
+      case Allow: Open(Loading, highlight);
       case Disallow(reason): Closed(FailedCondition(reason));
     };
   }

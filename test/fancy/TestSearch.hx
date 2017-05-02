@@ -23,6 +23,7 @@ class TestSearch {
       "Lima Bean", "Mango", "Melon", "Orange", "Peach", "Pear", "Pepper",
       "Potato", "Radish", "Spinach", "Tomato", "Turnip", "Zucchini"
   ];
+  static var beans = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]);
 
   // technically unsafe, but you can see with your eyes that it's fine...
   static var suggestionsNel = Nel.fromArray(suggestions).get();
@@ -130,18 +131,21 @@ class TestSearch {
     var config = AllString.sync({
       suggestions: suggestions,
       alwaysHighlight: false,
-      minLength: 2
+      minLength: 1
     });
 
     var search = new Search(config);
     assertMenuStates(search.store, [
       Closed(Inactive),
       Closed(FailedCondition("Input too short")),
+      Open(Loading, None),
+      Open(Results(beans), None),
       Closed(FailedCondition("Input too short"))
     ]);
 
-    search.store.dispatch(OpenMenu);
-    search.store.dispatch(SetFilter("a"));
+    search.store.dispatch(OpenMenu)
+      .dispatch(SetFilter("bean"))
+      .dispatch(SetFilter(""));
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -183,14 +187,14 @@ class TestSearch {
   // you highlighted is still in the list after changes
   public function testSearchAfterHighlight() {
     var search = new Search(simpleConfig);
-    var results = Nel.nel("Black Bean", ["Fava Beans", "Lima Bean"]);
+
     assertMenuStates(search.store, [
       Closed(Inactive),
       Open(Loading, None),
       Open(Results(suggestionsNel), None),
       Open(Results(suggestionsNel), Some("Fava Beans")),
       Open(Loading, Some("Fava Beans")),
-      Open(Results(results), Some("Fava Beans"))
+      Open(Results(beans), Some("Fava Beans"))
     ]);
 
     search.store.dispatch(OpenMenu)
