@@ -6,6 +6,7 @@ import thx.promise.Promise;
 
 import fancy.search.config.AppConfig;
 import fancy.search.defaults.AllString;
+import fancy.search.defaults.AutocompleteDefaults;
 import fancy.search.defaults.ClassNameDefaults;
 import fancy.search.defaults.KeyboardDefaults;
 
@@ -23,17 +24,12 @@ class Main {
       { firstName: "Andy", lastName: "White", github: "andywhite37" },
     ];
 
-    var config: AppConfig<Person, String, Option<Person>> = {
-      filterer: makeFilterer(people),
-      sugEq: function (a, b) return a.github == b.github,
-      initFilter: "",
-      initValue: None,
-      allowMenu: thx.fp.Functions.const(Allow),
-      alwaysHighlight: true,
-      getValue: function (highlight: Option<Person>, _, curr: Option<Person>) {
-        return highlight.orElse(curr);
-      }
-    };
+    // AppConfig<Person, String, StringOrValue<Person>>
+    var config = AutocompleteDefaults.sync({
+      suggestions: people,
+      filter: (person, search) -> personToString(person).caseInsensitiveContains(search),
+      sugEq: (a, b) -> Strings.order.equal(a.github, b.github)
+    });
 
     var container: js.html.Element = dots.Query.find(".fancy-container");
     var input = dots.Query.find(".fancy-container input");
@@ -67,20 +63,15 @@ class Main {
       dots.Dom.append(container, [ dom ]);
     }).run();
 
-    search.values.next(function (val: Option<Person>) {
-      input.value = val.cata("", personToString);
+    search.values.next(function (val: StringOrValue<Person>) {
+      input.value = switch val {
+        case Value(person): personToString(person);
+        case Raw(str, _): str;
+      };
     }).run();
   }
 
   static function personToString(p: Person): String {
     return p.firstName + " " + p.lastName + " " + p.github;
-  }
-
-  static function makeFilterer(people: Array<Person>): Filterer<Person, String> {
-    return function filterer(search: String): Promise<Array<Person>> {
-      return Promise.value(search.isEmpty() ? people : people.filter(function (p) {
-        return personToString(p).caseInsensitiveContains(search);
-      }));
-    }
   }
 }

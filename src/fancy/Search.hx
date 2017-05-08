@@ -28,7 +28,7 @@ class Search<Sug, Filter, Value> {
     values = store.stream().map.fn(_.value).distinct();
   }
 
-  static function loadSuggestions<Sug, Filter, Value>(config: AppConfig<Sug, Filter, Value>): Middleware<State<Sug, Filter, Value>, Action<Sug, Filter, Value>> {
+  function loadSuggestions(config: AppConfig<Sug, Filter, Value>): Middleware<State<Sug, Filter, Value>, Action<Sug, Filter, Value>> {
     // TODO: inside here, we're going to have to make sure we only update the state
     // when the currently-applicable promise returns
     return function (state, action, dispatch) {
@@ -37,7 +37,11 @@ class Search<Sug, Filter, Value> {
         // so we can ignore ChangeValue's content. also menu will definitely be Open
         case [Allow, Open(_, h), OpenMenu] | [Allow, Open(_, h), SetFilter(_)]:
           config.filterer(state.filter)
-            .success.fn(dispatch(PopulateSuggestions(thx.Nel.fromArray(_), h)))
+            .success(results -> {
+              if (state.config.filterEq(state.filter, store.get().filter)) {
+                dispatch(PopulateSuggestions(thx.Nel.fromArray(results), h));
+              }
+            })
             .failure(function (_) dispatch(FailSuggestions));
         case _: // do nothing
       }

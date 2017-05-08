@@ -55,6 +55,7 @@ class AutocompleteDefaults {
     return {
       filterer: filterer,
       sugEq: sugEq,
+      filterEq: thx.Strings.order.equal,
       allowMenu: function (filter: String) {
         return filter.length >= minLength ? Allow : Disallow("Input too short");
       },
