@@ -115,6 +115,39 @@ class TestSearch {
     searchB.store.dispatch(OpenMenu).dispatch(CloseMenu);
   }
 
+  // delayed results shouldn't load out of order
+  public function testAsyncResultOrder() {
+    var promiseCount = 0;
+    var config = thx.Objects.clone(simpleConfig);
+
+    config.filterer = function (str) {
+      return Promise.nil
+        .delay((2 - promiseCount++) * 4)
+        .flatMap(_ -> AllString.filterStringsSync(suggestions, None)(str))
+        .always(Assert.createAsync());
+    };
+
+    var search = new Search(config);
+    assertMenuStates(search.store, [
+      Closed(Inactive),
+      Open(Loading, None),
+      Open(Loading, None),
+      Open(Results(Nel.pure("Zucchini")), None)
+    ]);
+
+    // after 10ms, when all of our promises should have returned,
+    // confirm that the state is still zucchini (even though the
+    // empty search resolved last, after 8ms).
+    thx.Timer.delay(() -> {
+      Assert.same(Open(Results(Nel.pure("Zucchini")), None), search.store.get().menu);
+    }, 10);
+    // TODO: somehow createAsync here? This fails if the timer is set to 20ms...
+
+    search.store
+      .dispatch(OpenMenu)
+      .dispatch(SetFilter("z"));
+  }
+
   // when the filterer fails, the state should reflect that
   public function testFailedResults() {
     var config = thx.Objects.clone(simpleConfig);

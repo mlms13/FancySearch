@@ -7,6 +7,7 @@ import thx.Lazy;
 typedef AppConfig<Sug, Filter, Value> = {
   filterer: Filterer<Sug, Filter>,
   sugEq: Sug -> Sug -> Bool,
+  filterEq: Filter -> Filter -> Bool,
   allowMenu: Filter -> AllowMenu,
   alwaysHighlight: Bool,
   initFilter: Filter,
