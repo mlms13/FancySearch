@@ -38,7 +38,8 @@ class Main {
       return DoomAutocomplete.render({
         state: state,
         cfg: rendererConfig,
-        dispatch: dispatch
+        dispatch: dispatch,
+        placeholder: "Search for something"
       });
     });
 

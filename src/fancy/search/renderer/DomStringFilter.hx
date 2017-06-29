@@ -67,15 +67,23 @@ class DomStringFilter {
     input.on("blur", function (_) search.store.dispatch(CloseMenu));
     input.on("input", function (_) search.store.dispatch(SetFilter(input.value)));
     input.on("keydown", function (e: js.html.KeyboardEvent) {
-      e.stopPropagation();
-      var code = e.which != null ? e.which : e.keyCode;
-
-      if (cfg.keys.highlightUp.contains(code)) {
+      var keyWithModifiers = dots.Keys.getKeyAndModifiers(e);
+      if (cfg.keys.highlightUp(keyWithModifiers)) {
+        e.stopPropagation();
+        e.preventDefault();
         search.store.dispatch(ChangeHighlight(Move(Up)));
-      } else if (cfg.keys.highlightDown.contains(code)) {
+      } else if (cfg.keys.highlightDown(keyWithModifiers)) {
+        e.stopPropagation();
+        e.preventDefault();
         search.store.dispatch(ChangeHighlight(Move(Down)));
-      } else if (cfg.keys.choose.contains(code)) {
+      } else if (cfg.keys.choose(keyWithModifiers)) {
+        e.stopPropagation();
+        e.preventDefault();
         search.store.dispatch(ChooseCurrent);
+      } else if (cfg.keys.close(keyWithModifiers)) {
+        e.stopPropagation();
+        e.preventDefault();
+        search.store.dispatch(CloseMenu);
       }
     });
 

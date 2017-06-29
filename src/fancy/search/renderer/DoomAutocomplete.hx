@@ -1,7 +1,8 @@
-package doom.fs.renderer;
+package fancy.search.renderer;
 
 import haxe.ds.Option;
 import js.html.InputElement;
+import dots.Keys;
 import doom.html.Html.*;
 import doom.core.VNode;
 using thx.Arrays;
@@ -18,7 +19,7 @@ typedef Props<Sug, Value> = {
   placeholder: String
 };
 
-class Autocomplete {
+class DoomAutocomplete {
   public static function render<Sug, Value>(props: Props<Sug, Value>) {
     var captureKeys = switch props.state.menu {
       case Open(Results(_), _): true;
@@ -55,21 +56,21 @@ class Autocomplete {
         dispatch(OpenMenu);
       },
       "keydown" => (captureKeys ? function (_, e: js.html.KeyboardEvent) {
-        var code = e.which != null ? e.which : e.keyCode;
+        var keyWithModifier = dots.Keys.getKeyAndModifiers(e);
 
-        if (keys.highlightUp.contains(code)) {
+        if (keys.highlightUp(keyWithModifier)) {
           e.preventDefault();
           e.stopPropagation();
           dispatch(ChangeHighlight(Move(Up)));
-        } else if (keys.highlightDown.contains(code)) {
+        } else if (keys.highlightDown(keyWithModifier)) {
           e.preventDefault();
           e.stopPropagation();
           dispatch(ChangeHighlight(Move(Down)));
-        } else if (keys.choose.contains(code)) {
+        } else if (keys.choose(keyWithModifier)) {
           e.preventDefault();
           e.stopPropagation();
           dispatch(ChooseCurrent);
-        } else if (keys.close.contains(code)) {
+        } else if (keys.close(keyWithModifier)) {
           e.preventDefault();
           e.stopPropagation();
           dispatch(CloseMenu);

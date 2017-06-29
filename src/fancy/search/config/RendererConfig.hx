@@ -2,6 +2,7 @@ package fancy.search.config;
 
 import haxe.ds.Option;
 import thx.Lazy;
+import dots.Keys;
 
 typedef RendererConfig<Sug, Filter, El> = {
   classes: ClassNameConfig,
@@ -11,10 +12,10 @@ typedef RendererConfig<Sug, Filter, El> = {
 };
 
 typedef KeyboardConfig = {
-  highlightUp: Array<Int>,
-  highlightDown: Array<Int>,
-  choose: Array<Int>,
-  close: Array<Int>
+  highlightUp: KeyWithModifiers -> Bool,
+  highlightDown: KeyWithModifiers -> Bool,
+  choose: KeyWithModifiers -> Bool,
+  close: KeyWithModifiers -> Bool
 };
 
 typedef ClassNameConfig = {
