@@ -1,4 +1,4 @@
-package fancy.search.renderer;
+package doom.fs.renderer;
 
 import haxe.ds.Option;
 import js.html.InputElement;
@@ -7,7 +7,6 @@ import doom.core.VNode;
 using thx.Arrays;
 using thx.Options;
 
-import fancy.Search;
 import fancy.search.Action;
 import fancy.search.State;
 import fancy.search.config.RendererConfig;
@@ -15,44 +14,67 @@ import fancy.search.config.RendererConfig;
 typedef Props<Sug, Value> = {
   state: State<Sug, String, Value>,
   cfg: RendererConfig<Sug, String, VNode>,
-  dispatch: Action<Sug, String, Value> -> Void
+  dispatch: Action<Sug, String, Value> -> Void,
+  placeholder: String
 };
 
-class DoomAutocomplete {
+class Autocomplete {
   public static function render<Sug, Value>(props: Props<Sug, Value>) {
+    var captureKeys = switch props.state.menu {
+      case Open(Results(_), _): true;
+      case _: false;
+    };
+
     return div([
-      renderInput(props.cfg.keys, props.cfg.classes, props.dispatch, props.state.filter),
+      renderInput(props.cfg.keys, props.cfg.classes, props.placeholder, props.dispatch, captureKeys, props.state.filter),
       renderMenu(props.cfg, props.dispatch, props.state)
     ]);
   }
 
-  static function renderInput(keys: KeyboardConfig, classes: ClassNameConfig, dispatch, value: String) {
+  static function renderInput<Sug>(
+    keys: KeyboardConfig,
+    classes: ClassNameConfig,
+    placeholder: String,
+    dispatch,
+    captureKeys: Bool,
+    value: String) {
     return input([
       "class" => "fancify " + classes.input,
       "type" => "text",
-      "placeholder" => "Search for Something",
+      "placeholder" => placeholder,
       "value" => value,
       "focus" => function (el, _) {
         var inpt: InputElement = cast el;
         dispatch(SetFilter(inpt.value));
+        dispatch(OpenMenu);
       },
       "blur" => function () dispatch(CloseMenu),
       "input" => function (el, _) {
         var inpt: InputElement = cast el;
         dispatch(SetFilter(inpt.value));
+        dispatch(OpenMenu);
       },
-      "keydown" => function (_, e: js.html.KeyboardEvent) {
-        e.stopPropagation();
+      "keydown" => (captureKeys ? function (_, e: js.html.KeyboardEvent) {
         var code = e.which != null ? e.which : e.keyCode;
 
         if (keys.highlightUp.contains(code)) {
           e.preventDefault();
+          e.stopPropagation();
           dispatch(ChangeHighlight(Move(Up)));
         } else if (keys.highlightDown.contains(code)) {
           e.preventDefault();
+          e.stopPropagation();
           dispatch(ChangeHighlight(Move(Down)));
+        } else if (keys.choose.contains(code)) {
+          e.preventDefault();
+          e.stopPropagation();
+          dispatch(ChooseCurrent);
+        } else if (keys.close.contains(code)) {
+          e.preventDefault();
+          e.stopPropagation();
+          dispatch(CloseMenu);
         }
-      }
+      } : null)
     ]);
   }
 
@@ -92,8 +114,8 @@ class DoomAutocomplete {
 
     return li([
       "class" => cfg.classes.item + " " + highlightClass,
-      "mouseover" => function () dispatch(ChangeHighlight(Specific(item))),
-      "mouseup" => function () dispatch(ChooseCurrent)
+      "mouseover" => () -> dispatch(ChangeHighlight(Specific(item))),
+      "mousedown" => () -> dispatch(ChooseCurrent)
     ], cfg.renderSuggestion(item, filter));
   }
 }
